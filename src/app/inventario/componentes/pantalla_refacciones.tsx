@@ -14,6 +14,8 @@ type Producto = {
     cantidad: number;
     empresa: string;
     numero_parte: string;
+    costo: number;
+    marca: string;
 };
 
 type Props = {
@@ -34,6 +36,8 @@ export default function Pantalla_refacciones ({ onModificar }: Props){
             imagen: "imagen_a.png",
             empresa: "empresa 1",
             numero_parte: "parte 31231",
+            costo: 100.00,
+            marca: "Marca x",
             
         },
         {
@@ -48,6 +52,8 @@ export default function Pantalla_refacciones ({ onModificar }: Props){
             imagen: "imagen_b.png",
             empresa: "empresa 2",
             numero_parte: "parte 12321",
+            costo: 234,
+            marca: "Marca y"
         },
     ]);
 
@@ -92,16 +98,16 @@ export default function Pantalla_refacciones ({ onModificar }: Props){
                         <tr>
                             <th className="px-4 py-2 text-left">Nombre</th>
                             <th className="px-4 py-2">Categoría</th>
-                            <th className="px-4 py-2">Stock Mínimo</th>
+                            <th className="px-4 py-2">cantidad</th>
                             <th className="px-4 py-2">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                 {productos.map((producto) => (
                     <tr key={producto.id}>
-                        <td><button  onClick={() => onModificar(producto)}>{producto.nombre}</button></td>
+                        <td><button  onClick={() => onModificar(producto)} className="text-blue-600 hover:underline">{producto.nombre}</button></td>
                         <td className="text-center">{producto.categoria}</td>
-                        <td className="text-center">{producto.stock_minimo}</td>
+                        <td className="text-center">{producto.cantidad}</td>
                         <td className="flex space-x-2">
                             
                             <button onClick={() => handleEliminar(producto.id)}

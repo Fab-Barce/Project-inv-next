@@ -11,8 +11,8 @@ const Header = () => {
         textAlign: "center",
       }}
     >
-      <h1>Bienvenido a Mi Proyecto</h1>
-      <p>La mejor aplicación para gestionar inventarios y visualización</p>
+      <h1>Bienvenido a Mi Proyecto </h1>
+      <p>La mejor aplicación para gestionar inventarios</p>
     </header>
   );
 };
