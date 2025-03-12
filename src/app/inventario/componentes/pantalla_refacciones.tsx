@@ -36,7 +36,7 @@ export default function Pantalla_refacciones ({ onModificar }: Props){
             imagen: "imagen_a.png",
             empresa: "empresa 1",
             numero_parte: "parte 31231",
-            costo: 100.00,
+            costo: 100,
             marca: "Marca x",
             
         },
