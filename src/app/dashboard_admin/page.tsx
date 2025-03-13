@@ -11,7 +11,7 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-6">
 
                 {/* Tarjeta Inventario con enlace a /inventario */}
-                <Link href="dashboard/inventario" className="w-48 h-60">
+                <Link href="dashboard_admin/inventario" className="w-48 h-60">
                     <div className="w-full h-full bg-white shadow-lg rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100">
                         <div className="text-xl text-black font-bold">Inventario</div>
                         <div className="mt-4">
@@ -22,7 +22,7 @@ export default function Home() {
                 
 
                 {/* Tarjeta Vehículos */}
-                <Link href="dashboard/vehiculos" className="w-48 h-60">
+                <Link href="dashboard_admin/vehiculos" className="w-48 h-60">
                     <div className="w-full h-full bg-white shadow-lg rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100">
                         <div className="text-xl text-black font-bold">Vehículos</div>
                         <div className="mt-4">
@@ -30,6 +30,21 @@ export default function Home() {
                         </div>
                     </div>
                 </Link>
+
+                
+
+                {/* Tarjeta Vehículos */}
+                <Link href="dashboard_admin/users" className="w-48 h-60">
+                    <div className="w-full h-full bg-white shadow-lg rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100">
+                        <div className="text-xl text-black font-bold">Usuarios</div>
+                        <div className="mt-4">
+                            🙍‍♂️ {/* Icono simulado */}
+                        </div>
+                    </div>
+                </Link>
+
+
+                
 
             </div>
         </div>

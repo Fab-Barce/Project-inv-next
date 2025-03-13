@@ -5,13 +5,13 @@ export default function Home() {
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
 
             {/* Título */}
-            <h1 className="text-2xl font-bold mb-8">Texto de Bienvenida al Sistema</h1>
+            <h1 className="text-2xl font-bold mb-8">Texto de Bienvenida al Sistema Vistas</h1>
 
             {/* Contenedor de los botones tipo tarjetas */}
             <div className="grid grid-cols-2 gap-6">
 
                 {/* Tarjeta Inventario con enlace a /inventario */}
-                <Link href="dashboard/inventario" className="w-48 h-60">
+                <Link href="/dashboard_v2/vista-inventario" className="w-48 h-60">
                     <div className="w-full h-full bg-white shadow-lg rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100">
                         <div className="text-xl text-black font-bold">Inventario</div>
                         <div className="mt-4">
@@ -20,9 +20,8 @@ export default function Home() {
                     </div>
                 </Link>
                 
-
                 {/* Tarjeta Vehículos */}
-                <Link href="dashboard/vehiculos" className="w-48 h-60">
+                <Link href="/dashboard_v2/vista-vehiculos" className="w-48 h-60">
                     <div className="w-full h-full bg-white shadow-lg rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100">
                         <div className="text-xl text-black font-bold">Vehículos</div>
                         <div className="mt-4">

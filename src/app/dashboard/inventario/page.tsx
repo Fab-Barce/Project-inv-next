@@ -16,6 +16,8 @@ type Producto = {
     cantidad: number;
     empresa: string;
     numero_parte: string;
+    costo: number;
+    marca: string;
 };
 
 export default function Inventario() {
