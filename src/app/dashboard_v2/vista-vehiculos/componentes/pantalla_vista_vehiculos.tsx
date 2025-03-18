@@ -46,14 +46,16 @@ export default function Pantalla_vehiculos({ onVerDetalles }: Props) {
         <div className="min-h-screen bg-gray-100 p-6">
 
             {/* Título y Botón de Regreso */}
-            <div className="flex justify-between items-center mb-4">
-                <h1 className="text-xl text-black font-bold">Vehículos</h1>
-                <Link href="/dashboard">
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            
+                <h1 className="text-xl text-black font-bold mb-4">Vehículos</h1>
+
+                <div className="flex space-x-2 mb-4 bg-white p-2 shadow rounded-lg">
+                    <Link href="/dashboard_v2">
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                         Volver
-                    </button>
-                </Link>
-            </div>
+                        </button>
+                    </Link> 
+                </div>
 
             {/* Tabla de vehículos */}
             <div className="bg-white rounded shadow-md overflow-hidden">
@@ -66,25 +68,29 @@ export default function Pantalla_vehiculos({ onVerDetalles }: Props) {
                             <th className="px-4 py-2">Acciones</th>
                         </tr>
                     </thead>
+                    
                     <tbody>
                         {vehiculos.map((vehiculo) => (
-                            <tr key={vehiculo.id}>
-                                <td>
-                                    <button
+                            <tr key={vehiculo.id} className="border-b">
+                                <td className="px-4 py-2">{vehiculo.marca}</td>
+                                <td className="px-4 py-2 text-center">{vehiculo.año}</td>
+                                <td className="px-4 py-2 text-center">{vehiculo.placa}</td>
+                                <td className="px-4 py-2 text-center">
+                                    <button 
                                         onClick={() => onVerDetalles(vehiculo)}
-                                        className="text-blue-600 hover:underline"
+                                        className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
                                     >
-                                        {vehiculo.modelo}
+                                        Ver Detalles
                                     </button>
                                 </td>
-                                <td className="text-center">{vehiculo.marca}</td>
-                                <td className="text-center">{vehiculo.año}</td>
-                                <td className="text-center">👁️ Ver</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+
+
+
 
             {vehiculos.length === 0 && (
                 <div className="mt-4 text-gray-500">

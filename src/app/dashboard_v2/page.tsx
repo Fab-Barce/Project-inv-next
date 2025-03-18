@@ -7,6 +7,15 @@ export default function Home() {
             {/* Título */}
             <h1 className="text-2xl font-bold mb-8">Texto de Bienvenida al Sistema Vistas</h1>
 
+            <div className="flex space-x-2 mb-4 p-2">
+                    <Link href="/">
+                        <button className="bg-blue-500 text-white px-5 py-3 rounded-lg hover:bg-blue-600">
+                        Cerrar sesión
+                        </button>
+                    </Link> 
+            </div>
+
+
             {/* Contenedor de los botones tipo tarjetas */}
             <div className="grid grid-cols-2 gap-6">
 

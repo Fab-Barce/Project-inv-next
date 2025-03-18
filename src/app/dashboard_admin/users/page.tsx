@@ -11,6 +11,7 @@ type Usuario = {
     rol: "visualizacion" | "modificacion";
     username: string;
     password: string;
+    correo: string;
 };
 
 export default function UsuariosPage() {
@@ -33,12 +34,7 @@ export default function UsuariosPage() {
         <div className="p-6 bg-gray-100 min-h-screen">
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-xl text-black font-bold">Gestión de Usuarios</h1>
-                <button
-                    onClick={() => router.push("/users/nuevo")}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
-                >
-                    Nuevo
-                </button>
+
             </div>
 
             {modo === "listado" ? (

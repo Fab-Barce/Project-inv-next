@@ -41,7 +41,7 @@ export default function VistaRefaccion({ producto, onCancelar }: Props) {
                 <Field label="Stock Mínimo" value={formData?.stock_minimo || 0} />
                 <Field label="Unidad" value={formData?.unidad || ""} />
                 <Field label="Proveedor" value={formData?.proveedor || ""} />
-                <Field label="Costo 💲" value={formData?.costo || 0} />
+                <Field label="Costo $" value={formData?.costo || 0} />
                 <Field label="Marca" value={formData?.marca || ""} />
                 <Field label="Cantidad" value={formData?.cantidad || 0} />
             </div>

@@ -4,26 +4,58 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CrearUsuario() {
-    const [nombreUsuario, setNombreUsuario] = useState("");
+    const [nombre, setNombre] = useState("");
     const [contrasena, setContrasena] = useState("");
+    const [correo, setCorreo] = useState("");
     const [rol, setRol] = useState("visualizacion"); 
     const router = useRouter();
 
-    const handleCrearUsuario = () => {
-        if (!nombreUsuario || !contrasena) {
+    const handleCrearUsuario = async () => {
+        if (!nombre || !contrasena || !correo) {
             alert("Por favor, completa todos los campos.");
             return;
         }
 
-        const nuevoUsuario = { nombreUsuario, contrasena, rol };
-        console.log("Usuario creado:", nuevoUsuario);
-        alert("Usuario creado correctamente.");
+        const nuevoUsuario = { 
+            nombre, 
+            contrasena, 
+            correo, 
+            rol 
+        };
 
-        // Aquí puedes agregar la lógica para enviar los datos al backend
+        try {
+            const response = await fetch("http://localhost:8000/api/usuarios/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    nombre,
+                    contrasena,
+                    correo,
+                    rol
+                })
+            });
+            
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Usuario creado correctamente.");
+                router.push("/dashboard_admin/users");  // Redirigir después de crear el usuario
+            } else {
+                alert(`Error: ${data.detail || "No se pudo crear el usuario."}`);
+            }
+
+        } catch (error) {
+            console.error("Error al crear el usuario:", error);
+            alert("Error al conectar con el servidor.");
+        }
 
         // Limpiar campos después de la creación
-        setNombreUsuario("");
+        setNombre("");
         setContrasena("");
+        setCorreo("");
         setRol("visualizacion");
     };
 
@@ -36,8 +68,18 @@ export default function CrearUsuario() {
                     <label className="block text-gray-700">Nombre de Usuario:</label>
                     <input 
                         type="text"
-                        value={nombreUsuario}
-                        onChange={(e) => setNombreUsuario(e.target.value)}
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        className="w-full p-2 border rounded-md"
+                    />
+                </div>
+
+                <div className="mb-4">
+                    <label className="block text-gray-700">Correo Electrónico:</label>
+                    <input 
+                        type="email"
+                        value={correo}
+                        onChange={(e) => setCorreo(e.target.value)}
                         className="w-full p-2 border rounded-md"
                     />
                 </div>
@@ -73,7 +115,7 @@ export default function CrearUsuario() {
                     </button>
 
                     <button
-                        onClick={() => router.push("/users")}
+                        onClick={() => router.push("/dashboard_admin/users")}
                         className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg w-full font-semibold"
                     >
                         Cancelar

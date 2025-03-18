@@ -59,9 +59,6 @@ export default function Pantalla_Vista_Refacciones({ onModificar }: Props) {
 
     return (
 
-        
-
-
         <div className="min-h-screen bg-gray-100 p-6">
 
             <h1 className="text-xl text-black font-bold mb-4">Inventario de Refacciones (Solo Vista)</h1>
@@ -84,7 +81,7 @@ export default function Pantalla_Vista_Refacciones({ onModificar }: Props) {
                             <th className="px-4 py-2 text-left">Nombre</th>
                             <th className="px-4 py-2">Categoría</th>
                             <th className="px-4 py-2">Cantidad</th>
-                            <th className="px-4 py-2">Ver Detalles</th>
+                            <th className="px-4 py-2">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -95,7 +92,7 @@ export default function Pantalla_Vista_Refacciones({ onModificar }: Props) {
                                 <td className="px-4 py-2 text-center">{producto.cantidad}</td>
                                 <td className="px-4 py-2 text-center">
                                     <button 
-                                        onClick={() => alert(JSON.stringify(producto, null, 2))} 
+                                        onClick={() => onModificar(producto)}
                                         className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
                                     >
                                         Ver Detalles

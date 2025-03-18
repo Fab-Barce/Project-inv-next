@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 type Usuario = {
     id: number;
     nombre: string;
+    correo: string; // Campo de correo añadido
     rol: "visualizacion" | "modificacion";
     username: string;
     password: string;
@@ -19,6 +20,7 @@ export default function Usuario({ usuario, onCancelar }: Props) {
     const [formData, setFormData] = useState<Usuario>({
         id: 0,
         nombre: "",
+        correo: "", // Inicialización del campo correo
         rol: "visualizacion",
         username: "",
         password: ""
@@ -46,6 +48,7 @@ export default function Usuario({ usuario, onCancelar }: Props) {
 
             <div className="grid grid-cols-2 gap-4">
                 <Field label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} editable={editable} />
+                <Field label="Correo" name="correo" value={formData.correo} onChange={handleInputChange} editable={editable} /> {/* Campo de correo añadido */}
                 <Field label="Rol" name="rol" value={formData.rol} onChange={handleInputChange} editable={editable} />
                 <Field label="Usuario" name="username" value={formData.username} onChange={handleInputChange} editable={editable} />
                 <Field label="Contraseña" name="password" value={formData.password} onChange={handleInputChange} editable={editable} />
