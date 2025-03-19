@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 type Usuario = {
-  id: number;
+  user_id: number;
   nombre: string;
   correo: string;
   rol: "visualizacion" | "modificacion";
@@ -52,7 +52,7 @@ export default function PantallaUsuarios() {
           })
         );
 
-        setUsuarios((prev) => prev.filter((u) => !selectedItems.includes(u.id)));
+        setUsuarios((prev) => prev.filter((u) => !selectedItems.includes(u.user_id)));
         setSelectedItems([]);
         setDeleteMode(false);
       } catch (error) {
@@ -67,7 +67,7 @@ export default function PantallaUsuarios() {
     if (confirmar) {
       try {
         await fetch(`http://localhost:8000/api/usuarios2/${id}/`, { method: "DELETE" });
-        setUsuarios(usuarios.filter((u) => u.id !== id));
+        setUsuarios(usuarios.filter((u) => u.user_id !== id));
         alert(`Usuario con ID ${id} eliminado.`);
       } catch (error) {
         console.error("Error al eliminar el usuario:", error);
@@ -125,37 +125,29 @@ export default function PantallaUsuarios() {
           </thead>
           <tbody>
             {usuarios.map((usuario) => (
-              <tr key={usuario.id}>
+              <tr key={usuario.user_id}>
                 {deleteMode && (
-                  <td className="px-4 py-2 text-center">
+                  <td className="px-4 py-2 text-center ">
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(usuario.id)}
-                      onChange={() => handleSelect(usuario.id)}
+                      checked={selectedItems.includes(usuario.user_id)}
+                      onChange={() => handleSelect(usuario.user_id)}
                     />
                   </td>
                 )}
                 <td>{usuario.nombre}</td>
                 <td>{usuario.correo}</td>
                 <td className="text-center">{usuario.rol}</td>
-                <td className="flex space-x-2">
-                  <Link href={`/dashboard_admin/users/${usuario.id}`}>
-                    <button
-                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                    >
-                      Ver Detalles
-                    </button>
-                  </Link>
-
-                  {/* El botón de eliminar solo debe aparecer si no estamos en el modo de eliminación */}
-                  {!deleteMode && (
-                    <button
-                      onClick={() => handleEliminar(usuario.id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                    >
-                      Eliminar
-                    </button>
-                  )}
+                <td className="px-4 py-2 text-center">
+                  <div className="flex justify-center">
+                    <Link href={`/dashboard_admin/users/${usuario.user_id}`}>
+                      <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600  "
+                      >
+                        Ver Detalles
+                      </button>
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}

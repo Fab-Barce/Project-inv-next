@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // 🔹 Importar iconos
 
 export default function CrearUsuario() {
     const [nombre, setNombre] = useState("");
     const [contrasena, setContrasena] = useState("");
     const [correo, setCorreo] = useState("");
-    const [rol, setRol] = useState("visualizacion"); 
+    const [rol, setRol] = useState("visualizacion");
+    const [mostrarContrasena, setMostrarContrasena] = useState(false); // 🔹 Estado para mostrar/ocultar contraseña
+
     const router = useRouter();
 
     const handleCrearUsuario = async () => {
@@ -16,33 +19,20 @@ export default function CrearUsuario() {
             return;
         }
 
-        const nuevoUsuario = { 
-            nombre, 
-            contrasena, 
-            correo, 
-            rol 
-        };
+        const nuevoUsuario = { nombre, contrasena, correo, rol };
 
         try {
             const response = await fetch("http://localhost:8000/api/usuarios/", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    nombre,
-                    contrasena,
-                    correo,
-                    rol
-                })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(nuevoUsuario)
             });
-            
 
             const data = await response.json();
 
             if (response.ok) {
                 alert("Usuario creado correctamente.");
-                router.push("/dashboard_admin/users");  // Redirigir después de crear el usuario
+                router.push("/dashboard_admin/users");
             } else {
                 alert(`Error: ${data.detail || "No se pudo crear el usuario."}`);
             }
@@ -52,7 +42,6 @@ export default function CrearUsuario() {
             alert("Error al conectar con el servidor.");
         }
 
-        // Limpiar campos después de la creación
         setNombre("");
         setContrasena("");
         setCorreo("");
@@ -86,12 +75,21 @@ export default function CrearUsuario() {
 
                 <div className="mb-4">
                     <label className="block text-gray-700">Contraseña:</label>
-                    <input 
-                        type="password"
-                        value={contrasena}
-                        onChange={(e) => setContrasena(e.target.value)}
-                        className="w-full p-2 border rounded-md"
-                    />
+                    <div className="relative">
+                        <input 
+                            type={mostrarContrasena ? "text" : "password"}  // 🔹 Alternar visibilidad
+                            value={contrasena}
+                            onChange={(e) => setContrasena(e.target.value)}
+                            className="w-full p-2 border rounded-md pr-10"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setMostrarContrasena(!mostrarContrasena)}
+                            className="absolute right-2 top-2 text-gray-500 focus:outline-none"
+                        >
+                            {mostrarContrasena ? <FaEyeSlash /> : <FaEye />}  {/* 🔹 Ícono dinámico */}
+                        </button>
+                    </div>
                 </div>
 
                 <div className="mb-4">

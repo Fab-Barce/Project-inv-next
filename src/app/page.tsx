@@ -21,9 +21,9 @@ export default function Login() {
                   "Content-Type": "application/json",  // Asegúrate de enviar JSON
                 },
                 body: JSON.stringify({
-                  nombre: nombre,  // Aquí estás enviando el correo en lugar de "username"
+                  nombre: nombre,
                   correo: correo,
-                  password: contrasena,   // La contraseña
+                  contrasena: contrasena,   // La contraseña
 
                 }),
               });
