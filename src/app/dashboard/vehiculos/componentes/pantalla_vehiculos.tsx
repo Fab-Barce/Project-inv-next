@@ -111,6 +111,12 @@ export default function PantallaVehiculos({ onModificar }: Props) {
           </button>
         )}
 
+        <Link href="/dashboard/vehiculos/operadores">
+          <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+            Operadores
+          </button>
+        </Link>
+
         <Link href="/dashboard">
           <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
             Volver

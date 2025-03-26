@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Headerv2 from "@/app/components/headerv2";
 
 export default function NuevoVehiculo() {
   const router = useRouter();
@@ -40,99 +41,102 @@ export default function NuevoVehiculo() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-xl font-bold mb-4">Nuevo Vehículo</h1>
-      <div className="bg-white p-4 rounded shadow-md grid grid-cols-2 gap-4">
-        {/* Columna izquierda */}
-        <div className="space-y-4">
-          <div>
-            <label className="block text-gray-700">Número de Serie</label>
-            <input
-              type="text"
-              name="num_serie"
-              value={formData.num_serie}
-              onChange={handleInputChange}
-              className="w-full border px-2 py-1"
-            />
+    <div>
+      <Headerv2 />
+      <div className="min-h-screen bg-gray-100 p-6">
+        <h1 className="text-xl font-bold mb-4">Nuevo Vehículo</h1>
+        <div className="bg-white p-4 rounded shadow-md grid grid-cols-2 gap-4">
+          {/* Columna izquierda */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-700">Número de Serie</label>
+              <input
+                type="text"
+                name="num_serie"
+                value={formData.num_serie}
+                onChange={handleInputChange}
+                className="w-full border px-2 py-1"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700">Placas</label>
+              <input
+                type="text"
+                name="placas"
+                value={formData.placas}
+                onChange={handleInputChange}
+                className="w-full border px-2 py-1"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700">Operador</label>
+              <input
+                type="text"
+                name="operador"
+                value={formData.operador}
+                onChange={handleInputChange}
+                className="w-full border px-2 py-1"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700">Año</label>
+              <input
+                type="number"
+                name="anio"
+                value={formData.anio}
+                onChange={handleInputChange}
+                className="w-full border px-2 py-1"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-gray-700">Placas</label>
-            <input
-              type="text"
-              name="placas"
-              value={formData.placas}
-              onChange={handleInputChange}
-              className="w-full border px-2 py-1"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Operador</label>
-            <input
-              type="text"
-              name="operador"
-              value={formData.operador}
-              onChange={handleInputChange}
-              className="w-full border px-2 py-1"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Año</label>
-            <input
-              type="number"
-              name="anio"
-              value={formData.anio}
-              onChange={handleInputChange}
-              className="w-full border px-2 py-1"
-            />
-          </div>
-        </div>
 
-        {/* Columna derecha */}
-        <div className="space-y-4">
-          <div>
-            <label className="block text-gray-700">Empresa</label>
-            <input
-              type="text"
-              name="empresa"
-              value={formData.empresa}
-              onChange={handleInputChange}
-              className="w-full border px-2 py-1"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Marca</label>
-            <input
-              type="text"
-              name="marca"
-              value={formData.marca}
-              onChange={handleInputChange}
-              className="w-full border px-2 py-1"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Imagen</label>
-            <input
-              type="file"
-              name="imagen"
-              onChange={handleFileChange}
-              className="w-full border px-2 py-1"
-            />
-          </div>
-          <div className="flex justify-end space-x-2">
-            <button
-              type="button"
-              className="bg-red-500 text-white px-4 py-2 rounded"
-              onClick={() => router.push('/dashboard/vehiculos')}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              className="bg-green-500 text-white px-4 py-2 rounded"
-              onClick={handleSubmit}
-            >
-              Guardar
-            </button>
+          {/* Columna derecha */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-700">Empresa</label>
+              <input
+                type="text"
+                name="empresa"
+                value={formData.empresa}
+                onChange={handleInputChange}
+                className="w-full border px-2 py-1"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700">Marca</label>
+              <input
+                type="text"
+                name="marca"
+                value={formData.marca}
+                onChange={handleInputChange}
+                className="w-full border px-2 py-1"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700">Imagen</label>
+              <input
+                type="file"
+                name="imagen"
+                onChange={handleFileChange}
+                className="w-full border px-2 py-1"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                className="bg-red-500 text-white px-4 py-2 rounded"
+                onClick={() => router.push('/dashboard/vehiculos')}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="bg-green-500 text-white px-4 py-2 rounded"
+                onClick={handleSubmit}
+              >
+                Guardar
+              </button>
+            </div>
           </div>
         </div>
       </div>

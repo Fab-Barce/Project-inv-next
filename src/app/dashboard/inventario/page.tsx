@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Pantalla_refacciones from "./componentes/pantalla_refacciones";
 import Refaccion from "./componentes/refaccion";
+import Headerv2 from "@/app/components/headerv2";
 
 type Producto = {
     id: number;
@@ -36,7 +37,9 @@ export default function Inventario() {
     };
 
     return (
+
         <div>
+            <Headerv2 />
             {modo === "listado" ? (
                 <Pantalla_refacciones onModificar={handleModificar} />
             ) : (

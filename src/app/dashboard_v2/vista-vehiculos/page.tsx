@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Pantalla_vehiculos from "./componentes/pantalla_vista_vehiculos";
 import Vista_vehiculo from "./componentes/vista_vehiculo";
+import Headerv2 from "@/app/components/headerv2";
 
 type Vehiculo = {
     id: number;
@@ -31,6 +32,7 @@ export default function Vehiculos() {
 
     return (
         <div>
+            <Headerv2 />
             {modo === "listado" ? (
                 <Pantalla_vehiculos onVerDetalles={handleVerDetalles} />
             ) : (

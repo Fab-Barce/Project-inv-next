@@ -1,68 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
-type Producto = {
-  id: number;
-  nombre: string;
-  categoria: string;
-  stock_minimo: number;
-  descripcion: string;
-  unidad: string;
-  proveedor: string;
-  imagen: string;
-  cantidad: number;
-  empresa: string;
+type Refaccion = {
+  refaccion_id: number;
   numero_parte: string;
+  nombre: string;
+  cantidad: number;
+  stock_minimo: number;
   costo: number;
-  marca: string;
 };
 
 type Props = {
-  onModificar: (producto: Producto) => void;
+  onModificar: (refaccion: Refaccion) => void;
 };
 
 export default function Pantalla_refacciones({ onModificar }: Props) {
-  const [productos, setProductos] = useState<Producto[]>([
-    {
-      id: 1,
-      nombre: "Refacción A",
-      cantidad: 6,
-      categoria: "Categoría 1",
-      stock_minimo: 5,
-      descripcion: "Descripción de Refacción A",
-      unidad: "Unidad 1",
-      proveedor: "Proveedor X",
-      imagen: "imagen_a.png",
-      empresa: "empresa 1",
-      numero_parte: "parte 31231",
-      costo: 100,
-      marca: "Marca x",
-    },
-    {
-      id: 2,
-      nombre: "Refacción B",
-      cantidad: 7,
-      categoria: "Categoría 2",
-      stock_minimo: 3,
-      descripcion: "Descripción de Refacción B",
-      unidad: "Unidad 2",
-      proveedor: "Proveedor Y",
-      imagen: "imagen_b.png",
-      empresa: "empresa 2",
-      numero_parte: "parte 12321",
-      costo: 234,
-      marca: "Marca y",
-    },
-  ]);
-
-  // Estado para activar o desactivar el modo de eliminación
+  const [refacciones, setRefacciones] = useState<Refaccion[]>([]);
   const [deleteMode, setDeleteMode] = useState<boolean>(false);
-  // Arreglo con los IDs de los productos seleccionados para eliminar
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
-  // Función para seleccionar o deseleccionar un producto
+  // Función para obtener los datos de la API
+  useEffect(() => {
+    const fetchRefacciones = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/Refacciones/");
+        if (!response.ok) {
+          throw new Error("Error al obtener las refacciones");
+        }
+        const data = await response.json();
+        
+        console.log("Datos recibidos de la API:", data); // Debug
+
+        const refaccionesFiltradas = data.map((item: any) => ({
+          refaccion_id: item.refaccion_id || item.id,
+          numero_parte: item.numero_parte || "N/A",
+          nombre: item.nombre || "Sin nombre",
+          cantidad: Number(item.cantidad) || 0,
+          stock_minimo: Number(item.stock_minimo) || 0,
+          costo: Number(item.costo) || 0,
+        }));
+
+        setRefacciones(refaccionesFiltradas);
+      } catch (error) {
+        console.error("Error al obtener refacciones:", error);
+      }
+    };
+
+    fetchRefacciones();
+  }, []);
+
+  // Función para seleccionar o deseleccionar una refacción
   const handleSelect = (id: number) => {
     if (selectedItems.includes(id)) {
       setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
@@ -71,23 +60,26 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
     }
   };
 
-  // Función para eliminar en lote los productos seleccionados
-  const handleBulkDelete = () => {
+  // Función para eliminar en lote las refacciones seleccionadas
+  const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return;
-    const confirmar = confirm("¿Estás seguro de eliminar los productos seleccionados?");
+    const confirmar = confirm("¿Estás seguro de eliminar las refacciones seleccionadas?");
     if (confirmar) {
-      setProductos(productos.filter((p) => !selectedItems.includes(p.id)));
-      setSelectedItems([]);
-      setDeleteMode(false);
-    }
-  };
+      try {
+        await Promise.all(
+          selectedItems.map(async (refaccion_id) => {
+            await fetch(`http://localhost:8000/Refacciones/delete/${refaccion_id}/`, {
+              method: "DELETE",
+            });
+          })
+        );
 
-  // Función de eliminación individual (solo se muestra cuando no está en modo eliminación)
-  const handleEliminar = (id: number) => {
-    const confirmar = confirm(`¿Estás seguro de eliminar el producto con ID ${id}?`);
-    if (confirmar) {
-      setProductos(productos.filter((p) => p.id !== id));
-      alert(`Producto con ID ${id} eliminado.`);
+        setRefacciones((prev) => prev.filter((u) => !selectedItems.includes(u.refaccion_id)));
+        setSelectedItems([]);
+        setDeleteMode(false);
+      } catch (error) {
+        console.error("Error al eliminar refacciones:", error);
+      }
     }
   };
 
@@ -95,14 +87,26 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Título */}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl text-black font-bold">Inventario</h1>
+        <h1 className="text-xl text-black font-bold">Inventario de Refacciones</h1>
       </div>
 
       {/* Área de botones */}
       <div className="flex space-x-2 mb-4 bg-white p-2 shadow rounded-lg">
         <Link href="/dashboard/inventario/nuevo">
-          <button className="flex items-center space-x-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+          <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
             Nuevo
+          </button>
+        </Link>
+
+        <Link href="/dashboard/inventario/categorias">
+          <button className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+            Categorías
+          </button>
+        </Link>
+
+        <Link href="/dashboard/inventario/proveedores">
+          <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+            Proveedores
           </button>
         </Link>
 
@@ -110,15 +114,13 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
         <button
           onClick={() => {
             setDeleteMode(!deleteMode);
-            // Reiniciamos la selección al cambiar de modo
             setSelectedItems([]);
           }}
           className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
         >
-          {deleteMode ? "Cancelar Eliminación" : "Eliminar"}
+          {deleteMode ? "Cancelar Eliminación" : "Eliminar Refacción"}
         </button>
 
-        {/* Botón para confirmar eliminación en modo borrado */}
         {deleteMode && (
           <button
             onClick={handleBulkDelete}
@@ -134,65 +136,47 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
             Volver
           </button>
         </Link>
-
-        <div className="flex ml-auto space-x-2">
-          <div className="flex text-black items-center border rounded px-2">
-            <input
-              type="text"
-              placeholder="Buscar"
-              className="outline-none py-1 bg-transparent"
-            />
-            <span>🔍</span>
-          </div>
-        </div>
       </div>
 
-      {/* Tabla de productos */}
+      {/* Tabla de refacciones */}
       <div className="bg-white rounded shadow-md overflow-hidden">
         <table className="w-full table-auto">
           <thead className="bg-gray-200 text-gray-600">
             <tr>
-              {/* Columna para checkboxes en modo eliminación */}
               {deleteMode && <th className="px-4 py-2"></th>}
+              <th className="px-4 py-2 text-left">Número de Parte</th>
               <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2">Categoría</th>
               <th className="px-4 py-2">Cantidad</th>
-              {/* Se muestra la columna de acciones solo si no está en modo eliminación */}
-              {!deleteMode && <th className="px-4 py-2">Acciones</th>}
+              <th className="px-4 py-2">Stock Mínimo</th>
+              <th className="px-4 py-2">Costo</th>
+              <th className="px-4 py-2">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {productos.map((producto) => (
-              <tr key={producto.id} className="border-t">
+            {refacciones.map((refaccion) => (
+              <tr key={refaccion.refaccion_id} className="border-t">
                 {deleteMode && (
                   <td className="px-4 py-2 text-center">
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(producto.id)}
-                      onChange={() => handleSelect(producto.id)}
+                      checked={selectedItems.includes(refaccion.refaccion_id)}
+                      onChange={() => handleSelect(refaccion.refaccion_id)}
                     />
                   </td>
                 )}
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => onModificar(producto)}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {producto.nombre}
-                  </button>
-                </td>
-                <td className="px-4 py-2 text-center">{producto.categoria}</td>
-                <td className="px-4 py-2 text-center">{producto.cantidad}</td>
+                <td className="px-4 py-2">{refaccion.numero_parte}</td>
+                <td className="px-4 py-2">{refaccion.nombre}</td>
+                <td className="px-4 py-2 text-center">{refaccion.cantidad}</td>
+                <td className="px-4 py-2 text-center">{refaccion.stock_minimo}</td>
+                <td className="px-4 py-2 text-center">${refaccion.costo.toFixed(2)}</td>
                 {!deleteMode && (
-                  <td className="px-4 py-2 flex space-x-2">
-
-                    <button 
-                      onClick={() => onModificar(producto)}
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => onModificar(refaccion)}
                       className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                     >
                       Ver Detalles
                     </button>
-
                   </td>
                 )}
               </tr>
@@ -201,9 +185,10 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
         </table>
       </div>
 
-      {productos.length === 0 && (
-        <div className="mt-4 text-gray-500">No hay productos en el inventario.</div>
+      {refacciones.length === 0 && (
+        <div className="mt-4 text-gray-500">No hay refacciones en el inventario.</div>
       )}
     </div>
   );
 }
+

@@ -49,7 +49,18 @@ export default function Pantalla_vehiculos({ onVerDetalles }: Props) {
             
                 <h1 className="text-xl text-black font-bold mb-4">Vehículos</h1>
 
+
+
                 <div className="flex space-x-2 mb-4 bg-white p-2 shadow rounded-lg">
+
+                    <Link href="/dashboard_v2/vista-vehiculos/operadores">
+                        <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                            Operadores
+                        </button>
+                    </Link>
+
+
+
                     <Link href="/dashboard_v2">
                         <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                         Volver

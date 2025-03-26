@@ -65,6 +65,19 @@ export default function Pantalla_Vista_Refacciones({ onModificar }: Props) {
 
             <div className="flex space-x-2 mb-4 bg-white p-2 shadow rounded-lg">
 
+
+                <Link href="/dashboard_v2/vista-inventario/categorias">
+                    <button className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                        Categorías
+                    </button>
+                </Link>
+
+                <Link href="/dashboard_v2/vista-inventario/proveedores">
+                    <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                        Proveedores
+                    </button>
+                </Link>
+
                 <Link href="/dashboard_v2">
                     <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                         Volver

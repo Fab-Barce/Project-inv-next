@@ -19,7 +19,7 @@ export default function PantallaUsuarios() {
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/usuarios2/");
+        const response = await fetch("http://localhost:8000/api/usuarios/");
         if (!response.ok) throw new Error("Error al obtener los usuarios");
         const data = await response.json();
         setUsuarios(data);
@@ -46,7 +46,7 @@ export default function PantallaUsuarios() {
       try {
         await Promise.all(
           selectedItems.map(async (id) => {
-            await fetch(`http://localhost:8000/api/usuarios2/${id}/`, {
+            await fetch(`http://localhost:8000/api/usuarios/${id}/`, {
               method: "DELETE",
             });
           })
@@ -66,7 +66,7 @@ export default function PantallaUsuarios() {
     const confirmar = confirm(`¿Estás seguro de eliminar al usuario con ID ${id}?`);
     if (confirmar) {
       try {
-        await fetch(`http://localhost:8000/api/usuarios2/${id}/`, { method: "DELETE" });
+        await fetch(`http://localhost:8000/api/usuarios/${id}/`, { method: "DELETE" });
         setUsuarios(usuarios.filter((u) => u.user_id !== id));
         alert(`Usuario con ID ${id} eliminado.`);
       } catch (error) {

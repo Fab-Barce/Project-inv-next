@@ -3,6 +3,7 @@
 import { useState } from "react";
 import PantallaVehiculos from "./componentes/pantalla_vehiculos";  // Asegúrate de que el archivo se llame así
 import VehiculoDetalle from "./componentes/vehiculo";              // Asegúrate de que el archivo se llame así
+import Headerv2 from "@/app/components/headerv2";
 
 type Vehiculo = {
     id: number;
@@ -32,6 +33,7 @@ export default function Inventario() {
 
     return (
         <div>
+            <Headerv2 />
             {modo === "listado" ? (
                 <PantallaVehiculos onModificar={handleModificar} />
             ) : (

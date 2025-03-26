@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"; // Para el botón de regreso
+import Header from "./components/header"; // Importamos el Header
+
 
 export default function Login() {
     const [nombre, setNombreUsuario] = useState("");
@@ -23,7 +25,7 @@ export default function Login() {
                 body: JSON.stringify({
                   nombre: nombre,
                   correo: correo,
-                  contrasena: contrasena,   // La contraseña
+                  password: contrasena,   // La contraseña
 
                 }),
               });
@@ -53,48 +55,53 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-            <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold text-blue-600 mb-4">Iniciar Sesión</h2>
+        <div>
+            <Header />
 
-                {error && <p className="text-red-500 text-center">{error}</p>}
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+                
+                <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+                    <h2 className="text-2xl font-bold text-blue-600 mb-4">Iniciar Sesión</h2>
 
-                <div className="mb-4">
-                    <label className="block text-gray-700">Nombre de Usuario:</label>
-                    <input
-                        type="text"
-                        value={nombre}
-                        onChange={(e) => setNombreUsuario(e.target.value)}
-                        className="w-full p-2 border rounded-md"
-                    />
+                    {error && <p className="text-red-500 text-center">{error}</p>}
+
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Nombre de Usuario:</label>
+                        <input
+                            type="text"
+                            value={nombre}
+                            onChange={(e) => setNombreUsuario(e.target.value)}
+                            className="w-full p-2 border rounded-md"
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Correo Electrónico:</label>
+                        <input
+                            type="email"
+                            value={correo}
+                            onChange={(e) => setCorreo(e.target.value)}
+                            className="w-full p-2 border rounded-md"
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Contraseña:</label>
+                        <input
+                            type="password"
+                            value={contrasena}
+                            onChange={(e) => setContrasena(e.target.value)}
+                            className="w-full p-2 border rounded-md"
+                        />
+                    </div>
+
+                    <button
+                        onClick={handleLogin}
+                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg w-full font-semibold"
+                    >
+                        Iniciar Sesión
+                    </button>
                 </div>
-
-                <div className="mb-4">
-                    <label className="block text-gray-700">Correo Electrónico:</label>
-                    <input
-                        type="email"
-                        value={correo}
-                        onChange={(e) => setCorreo(e.target.value)}
-                        className="w-full p-2 border rounded-md"
-                    />
-                </div>
-
-                <div className="mb-4">
-                    <label className="block text-gray-700">Contraseña:</label>
-                    <input
-                        type="password"
-                        value={contrasena}
-                        onChange={(e) => setContrasena(e.target.value)}
-                        className="w-full p-2 border rounded-md"
-                    />
-                </div>
-
-                <button
-                    onClick={handleLogin}
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg w-full font-semibold"
-                >
-                    Iniciar Sesión
-                </button>
             </div>
         </div>
     );

@@ -4,14 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation"; // Para manejar la redirección
 import PantallaUsuarios from "./componentes/pantalla_usuarios";
 import Usuario from "./componentes/usuario";
+import Headerv2 from "@/app/components/headerv2";
 
 type Usuario = {
     id: number;
     nombre: string;
+    correo: string; // Campo de correo añadido
     rol: "visualizacion" | "modificacion";
     username: string;
     password: string;
-    correo: string;
 };
 
 export default function UsuariosPage() {
@@ -31,17 +32,20 @@ export default function UsuariosPage() {
     };
 
     return (
-        <div className="p-6 bg-gray-100 min-h-screen">
-            <div className="flex justify-between items-center mb-4">
-                <h1 className="text-xl text-black font-bold">Gestión de Usuarios</h1>
+        <div>
+            <Headerv2 />
+            <div className="p-6 bg-gray-100 min-h-screen">
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-xl text-black font-bold">Gestión de Usuarios</h1>
 
+                </div>
+
+                {modo === "listado" ? (
+                    <PantallaUsuarios onModificar={handleModificar} />
+                ) : (
+                    <Usuario usuario={usuarioSeleccionado} onCancelar={handleCancelarEdicion} />
+                )}
             </div>
-
-            {modo === "listado" ? (
-                <PantallaUsuarios onModificar={handleModificar} />
-            ) : (
-                <Usuario usuario={usuarioSeleccionado} onCancelar={handleCancelarEdicion} />
-            )}
         </div>
     );
 }

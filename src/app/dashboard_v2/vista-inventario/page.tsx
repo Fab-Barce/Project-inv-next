@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Pantalla_Vista_Refacciones from "./componentes/pantalla_vista_refacciones";
 import VistaRefaccion from "./componentes/vista_refaccion"; // Cambiado para solo visualización
+import Headerv2 from "@/app/components/headerv2";
 
 type Producto = {
     id: number;
@@ -37,6 +38,7 @@ export default function Inventario() {
 
     return (
         <div>
+            <Headerv2 />
             {modo === "listado" ? (
                 <Pantalla_Vista_Refacciones onModificar={handleVer} />
             ) : (

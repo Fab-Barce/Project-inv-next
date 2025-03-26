@@ -28,8 +28,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Header /> {/* El encabezado se muestra en todas las páginas */}
+        {/* El encabezado se muestra en todas las páginas */}
+
         {children} {/* Aquí se renderizan las páginas de contenido */}
+        
         <Footer /> {/* El pie de página se muestra en todas las páginas */}
       </body>
     </html>
