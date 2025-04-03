@@ -1,14 +1,15 @@
 import Link from "next/link";
 
 type Proveedor = {
-  id: number;
+  proveedor_id: number;
   nombre: string;
   direccion: string;
-  rfc: string;
+  RFC: string;
   nombre_representante: string;
   descripcion: string;
-  num_telf: string;
+  num_telef: string;
 };
+
 
 type Props = {
   proveedor: Proveedor | null;
@@ -24,11 +25,11 @@ export default function ProveedorDetalle({ proveedor, onCancelar }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <Field label="Nombre" value={proveedor.nombre} />
-        <Field label="RFC" value={proveedor.rfc} />
+        <Field label="RFC" value={proveedor.RFC} />
         <Field label="Representante" value={proveedor.nombre_representante} />
         <Field label="Dirección" value={proveedor.direccion} />
         <Field label="Descripción" value={proveedor.descripcion} />
-        <Field label="Teléfono" value={proveedor.num_telf} />
+        <Field label="Teléfono" value={proveedor.num_telef} />
       </div>
 
       <div className="flex space-x-3 mt-6">

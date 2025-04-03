@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-
+ 
 type Categoria = {
   id: number;
   nombre: string;

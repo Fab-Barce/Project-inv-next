@@ -2,14 +2,16 @@ import React, { useEffect, useState } from "react";
 
 
 type Vehiculo = {
-    id: number;
-    modelo: string;
+    vehiculo_id: number;
+    num_serie: string;
+    placas: string;
+    operador_id: number;
+    imagen_vehi: string;
+    anio: number;
+    empresa_id: number;
     marca: string;
-    año: number;
-    color: string;
-    placa: string;
     empresa: string;
-    descripcion: string;
+    operador:string;
 };
 
 type Props = {
@@ -32,15 +34,17 @@ export default function Vista_vehiculo({ vehiculo, onCancelar }: Props) {
             <h2 className="text-2xl font-bold text-blue-600 mb-4">Detalles del Vehículo</h2>
 
 
-                <div className="grid grid-cols-2 gap-4">
-                <Field label="Nombre" value={formData?.modelo || ""} />
-                <Field label="Categoría" value={formData?.marca || ""} />
-                <Field label="Stock Mínimo" value={formData?.año || 0} />
-                <Field label="Unidad" value={formData?.color || ""} />
-                <Field label="Proveedor" value={formData?.placa || ""} />
-                <Field label="Costo $" value={formData?.empresa || ""} />
-                <Field label="Cantidad" value={formData?.descripcion || ""} />
+            <div className="grid grid-cols-2 gap-4">
+                <Field label="Número de Serie" value={formData?.num_serie || ""} />
+                <Field label="Placas" value={formData?.placas || ""} />
+                <Field label="Operador" value={formData?.operador || 0} />
+                <Field label="Empresa" value={formData?.empresa || ""} />
+                <Field label="Marca" value={formData?.marca || ""} />
+                <Field label="Año" value={formData?.anio || ""} />
+                <div className="flex-col">
+                    {formData?.imagen_vehi && <img src={formData.imagen_vehi} alt="Imagen" className="h-20" />}
                 </div>
+            </div>
 
 
             <div className="flex justify-end mt-4">

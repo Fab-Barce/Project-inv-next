@@ -6,19 +6,20 @@ import VistaRefaccion from "./componentes/vista_refaccion"; // Cambiado para sol
 import Headerv2 from "@/app/components/headerv2";
 
 type Producto = {
-    id: number;
-    nombre: string;
-    categoria: string;
-    stock_minimo: number;
-    descripcion: string;
-    unidad: string;
-    proveedor: string;
-    imagen: string;
-    cantidad: number;
-    empresa: string;
+    refaccion_id: number;
+    proveedor_id: string;
+    vehiculo_id: string;
     numero_parte: string;
-    costo: number,
-    marca: string,
+    nombre: string;
+    cantidad: number;
+    stock_minimo: number;
+    costo: number;
+    categoria_id: string;
+    imagen_refa: string;
+    empresa_id: string;
+    categoria: string;
+    proveedor: string;
+    empresa: string;
 };
 
 export default function Inventario() {

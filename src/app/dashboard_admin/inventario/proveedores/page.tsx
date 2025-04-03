@@ -7,14 +7,15 @@ import Headerv2 from "@/app/components/headerv2";
 
 
 type Proveedor = {
-    id: number;
+    proveedor_id: number;
     nombre: string;
     direccion: string;
-    rfc: string;
+    RFC: string;
     nombre_representante: string;
     descripcion: string;
-    num_telf: string;
+    num_telef: string;
 };
+
 
 
 export default function Inventario() {

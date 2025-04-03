@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 type Categoria = {
-    id: number;
+    categoria_id: number;
     nombre: string;
     descripcion: string;
-};
+  };
+  
 
 type Props = {
     categoria: Categoria | null;
@@ -14,7 +15,7 @@ type Props = {
 
 export default function CategoriaDetalle({ categoria, onCancelar }: Props) {
     const [formData, setFormData] = useState<Categoria>({
-        id: 0,
+        categoria_id: 0,
         nombre: "",
         descripcion: "",
     });

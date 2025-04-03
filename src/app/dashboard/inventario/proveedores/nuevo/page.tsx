@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Headerv2 from "@/app/components/headerv2";
+import axios from "axios";
 
 export default function NuevoProveedor() {
   const router = useRouter();
@@ -10,11 +11,11 @@ export default function NuevoProveedor() {
   const [formData, setFormData] = useState({
     nombre: "",
     direccion: "",
-    rfc: "",
+    RFC: "",
     nombre_representante: "",
     descripcion: "",
-    num_telf: "",
-  });
+    num_telef: "",
+  }); 
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -25,10 +26,18 @@ export default function NuevoProveedor() {
       [name]: value,
     });
   };
+  
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
     console.log("Datos a guardar:", formData);
-    // Aquí se integraría la lógica para enviar los datos a la API
+    axios.post(`http://localhost:8000/Proveedores/create/`, formData )
+    .then(res => {
+      console.log(res);
+      console.log(res.data)
+      alert("Proveedor almacenado correctamente")
+  })
   };
 
   return (
@@ -41,7 +50,7 @@ export default function NuevoProveedor() {
           {/* Columna izquierda */}
           <div className="space-y-4">
             <Field label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} />
-            <Field label="RFC" name="rfc" value={formData.rfc} onChange={handleInputChange} />
+            <Field label="RFC" name="RFC" value={formData.RFC} onChange={handleInputChange} />
             <Field label="Representante" name="nombre_representante" value={formData.nombre_representante} onChange={handleInputChange} />
           </div>
 
@@ -49,7 +58,7 @@ export default function NuevoProveedor() {
           <div className="space-y-4">
             <Field label="Dirección" name="direccion" value={formData.direccion} onChange={handleInputChange} />
             <Field label="Descripción" name="descripcion" value={formData.descripcion} onChange={handleInputChange} />
-            <Field label="Teléfono" name="num_telf" value={formData.num_telf} onChange={handleInputChange} />
+            <Field label="Teléfono" name="num_telef" value={formData.num_telef} onChange={handleInputChange} />
           </div>
         </div>
 

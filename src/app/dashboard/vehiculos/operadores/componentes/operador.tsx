@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 type Operador = {
-    id: number;
+    operador_id: number;
     nombre: string;
-    unidad: string;
+    empresa_id: number;
     empresa: string;
+};
+
+type Empresa = {
+    empresa_id: number;
+    nombre: string;
 };
 
 type Props = {
@@ -15,26 +21,71 @@ type Props = {
 
 export default function OperadorDetalle({ operador, onCancelar }: Props) {
     const [formData, setFormData] = useState<Operador>({
-        id: 0,
+        operador_id: 0,
         nombre: "",
-        unidad: "",
-        empresa: "Empresa A",
+        empresa_id: 0,
+        empresa: "",
     });
 
     const [editable, setEditable] = useState(false); // Controla si los campos son editables
+    const [originalData, setOriginalData] = useState<Operador | null>(null);
+    const [empresas, setEmpresas] = useState<Empresa[]>([]);
 
     useEffect(() => {
         if (operador) {
             setFormData(operador);
+            setOriginalData(operador);
         }
     }, [operador]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    useEffect(() => {
+        axios.get("http://localhost:8000/Empresas/")
+        .then (response => {
+            setEmpresas(response.data)
+        }) 
+    },[])
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const getChangedFields = () => {
+        if (!originalData) return {};
+    
+        const changes: Partial<Operador> = {};
+    
+        for (const key in formData) {
+            const formValue = formData[key as keyof Operador];
+            const originalValue = originalData[key as keyof Operador];
+        
+            // Convertir ambos valores a string para comparación precisa
+            if (String(formValue) !== String(originalValue)) {
+                changes[key as keyof Operador] = formValue as Operador[keyof Operador];
+            }
+        }
+    
+        return changes;
+    };
+
+    const handleActualizar = async () => {
+        const changes = getChangedFields();
+        if (Object.keys(changes).length === 0) {
+            alert("No hay cambios para actualizar.");
+            return;
+        }
+        try {
+            await axios.put(
+                `http://localhost:8000/Operadores/update/${formData.operador_id}/`,
+                changes
+            );
+            alert("Operador actualizado con éxito.");
+            setEditable(false);
+            setOriginalData(formData); // Actualizar originalData después de la actualización
+        } catch (error) {
+            console.error("Error al actualizar:", error);
+            alert("Hubo un error al actualizar la categoria.");
+        }
     };
 
     return (
@@ -43,21 +94,24 @@ export default function OperadorDetalle({ operador, onCancelar }: Props) {
 
             <div className="grid grid-cols-2 gap-4">
                 <Field label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} editable={editable} />
-                <Field label="Unidad" name="unidad" value={formData.unidad} onChange={handleInputChange} editable={editable} />
 
-                <div>
-                    <label className="block text-gray-700 font-semibold">Empresa:</label>
-                    <select
-                        name="empresa"
-                        value={formData.empresa}
-                        onChange={handleInputChange}
-                        disabled={!editable}
-                        className={`w-full p-2 border rounded-md ${editable ? 'bg-white' : 'bg-gray-200 cursor-not-allowed'}`}
-                    >
-                        <option value="Empresa A">Empresa A</option>
-                        <option value="Empresa B">Empresa B</option>
-                    </select>
-                </div>
+                {editable ? (
+                    <div>
+                        <label className="block text-gray-700 font-semibold">Empresa:</label>
+                        <select
+                            name="empresa_id"
+                            value={formData?.empresa_id || ""}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded-md bg-white"
+                        >
+                            {empresas.map((empresa: any) => (
+                                <option key={empresa.empresa_id} value={empresa.empresa_id}>{empresa.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                ) : (
+                    <Field label="Empresa" name="empresa_id" value={formData?.empresa || ""} editable={false} />
+                )}
             </div>
 
             <div className="flex space-x-3 mt-6">
@@ -72,7 +126,7 @@ export default function OperadorDetalle({ operador, onCancelar }: Props) {
                 <button
                     type="button"
                     className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold"
-                    onClick={() => alert('Guardado')}
+                    onClick={handleActualizar}
                     disabled={!editable}
                 >
                     Guardar
@@ -96,15 +150,8 @@ export default function OperadorDetalle({ operador, onCancelar }: Props) {
     );
 }
 
-type FieldProps = {
-    label: string;
-    name: string;
-    value: string | number;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    editable: boolean;
-};
 
-const Field = ({ label, name, value, onChange, editable }: FieldProps) => (
+const Field = ({ label, name, value, onChange, editable }: any) => (
     <div>
         <label className="block text-gray-700 font-semibold">{label}:</label>
         <input

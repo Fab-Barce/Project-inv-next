@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Headerv2 from "@/app/components/headerv2";
+import axios from "axios";
+
+type Empresa = {
+  empresa_id: number;
+  nombre: string;
+};
 
 export default function NuevoOperador() {
   const router = useRouter();
-
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [id_empresa, setIdEmpresa] = useState(0);
   const [formData, setFormData] = useState({
     nombre: "",
-    unidad: "",
-    empresa: "Empresa A",
+    empresa_id: id_empresa,
   });
 
   const handleInputChange = (
@@ -23,10 +29,35 @@ export default function NuevoOperador() {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
     console.log("Datos a guardar:", formData);
-    // Aquí se integraría la lógica para enviar los datos a la API
+    axios.post(`http://localhost:8000/Operadores/create/`, formData )
+    .then(res => {
+      console.log(res);
+      console.log(res.data)
+      alert("Operador almacenado correctamente")
+  })
   };
+
+  const handleEmpresaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = Number(e.target.value);
+    setIdEmpresa(selectedId);
+    setFormData((prevData) => ({
+      ...prevData,
+      empresa_id: selectedId, // Actualizar el valor en formData
+    }));
+  };
+  
+
+
+  useEffect(() => {
+    axios.get("http://localhost:8000/Empresas/")
+    .then (response => {
+      setEmpresas(response.data)
+    }) 
+  },[])
 
   return (
     <div>
@@ -48,26 +79,12 @@ export default function NuevoOperador() {
             </div>
 
             <div>
-              <label className="block text-gray-700">Unidad</label>
-              <input
-                type="text"
-                name="unidad"
-                value={formData.unidad}
-                onChange={handleInputChange}
-                className="w-full border px-2 py-1 rounded"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700">Empresa</label>
-              <select
-                name="empresa"
-                value={formData.empresa}
-                onChange={handleInputChange}
-                className="w-full border px-2 py-1 rounded"
-              >
-                <option value="Empresa A">Empresa A</option>
-                <option value="Empresa B">Empresa B</option>
+            <label htmlFor="empresa_id" className="block text-gray-700">Empresa</label>
+              <select name="empresa_id" id="empresa_id" value={formData.empresa_id} onChange={handleEmpresaChange} className="w-full border px-2 py-1">
+                  <option value="">Seleccione una empresa</option>
+                  {empresas.map((empresa: { empresa_id: number; nombre: string }) => (
+                      <option key={empresa.empresa_id} value={empresa.empresa_id}>{empresa.nombre}</option>
+                  ))}
               </select>
             </div>
 
@@ -92,5 +109,6 @@ export default function NuevoOperador() {
         </div>
       </div>
     </div>
+
   );
 }

@@ -1,14 +1,28 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 
+type Empresa = {
+    empresa_id: number;
+    nombre: string;
+  };
+  
+  type Operador = {
+    operador_id: number;
+    nombre: string;
+    empresa_id:number;
+  };
+
 type Vehiculo = {
-    id: number;
-    num_serie: number;
+    vehiculo_id: number;
+    num_serie: string;
     placas: string;
-    operador: string;
-    imagen: string;
+    operador_id: number;
+    imagen_vehi: string;
     anio: number;
-    empresa: string;
+    empresa_id: number;
     marca: string;
+    empresa: string;
+    operador:string;
 };
 
 type Props = {
@@ -17,31 +31,97 @@ type Props = {
 };
 
 export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
-    const [formData, setFormData] = useState<Vehiculo>({
-        id: 0,
-        num_serie: 0,
-        placas: "",
-        operador: "",
-        imagen: "",
-        anio: 0,
-        empresa: "",
-        marca: "",
-    });
+    const [formData, setFormData] = useState<Vehiculo | null>(null);
+    const [operadores, setOperadores] = useState<Operador[]>([]);
+    const [empresas, setEmpresas] = useState<Empresa[]>([]);
+    const [editable, setEditable] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+    const [initialData, setInitialData] = useState<Vehiculo | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
 
-    const [editable, setEditable] = useState(false); // Controla si los campos son editables
+    useEffect(() => {
+        const storedUserId = localStorage.getItem("user_id");
+    
+        setUserId(storedUserId);
+        console.log("Mi user Id", localStorage.getItem("user_id"))
+    }, []);
 
     useEffect(() => {
         if (vehiculo) {
             setFormData(vehiculo);
+            setInitialData(vehiculo);
         }
+        console.log("tengo esto",vehiculo)
     }, [vehiculo]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    useEffect(() => {
+        axios.get("http://localhost:8000/Empresas/")
+        .then (response => {
+          setEmpresas(response.data)
+        }) 
+      },[])
+    
+      useEffect(() => {
+        axios.get("http://localhost:8000/Operadores/")
+        .then (response => {
+          setOperadores(response.data)
+        }) 
+      },[])
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: name === 'anio' || name === 'num_serie' ? Number(value) : value
+        setFormData(prev => (prev ? { ...prev, [name]: value } : null));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setFile(e.target.files[0]);
+        }
+    };
+
+    const handleSave = async () => {
+        if (!formData) return;
+
+        const updatedFields: Partial<Vehiculo> = {};
+        Object.keys(formData).forEach(key => {
+            if (formData[key as keyof Vehiculo] !== initialData?.[key as keyof Vehiculo]) {
+                updatedFields[key as keyof Vehiculo] = formData[key as keyof Vehiculo];
+            }
         });
+
+        const formDataToSend = new FormData();
+        for (const key in updatedFields) {
+            formDataToSend.append(key, updatedFields[key as keyof Vehiculo] as string);
+        }
+        if (file) {
+            formDataToSend.append("imagen_vehi", file);
+        }
+
+        try {
+            await axios.patch(`http://localhost:8000/Vehiculos/update/${vehiculo.vehiculo_id}/`, formDataToSend, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+            try{
+                axios.post(`http://localhost:8000/Movimientos/create/`, 
+                {
+                    vehiculo_id:vehiculo.vehiculo_id,
+                    tipo_movimiento:"actualizacion",
+                    user_id:userId,
+                }
+                )
+                .then(res => {
+                console.log(res);
+                alert("Movimiento almacenado correctamente")
+            })
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Hubo un problema al guardar el movimiento");
+            }
+            alert("Producto actualizado con éxito");
+            setEditable(false);
+        } catch (error) {
+            console.error("Error al actualizar el producto", error);
+        }
     };
 
     return (
@@ -49,13 +129,48 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
             <h2 className="text-2xl font-bold text-blue-600 mb-4">Detalle de Vehículo</h2>
 
             <div className="grid grid-cols-2 gap-4">
-                <Field label="Número de Serie" name="num_serie" value={formData.num_serie} onChange={handleInputChange} editable={editable} />
-                <Field label="Placas" name="placas" value={formData.placas} onChange={handleInputChange} editable={editable} />
-                <Field label="Operador" name="operador" value={formData.operador} onChange={handleInputChange} editable={editable} />
-                <Field label="Empresa" name="empresa" value={formData.empresa} onChange={handleInputChange} editable={editable} />
-                <Field label="Marca" name="marca" value={formData.marca} onChange={handleInputChange} editable={editable} />
-                <Field label="Año" name="anio" value={formData.anio} onChange={handleInputChange} editable={editable} />
-                <Field label="Imagen (URL)" name="imagen" value={formData.imagen} onChange={handleInputChange} editable={editable} />
+                <Field label="Número de Serie" name="num_serie" value={formData?.num_serie || ""} onChange={handleInputChange} editable={editable} />
+                <Field label="Placas" name="placas" value={formData?.placas || ""} onChange={handleInputChange} editable={editable} />
+                {editable ? (
+                    <div>
+                        <label className="block text-gray-700 font-semibold">Operador:</label>
+                        <select
+                            name="operador_id"
+                            value={formData?.operador_id || 0}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded-md bg-white"
+                        >
+                            {operadores.map((operador: any) => (
+                                <option key={operador.operador_id} value={operador.operador_id}>{operador.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                ) : (
+                    <Field label="Operador" name="operador_id" value={formData?.operador || 0} editable={false} />
+                )}
+                {editable ? (
+                    <div>
+                        <label className="block text-gray-700 font-semibold">Empresa:</label>
+                        <select
+                            name="empresa_id"
+                            value={formData?.empresa_id || 0}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border rounded-md bg-white"
+                        >
+                            {empresas.map((empresa: any) => (
+                                <option key={empresa.empresa_id} value={empresa.empresa_id}>{empresa.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                ) : (
+                    <Field label="Empresa" name="empresa_id" value={formData?.empresa || ""} editable={false} />
+                )}
+                <Field label="Marca" name="marca" value={formData?.marca || ""} onChange={handleInputChange} editable={editable} />
+                <Field label="Año" name="anio" value={formData?.anio || ""} onChange={handleInputChange} editable={editable} />
+                <div className="flex-col">
+                    {editable && <input type="file" onChange={handleFileChange} className="hover:bg-gray-400" />}
+                    {formData?.imagen_vehi && <img src={formData.imagen_vehi} alt="Imagen" className="h-20" />}
+                </div>
             </div>
 
             <div className="flex space-x-3 mt-6">
@@ -70,7 +185,7 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
                 <button
                     type="button"
                     className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold"
-                    onClick={() => alert('Guardado')}
+                    onClick={handleSave}
                     disabled={!editable}
                 >
                     Guardar
@@ -88,19 +203,12 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
     );
 }
 
-type FieldProps = {
-    label: string;
-    name: string;
-    value: string | number;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    editable: boolean;
-};
 
-const Field = ({ label, name, value, onChange, editable }: FieldProps) => (
+const Field = ({ label, name, value, onChange, editable }: any) => (
     <div>
         <label className="block text-gray-700 font-semibold">{label}:</label>
         <input
-            type={name === 'anio' || name === 'num_serie' ? 'number' : 'text'}
+            type={name === 'anio' ? 'number' : 'text'}
             name={name}
             value={value}
             onChange={onChange}

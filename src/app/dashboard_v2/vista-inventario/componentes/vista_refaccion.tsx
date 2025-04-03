@@ -2,21 +2,21 @@ import React, { useEffect, useState } from "react";
 
 // Definición del tipo de datos Producto
 type Producto = {
-    id: number;
-    nombre: string;
-    categoria: string;
-    stock_minimo: number;
-    descripcion: string;
-    unidad: string;
-    proveedor: string;
-    imagen: string;
-    cantidad: number;
-    empresa: string;
+    refaccion_id: number;
+    proveedor_id: string;
+    vehiculo_id: string;
     numero_parte: string;
+    nombre: string;
+    cantidad: number;
+    stock_minimo: number;
     costo: number;
-    marca: string;
-};
-
+    categoria_id: string;
+    imagen_refa: string;
+    empresa_id: string;
+    categoria: string;
+    proveedor: string;
+    empresa: string;
+  };
 type Props = {
     producto: Producto | null;
     onCancelar: () => void;
@@ -37,12 +37,15 @@ export default function VistaRefaccion({ producto, onCancelar }: Props) {
 
             <div className="grid grid-cols-2 gap-4">
                 <Field label="Nombre" value={formData?.nombre || ""} />
-                <Field label="Categoría" value={formData?.categoria || ""} />
-                <Field label="Stock Mínimo" value={formData?.stock_minimo || 0} />
-                <Field label="Unidad" value={formData?.unidad || ""} />
+                <Field label="numero_parte" value={formData?.numero_parte || ""} />
                 <Field label="Proveedor" value={formData?.proveedor || ""} />
+                <Field label="Categoría" value={formData?.categoria || ""} />
                 <Field label="Costo $" value={formData?.costo || 0} />
-                <Field label="Marca" value={formData?.marca || ""} />
+                <Field label="Stock Mínimo" value={formData?.stock_minimo || 0} />
+                <div className="flex-col">
+                    {formData?.imagen_refa && <img src={formData.imagen_refa} alt="Imagen" className="h-20" />}
+                </div>
+                <Field label="Empresa" value={formData?.empresa || ""}/>
                 <Field label="Cantidad" value={formData?.cantidad || 0} />
             </div>
 

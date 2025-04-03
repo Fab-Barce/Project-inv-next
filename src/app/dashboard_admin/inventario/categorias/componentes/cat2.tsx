@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 type Categoria = {
-    id: number;
+    categoria_id: number;
     nombre: string;
     descripcion: string;
-};
+  };
 
 type Props = {
     categoria: Categoria | null;
@@ -13,27 +14,72 @@ type Props = {
 };
 
 export default function CategoriaDetalle({ categoria, onCancelar }: Props) {
-    const [formData, setFormData] = useState<Categoria>({
-        id: 0,
-        nombre: "",
-        descripcion: "",
-    });
+  const [formData, setFormData] = useState<Categoria>({
+    categoria_id: 0,
+    nombre: "",
+    descripcion: "",
+  });
 
-    const [editable, setEditable] = useState(false); // Controla si los campos son editables
+  const [originalData, setOriginalData] = useState<Categoria | null>(null);
+  const [editable, setEditable] = useState(false);
 
-    useEffect(() => {
-        if (categoria) {
-            setFormData(categoria);
-        }
-    }, [categoria]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: name === 'anio' || name === 'num_serie' ? Number(value) : value
-        });
-    };
+  useEffect(() => {
+    if (categoria) {
+      setFormData(categoria);
+      setOriginalData(categoria);
+    }
+  }, [categoria]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const getChangedFields = () => {
+    if (!originalData) return {};
+
+    const changes: Partial<Categoria> = {};
+
+    for (const key in formData) {
+      const formValue = formData[key as keyof Categoria];
+      const originalValue = originalData[key as keyof Categoria];
+
+      // Convertir ambos valores a string para comparación precisa
+      if (String(formValue) !== String(originalValue)) {
+        changes[key as keyof Categoria] = formValue as Categoria[keyof Categoria];
+      }
+    }
+
+    return changes;
+  };
+
+  const handleActualizar = async () => {
+    const changes = getChangedFields();
+
+    if (Object.keys(changes).length === 0) {
+      alert("No hay cambios para actualizar.");
+      return;
+    }
+
+    try {
+      await axios.put(
+        `http://localhost:8000/Categorias/update/${formData.categoria_id}/`,
+        changes
+      );
+      alert("Categoria actualizada con éxito.");
+      setEditable(false);
+      setOriginalData(formData); // Actualizar originalData después de la actualización
+    } catch (error) {
+      console.error("Error al actualizar:", error);
+      alert("Hubo un error al actualizar la categoria.");
+    }
+  };
 
     return (
         <div className="p-6 bg-gray-100 rounded-lg shadow-lg border border-gray-300 max-w-3xl mx-auto mt-6">
@@ -57,7 +103,7 @@ export default function CategoriaDetalle({ categoria, onCancelar }: Props) {
                 <button
                     type="button"
                     className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold"
-                    onClick={() => alert('Guardado')}
+                    onClick={handleActualizar}
                     disabled={!editable}
                 >
                     Guardar

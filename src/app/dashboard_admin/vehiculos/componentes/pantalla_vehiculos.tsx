@@ -1,50 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 type Vehiculo = {
-  id: number;
-  num_serie: number;
+  vehiculo_id: number;
+  num_serie: string;
   placas: string;
-  operador: string;
-  imagen: string;
+  operador_id: number;
+  imagen_vehi: string;
   anio: number;
-  empresa: string;
+  empresa_id: number;
   marca: string;
+  empresa: string;
+  operador:string;
 };
+
 
 type Props = {
   onModificar: (vehiculo: Vehiculo) => void;
 };
 
 export default function PantallaVehiculos({ onModificar }: Props) {
-  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([
-    {
-      id: 1,
-      num_serie: 1234,
-      placas: "ASDC245",
-      operador: "Jose",
-      imagen: "imagen1.png",
-      anio: 2019,
-      empresa: "Empresa1",
-      marca: "Marca X",
-    },
-    {
-      id: 2,
-      num_serie: 4321,
-      placas: "NMSX234",
-      operador: "Juan",
-      imagen: "imagen2.png",
-      anio: 2018,
-      empresa: "Empresa2",
-      marca: "Marca Y",
-    },
-  ]);
-
-  // Estado para el modo eliminación y los elementos seleccionados
+  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchVehiculos = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/Vehiculos/");
+        if (!response.ok) {
+          throw new Error("Error al obtener los vehiculos");
+        }
+        const data = await response.json();
+        console.log("Datos recibidos de la API:", data); // Debug
+        setVehiculos(data);
+      } catch (error) {
+        console.error("Error al obtener vehiculos:", error);
+      }
+    };
+    fetchVehiculos();
+  }, []);
 
   // Seleccionar o deseleccionar un vehículo para eliminación
   const handleSelect = (id: number) => {
@@ -56,24 +53,46 @@ export default function PantallaVehiculos({ onModificar }: Props) {
   };
 
   // Eliminación en lote de los vehículos seleccionados
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return;
     const confirmar = confirm("¿Estás seguro de eliminar los vehículos seleccionados?");
     if (confirmar) {
-      setVehiculos(vehiculos.filter((v) => !selectedItems.includes(v.id)));
-      setSelectedItems([]);
-      setDeleteMode(false);
+      try {
+        await Promise.all(
+            selectedItems.map(async (vehiculo_id) => {
+                // Obtener la refacción eliminada para enviar su nombre en la segunda petición
+                const vehiculo = vehiculos.find((r) => r.vehiculo_id === vehiculo_id);
+
+                // Eliminar la refacción
+                await fetch(`http://localhost:8000/Vehiculos/delete/${vehiculo_id}/`, {
+                    method: "DELETE",
+                });
+
+                // Registrar movimiento de eliminación
+                await fetch("http://localhost:8000/Movimientos/create/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        tipo_movimiento: "eliminacion",
+                        user_id: localStorage.getItem("user_id"),
+                        nombre: vehiculo?.placas || "Desconocido", // Evita fallos si no encuentra la refacción
+                    }),
+                });
+            })
+        );
+
+        // Actualizar la lista eliminando las refacciones seleccionadas
+        setVehiculos((prev) => prev.filter((u) => !selectedItems.includes(u.vehiculo_id)));
+        setSelectedItems([]);
+        setDeleteMode(false);
+    } catch (error) {
+        console.error("Error al eliminar vehiculos y registrar movimientos:", error);
+    }
     }
   };
 
-  // Eliminación individual (solo se muestra cuando NO está en modo eliminación)
-  const handleEliminar = (id: number) => {
-    const confirmar = confirm(`¿Estás seguro de eliminar el vehículo con ID ${id}?`);
-    if (confirmar) {
-      setVehiculos(vehiculos.filter((v) => v.id !== id));
-      alert(`Vehículo con ID ${id} eliminado.`);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -87,14 +106,6 @@ export default function PantallaVehiculos({ onModificar }: Props) {
             Nuevo
           </button>
         </Link>
-
-        <Link href="/dashboard_admin/vehiculos/operadores">
-          <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-            Operadores
-          </button>
-        </Link>
-
-
 
         {/* Botón para activar/desactivar el modo eliminación */}
         <button
@@ -119,11 +130,17 @@ export default function PantallaVehiculos({ onModificar }: Props) {
           </button>
         )}
 
-          <Link href="/dashboard_admin">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-              Volver
-            </button>
-          </Link>
+        <Link href="/dashboard_admin/vehiculos/operadores">
+          <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+            Operadores
+          </button>
+        </Link>
+
+        <Link href="/dashboard_admin">
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            Volver
+          </button>
+        </Link>
 
         <div className="flex ml-auto space-x-2">
           <div className="flex text-black items-center border rounded px-2">
@@ -156,13 +173,13 @@ export default function PantallaVehiculos({ onModificar }: Props) {
           </thead>
           <tbody>
             {vehiculos.map((vehiculo) => (
-              <tr key={vehiculo.id} className="border-b">
+              <tr key={vehiculo.vehiculo_id} className="border-b">
                 {deleteMode && (
                   <td className="px-4 py-2 text-center">
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(vehiculo.id)}
-                      onChange={() => handleSelect(vehiculo.id)}
+                      checked={selectedItems.includes(vehiculo.vehiculo_id)}
+                      onChange={() => handleSelect(vehiculo.vehiculo_id)}
                     />
                   </td>
                 )}

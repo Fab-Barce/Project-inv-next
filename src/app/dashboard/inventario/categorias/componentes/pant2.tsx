@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 type Categoria = {
-    id: number;
+    categoria_id: number;
     nombre: string;
     descripcion: string;
 };
@@ -15,22 +16,19 @@ type Props = {
 };
 
 export default function PantallaCategoria({ onModificar }: Props) {
-  const [categorias, setCategoria] = useState<Categoria[]>([
-    {
-      id: 1,
-      nombre: "Llanta",
-      descripcion: "Esta es una categoria de prueba",
-    },
-    {
-        id: 2,
-        nombre: "Llanta2",
-        descripcion: "Esta es una categoria de prueba",
-    },
-  ]);
+  const [categorias, setCategoria] = useState<Categoria[]>([]);
 
   // Estado para el modo eliminación y los elementos seleccionados
   const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:8000/Categorias/")
+    .then (response => {
+      setCategoria(response.data)
+    }) 
+  },[])
+  
 
   // Seleccionar o deseleccionar un vehículo para eliminación
   const handleSelect = (id: number) => {
@@ -44,19 +42,28 @@ export default function PantallaCategoria({ onModificar }: Props) {
   // Eliminación en lote de los vehículos seleccionados
   const handleBulkDelete = () => {
     if (selectedItems.length === 0) return;
-    const confirmar = confirm("¿Estás seguro de eliminar los vehículos seleccionados?");
+    const confirmar = confirm(
+      "¿Estás seguro de eliminar las categorias seleccionadas?"
+    );
     if (confirmar) {
-        setCategoria(categorias.filter((v) => !selectedItems.includes(v.id)));
+      for (var i = 0; i < selectedItems.length; i+=1)
+      {
+        axios.delete(`http://localhost:8000/Categorias/delete/${selectedItems[i]}/`)
+        .then(res => {
+          console.log(res);
+          console.log(res.data);
+        })
+      }
+      setCategoria(categorias.filter((v) => !selectedItems.includes(v.categoria_id)));
       setSelectedItems([]);
       setDeleteMode(false);
     }
   };
-
   // Eliminación individual (solo se muestra cuando NO está en modo eliminación)
   const handleEliminar = (id: number) => {
     const confirmar = confirm(`¿Estás seguro de eliminar el vehículo con ID ${id}?`);
     if (confirmar) {
-        setCategoria(categorias.filter((v) => v.id !== id));
+        setCategoria(categorias.filter((v) => v.categoria_id !== id));
       alert(`Vehículo con ID ${id} eliminado.`);
     }
   };
@@ -130,13 +137,13 @@ export default function PantallaCategoria({ onModificar }: Props) {
           </thead>
           <tbody>
             {categorias.map((categoria) => (
-              <tr key={categoria.id} className="border-b">
+              <tr key={categoria.categoria_id} className="border-b">
                 {deleteMode && (
                   <td className="px-4 py-2 text-center">
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(categoria.id)}
-                      onChange={() => handleSelect(categoria.id)}
+                      checked={selectedItems.includes(categoria.categoria_id)}
+                      onChange={() => handleSelect(categoria.categoria_id)}
                     />
                   </td>
                 )}

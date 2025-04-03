@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 type Operador = {
-    id: number;
+    operador_id: number;
     nombre: string;
-    unidad: string;
+    // unidad: string;
     empresa: string;
 };
 
@@ -15,14 +16,18 @@ type Props = {
 };
 
 export default function PantallaOperador({ onModificar }: Props) {
-    const [operadores, setOperadores] = useState<Operador[]>([
-        { id: 1, nombre: "Juan", unidad: "Camión 1", empresa: "Empresa A" },
-        { id: 2, nombre: "Jose", unidad: "Camión 2", empresa: "Empresa B" },
-    ]);
+    const [operadores, setOperadores] = useState<Operador[]>([]);  
 
     // Estado para el modo eliminación y los elementos seleccionados
     const [deleteMode, setDeleteMode] = useState<boolean>(false);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
+    useEffect(() => {
+    axios.get("http://localhost:8000/Operadores/")
+    .then (response => {
+        setOperadores(response.data)
+    }) 
+    },[])
 
     // Seleccionar o deseleccionar un operador para eliminación
     const handleSelect = (id: number) => {
@@ -36,22 +41,24 @@ export default function PantallaOperador({ onModificar }: Props) {
     // Eliminación en lote de los operadores seleccionados
     const handleBulkDelete = () => {
         if (selectedItems.length === 0) return;
-        const confirmar = confirm("¿Estás seguro de eliminar los operadores seleccionados?");
+        const confirmar = confirm(
+          "¿Estás seguro de eliminar los operadores seleccionados?"
+        );
         if (confirmar) {
-            setOperadores(operadores.filter((v) => !selectedItems.includes(v.id)));
+            for (var i = 0; i < selectedItems.length; i+=1)
+            {
+            axios.delete(`http://localhost:8000/Operadores/delete/${selectedItems[i]}/`)
+            .then(res => {
+                console.log(res);
+                console.log(res.data);
+            })
+            }
+            setOperadores(operadores.filter((v) => !selectedItems.includes(v.operador_id)));
             setSelectedItems([]);
             setDeleteMode(false);
         }
     };
 
-    // Eliminación individual
-    const handleEliminar = (id: number) => {
-        const confirmar = confirm(`¿Estás seguro de eliminar el operador con ID ${id}?`);
-        if (confirmar) {
-            setOperadores(operadores.filter((v) => v.id !== id));
-            alert(`Operador con ID ${id} eliminado.`);
-        }
-    };
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
@@ -121,13 +128,13 @@ export default function PantallaOperador({ onModificar }: Props) {
                     </thead>
                     <tbody>
                         {operadores.map((operador) => (
-                            <tr key={operador.id} className="border-b">
+                            <tr key={operador.operador_id} className="border-b">
                                 {deleteMode && (
                                     <td className="px-4 py-2 text-center">
                                         <input
                                             type="checkbox"
-                                            checked={selectedItems.includes(operador.id)}
-                                            onChange={() => handleSelect(operador.id)}
+                                            checked={selectedItems.includes(operador.operador_id)}
+                                            onChange={() => handleSelect(operador.operador_id)}
                                         />
                                     </td>
                                 )}
@@ -139,7 +146,7 @@ export default function PantallaOperador({ onModificar }: Props) {
                                         {operador.nombre}
                                     </button>
                                 </td>
-                                <td className="px-4 py-2">{operador.unidad}</td>
+                                <td className="px-4 py-2">NA</td>
                                 <td className="px-4 py-2">{operador.empresa}</td>
                                 {!deleteMode && (
                                     <td className="px-4 py-2 flex space-x-2 justify-center">

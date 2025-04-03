@@ -6,15 +6,18 @@ import Vista_vehiculo from "./componentes/vista_vehiculo";
 import Headerv2 from "@/app/components/headerv2";
 
 type Vehiculo = {
-    id: number;
-    modelo: string;
+    vehiculo_id: number;
+    num_serie: string;
+    placas: string;
+    operador_id: number;
+    imagen_vehi: string;
+    anio: number;
+    empresa_id: number;
     marca: string;
-    año: number;
-    color: string;
-    placa: string;
     empresa: string;
-    descripcion: string;
+    operador:string;
 };
+
 
 export default function Vehiculos() {
     const [modo, setModo] = useState<"listado" | "ver">("listado");  

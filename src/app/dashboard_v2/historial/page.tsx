@@ -1,44 +1,34 @@
 // /pages/historial/movimientos.tsx
 "use client";
 import Headerv2 from "@/app/components/headerv2";
+import axios from "axios";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+type Movimiento = {
+  id_movimiento: number;
+  nombre_refaccion: string;
+  nombre: string;
+  placas: string;
+  placa_vehiculo: string;
+  cantidad: string;
+  fecha: string;
+  hora: string;
+  motivo: string;
+  tipo_movimiento: string;
+  user_nombre:string;
+};
 
 const HistorialMovimientos = () => {
-  const movimientos = [
-    {
-      id_movimiento: 1,
-      refaccion_id: "Refacción A",
-      vehiculo_id: "Vehículo 1",
-      cantidad: 10,
-      fecha: "2025-03-25",
-      hora: "14:30",
-      motivo: "Venta",
-      tipo_movimiento: "Ingreso",
-      user_id: "Usuario 1",
-    },
-    {
-      id_movimiento: 2,
-      refaccion_id: "Refacción B",
-      vehiculo_id: "Vehículo 2",
-      cantidad: 5,
-      fecha: "2025-03-24",
-      hora: "09:45",
-      motivo: "Compra",
-      tipo_movimiento: "Egreso",
-      user_id: "Usuario 2",
-    },
-    {
-      id_movimiento: 3,
-      refaccion_id: "Refacción C",
-      vehiculo_id: "Vehículo 3",
-      cantidad: 3,
-      fecha: "2025-03-23",
-      hora: "11:00",
-      motivo: "Mantenimiento",
-      tipo_movimiento: "Ingreso",
-      user_id: "Usuario 3",
-    },
-  ];
+  const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
+
+    useEffect(() => {
+      axios.get("http://localhost:8000/Movimientos/")
+      .then (response => {
+        setMovimientos(response.data)
+      }) 
+    },[])
+    
 
   return (
     <div>
@@ -51,7 +41,7 @@ const HistorialMovimientos = () => {
 
               {/* Área de botones */}
       <div className="flex space-x-2 mb-4 bg-white p-2 shadow rounded-lg">
-        <Link href="/dashboard_v2">
+        <Link href="/dashboard">
           <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
             Volver
           </button>
@@ -77,14 +67,14 @@ const HistorialMovimientos = () => {
                 {movimientos.map((movimiento) => (
                 <tr key={movimiento.id_movimiento} className="border-b">
                     <td className="px-4 py-2">{movimiento.id_movimiento}</td>
-                    <td className="px-4 py-2">{movimiento.refaccion_id}</td>
-                    <td className="px-4 py-2">{movimiento.vehiculo_id}</td>
+                    <td className="px-4 py-2">{movimiento.nombre || movimiento.nombre_refaccion}</td>
+                    <td className="px-4 py-2">{movimiento.placa_vehiculo || movimiento.placas}</td>
                     <td className="px-4 py-2">{movimiento.cantidad}</td>
                     <td className="px-4 py-2">{movimiento.fecha}</td>
                     <td className="px-4 py-2">{movimiento.hora}</td>
                     <td className="px-4 py-2">{movimiento.motivo}</td>
                     <td className="px-4 py-2">{movimiento.tipo_movimiento}</td>
-                    <td className="px-4 py-2">{movimiento.user_id}</td>
+                    <td className="px-4 py-2">{movimiento.user_nombre}</td>
                 </tr>
                 ))}
             </tbody>

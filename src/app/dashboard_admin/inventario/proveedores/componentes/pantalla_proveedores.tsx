@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 type Proveedor = {
-  id: number;
+  proveedor_id: number;
   nombre: string;
   direccion: string;
-  rfc: string;
+  RFC: string;
   nombre_representante: string;
   descripcion: string;
-  num_telf: string;
+  num_telef: string;
 };
 
 type Props = {
@@ -18,29 +19,16 @@ type Props = {
 };
 
 export default function PantallaProveedor({ onModificar }: Props) {
-  const [proveedores, setProveedor] = useState<Proveedor[]>([
-    {
-      id: 1,
-      nombre: "Proveedor 1",
-      direccion: "Calle Falsa 123",
-      rfc: "RFC123456",
-      nombre_representante: "Juan Pérez",
-      descripcion: "Proveedor de materiales de construcción",
-      num_telf: "555-123-4567",
-    },
-    {
-      id: 2,
-      nombre: "Proveedor 2",
-      direccion: "Av. Principal 456",
-      rfc: "RFC789012",
-      nombre_representante: "María Gómez",
-      descripcion: "Proveedor de insumos eléctricos",
-      num_telf: "555-987-6543",
-    },
-  ]);
-
+  const [proveedores, setProveedor] = useState<Proveedor[]>([]);
   const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:8000/Proveedores/")
+    .then (response => {
+      setProveedor(response.data)
+    })
+  },[])
 
   const handleSelect = (id: number) => {
     if (selectedItems.includes(id)) {
@@ -56,7 +44,15 @@ export default function PantallaProveedor({ onModificar }: Props) {
       "¿Estás seguro de eliminar los proveedores seleccionados?"
     );
     if (confirmar) {
-      setProveedor(proveedores.filter((v) => !selectedItems.includes(v.id)));
+      for (var i = 0; i < selectedItems.length; i+=1)
+      {
+        axios.delete(`http://localhost:8000/Proveedores/delete/${selectedItems[i]}/`)
+        .then(res => {
+          console.log(res);
+          console.log(res.data);
+        })
+      }
+      setProveedor(proveedores.filter((v) => !selectedItems.includes(v.proveedor_id)));
       setSelectedItems([]);
       setDeleteMode(false);
     }
@@ -67,7 +63,7 @@ export default function PantallaProveedor({ onModificar }: Props) {
       `¿Estás seguro de eliminar el proveedor con ID ${id}?`
     );
     if (confirmar) {
-      setProveedor(proveedores.filter((v) => v.id !== id));
+      setProveedor(proveedores.filter((v) => v.proveedor_id !== id));
       alert(`Proveedor con ID ${id} eliminado.`);
     }
   };
@@ -137,13 +133,13 @@ export default function PantallaProveedor({ onModificar }: Props) {
           </thead>
           <tbody>
             {proveedores.map((proveedor) => (
-              <tr key={proveedor.id} className="border-b">
+              <tr key={proveedor.proveedor_id} className="border-b">
                 {deleteMode && (
                   <td className="px-4 py-2 text-center">
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(proveedor.id)}
-                      onChange={() => handleSelect(proveedor.id)}
+                      checked={selectedItems.includes(proveedor.proveedor_id)}
+                      onChange={() => handleSelect(proveedor.proveedor_id)}
                     />
                   </td>
                 )}
@@ -155,11 +151,11 @@ export default function PantallaProveedor({ onModificar }: Props) {
                     {proveedor.nombre}
                   </button>
                 </td>
-                <td className="px-4 py-2">{proveedor.rfc}</td>
+                <td className="px-4 py-2">{proveedor.RFC}</td>
                 <td className="px-4 py-2">{proveedor.nombre_representante}</td>
                 <td className="px-4 py-2">{proveedor.direccion}</td>
                 <td className="px-4 py-2">{proveedor.descripcion}</td>
-                <td className="px-4 py-2">{proveedor.num_telf}</td>
+                <td className="px-4 py-2">{proveedor.num_telef}</td>
                 {!deleteMode && (
                   <td className="px-4 py-2 flex space-x-2 justify-center">
                     <button
@@ -173,7 +169,7 @@ export default function PantallaProveedor({ onModificar }: Props) {
                 )}
               </tr>
             ))}
-          </tbody>
+          </tbody> 
         </table>
       </div>
 

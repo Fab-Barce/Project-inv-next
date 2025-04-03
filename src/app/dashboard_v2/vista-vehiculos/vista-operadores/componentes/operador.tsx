@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 type Operador = {
-    id: number;
+    operador_id: number;
     nombre: string;
-    unidad: string;
+    empresa_id: number;
     empresa: string;
 };
 
@@ -15,10 +15,10 @@ type Props = {
 
 export default function OperadorDetalle({ operador, onCancelar }: Props) {
     const [formData, setFormData] = useState<Operador>({
-        id: 0,
+        operador_id: 0,
         nombre: "",
-        unidad: "",
-        empresa: "Empresa A",
+        empresa_id: 0,
+        empresa: "",
     });
 
     const [editable, setEditable] = useState(false); // Controla si los campos son editables
@@ -43,7 +43,6 @@ export default function OperadorDetalle({ operador, onCancelar }: Props) {
 
             <div className="grid grid-cols-2 gap-4">
                 <Field label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} editable={editable} />
-                <Field label="Unidad" name="unidad" value={formData.unidad} onChange={handleInputChange} editable={editable} />
 
                 <div>
                     <label className="block text-gray-700 font-semibold">Empresa:</label>

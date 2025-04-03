@@ -1,46 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link"; // Para el botón de regreso
 
 type Vehiculo = {
-    id: number;
-    modelo: string;
+    vehiculo_id: number;
+    num_serie: string;
+    placas: string;
+    operador_id: number;
+    imagen_vehi: string;
+    anio: number;
+    empresa_id: number;
     marca: string;
-    año: number;
-    color: string;
-    placa: string;
     empresa: string;
-    descripcion: string;
-};
+    operador:string;
+  };
 
 type Props = {
     onVerDetalles: (vehiculo: Vehiculo) => void;
 };
 
 export default function Pantalla_vehiculos({ onVerDetalles }: Props) {
-    const [vehiculos, setVehiculos] = useState<Vehiculo[]>([
-        {
-            id: 1,
-            modelo: "Camioneta Ford",
-            marca: "Ford",
-            año: 2020,
-            color: "Blanco",
-            placa: "ABC-123",
-            empresa: "Empresa A",
-            descripcion: "Camioneta de transporte de carga."
-        },
-        {
-            id: 2,
-            modelo: "Toyota Hilux",
-            marca: "Toyota",
-            año: 2019,
-            color: "Gris",
-            placa: "XYZ-456",
-            empresa: "Empresa B",
-            descripcion: "Vehículo de uso comercial."
-        },
-    ]);
+    const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
+
+    useEffect(() => {
+    const fetchVehiculos = async () => {
+        try {
+        const response = await fetch("http://localhost:8000/Vehiculos/");
+        if (!response.ok) {
+            throw new Error("Error al obtener los vehiculos");
+        }
+        const data = await response.json();
+        console.log("Datos recibidos de la API:", data); // Debug
+        setVehiculos(data);
+        } catch (error) {
+        console.error("Error al obtener vehiculos:", error);
+        }
+    };
+    fetchVehiculos();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
@@ -53,7 +51,7 @@ export default function Pantalla_vehiculos({ onVerDetalles }: Props) {
 
                 <div className="flex space-x-2 mb-4 bg-white p-2 shadow rounded-lg">
 
-                    <Link href="/dashboard_v2/vista-vehiculos/operadores">
+                    <Link href="/dashboard_v2/vista-vehiculos/vista-operadores">
                         <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
                             Operadores
                         </button>
@@ -82,10 +80,10 @@ export default function Pantalla_vehiculos({ onVerDetalles }: Props) {
                     
                     <tbody>
                         {vehiculos.map((vehiculo) => (
-                            <tr key={vehiculo.id} className="border-b">
+                            <tr key={vehiculo.vehiculo_id} className="border-b">
                                 <td className="px-4 py-2">{vehiculo.marca}</td>
-                                <td className="px-4 py-2 text-center">{vehiculo.año}</td>
-                                <td className="px-4 py-2 text-center">{vehiculo.placa}</td>
+                                <td className="px-4 py-2 text-center">{vehiculo.anio}</td>
+                                <td className="px-4 py-2 text-center">{vehiculo.placas}</td>
                                 <td className="px-4 py-2 text-center">
                                     <button 
                                         onClick={() => onVerDetalles(vehiculo)}

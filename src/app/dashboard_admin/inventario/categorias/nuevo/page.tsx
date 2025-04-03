@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Headerv2 from "@/app/components/headerv2";
+import axios from "axios";
 
 export default function NuevaCategoria() {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
     nombre: "",
-    descrpcion: "",
+    descripcion: "",
   });
 
   const handleInputChange = (
@@ -24,9 +25,16 @@ export default function NuevaCategoria() {
 
 
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
     console.log("Datos a guardar:", formData);
-    // Aquí se integraría la lógica para enviar los datos a la API
+    axios.post(`http://localhost:8000/Categorias/create/`, formData )
+    .then(res => {
+      console.log(res);
+      console.log(res.data)
+      alert("Categoria almacenada correctamente")
+  })
   };
 
   return (
@@ -52,8 +60,8 @@ export default function NuevaCategoria() {
               <label className="block text-gray-700">Descrpcion</label>
               <input
                 type="text"
-                name="descrpcion"
-                value={formData.descrpcion}
+                name="descripcion"
+                value={formData.descripcion}
                 onChange={handleInputChange}
                 className="w-full border px-2 py-1"
               />

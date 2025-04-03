@@ -6,15 +6,18 @@ import VehiculoDetalle from "./componentes/vehiculo";              // Asegúrate
 import Headerv2 from "@/app/components/headerv2";
 
 type Vehiculo = {
-    id: number;
-    num_serie: number;
+    vehiculo_id: number;
+    num_serie: string;
     placas: string;
-    operador: string;
-    imagen: string;
+    operador_id: number;
+    imagen_vehi: string;
     anio: number;
-    empresa: string;
+    empresa_id: number;
     marca: string;
+    empresa: string;
+    operador:string;
 };
+
 
 export default function Inventario() {
     const [modo, setModo] = useState<"listado" | "editar">("listado");  // Controla si muestra tabla o formulario

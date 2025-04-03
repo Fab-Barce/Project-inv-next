@@ -1,44 +1,114 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Headerv2 from "@/app/components/headerv2";
+import axios from "axios";
+
+type Empresa = {
+  empresa_id: number;
+  nombre: string;
+};
+
+type Operador = {
+  operador_id: number;
+  nombre: string;
+  empresa_id:number;
+};
+
 
 export default function NuevoVehiculo() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
+  const [formDatas, setFormDatas] = useState({
     num_serie: "",
     placas: "",
-    operador: "",
-    imagen: null as File | null,
     anio: "",
-    empresa: "",
     marca: "",
   });
+  const [operadores, setOperadores] = useState<Operador[]>([]);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [id_operador, setIdOperador] = useState(0);
+  const [id_empresa, setIdEmpresa] = useState(0);
+  const [imagen_vehi, setImagen_vehi] = useState(null);
+
+  useEffect(() => {
+    axios.get("http://localhost:8000/Empresas/")
+    .then (response => {
+      setEmpresas(response.data)
+    }) 
+  },[])
+
+  useEffect(() => {
+    axios.get("http://localhost:8000/Operadores/")
+    .then (response => {
+      setOperadores(response.data)
+    }) 
+  },[])
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormDatas({
+      ...formDatas,
       [name]: value,
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData({
-      ...formData,
-      imagen: file,
-    });
+  const handleOperadorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setIdOperador(Number(e.target.value));
   };
 
-  const handleSubmit = () => {
-    console.log("Datos a guardar:", formData);
-    // Aquí se integraría la lógica para enviar los datos a la API
+  const handleEmpresaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setIdEmpresa(Number(e.target.value));
   };
+
+  const handleFileChange = (e: any) => {
+    setImagen_vehi(e.target.files[0]);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('num_serie', formDatas.num_serie);
+      formData.append('placas', formDatas.placas);
+      formData.append('operador_id', id_operador.toString());
+      formData.append('imagen_vehi', imagen_vehi || '');
+      formData.append('empresa_id', id_empresa.toString());
+      formData.append('marca', formDatas.marca );
+      formData.append('anio', formDatas.anio );
+      // Crear materia
+      const response = await axios.post(`http://localhost:8000/Vehiculos/create/`, formData,{
+          headers: {
+              'Content-Type': 'multipart/form-data'
+          }
+      });
+      alert("Vehiculo guardado correctamente.");
+      router.push("/dashboard/inventario"); // Redirige al listado después de guardar
+      console.log(response)
+      try{
+        axios.post(`http://localhost:8000/Movimientos/create/`, 
+          {
+            vehiculo_id:response.data.vehiculo_id,
+            tipo_movimiento:"entrada",
+            user_id:localStorage.getItem("user_id"),
+          }
+        )
+        .then(res => {
+          console.log(res);
+          alert("Movimiento almacenado correctamente")
+      })
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Hubo un problema al guardar el movimiento");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Hubo un problema al guardar la refacción.");
+    }
+  };
+
 
   return (
     <div>
@@ -53,7 +123,7 @@ export default function NuevoVehiculo() {
               <input
                 type="text"
                 name="num_serie"
-                value={formData.num_serie}
+                value={formDatas.num_serie}
                 onChange={handleInputChange}
                 className="w-full border px-2 py-1"
               />
@@ -63,27 +133,26 @@ export default function NuevoVehiculo() {
               <input
                 type="text"
                 name="placas"
-                value={formData.placas}
+                value={formDatas.placas}
                 onChange={handleInputChange}
                 className="w-full border px-2 py-1"
               />
             </div>
             <div>
-              <label className="block text-gray-700">Operador</label>
-              <input
-                type="text"
-                name="operador"
-                value={formData.operador}
-                onChange={handleInputChange}
-                className="w-full border px-2 py-1"
-              />
+              <label htmlFor="operador" className="block text-gray-700">Operador</label>
+              <select id="operador" value={id_operador} onChange={handleOperadorChange} className="w-full border px-2 py-1">
+                  <option value="">Seleccione un operadorr</option>
+                  {operadores.map((operador: { operador_id: number; nombre: string }) => (
+                      <option key={operador.operador_id} value={operador.operador_id}>{operador.nombre}</option>
+                  ))}
+              </select>
             </div>
             <div>
               <label className="block text-gray-700">Año</label>
               <input
                 type="number"
                 name="anio"
-                value={formData.anio}
+                value={formDatas.anio}
                 onChange={handleInputChange}
                 className="w-full border px-2 py-1"
               />
@@ -93,21 +162,20 @@ export default function NuevoVehiculo() {
           {/* Columna derecha */}
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-700">Empresa</label>
-              <input
-                type="text"
-                name="empresa"
-                value={formData.empresa}
-                onChange={handleInputChange}
-                className="w-full border px-2 py-1"
-              />
+              <label htmlFor="empresa" className="block text-gray-700">Empresa</label>
+              <select id="empresa" value={id_empresa} onChange={handleEmpresaChange} className="w-full border px-2 py-1">
+                  <option value="">Seleccione una empresa</option>
+                  {empresas.map((empresa: { empresa_id: number; nombre: string }) => (
+                      <option key={empresa.empresa_id} value={empresa.empresa_id}>{empresa.nombre}</option>
+                  ))}
+              </select>
             </div>
             <div>
               <label className="block text-gray-700">Marca</label>
               <input
                 type="text"
                 name="marca"
-                value={formData.marca}
+                value={formDatas.marca}
                 onChange={handleInputChange}
                 className="w-full border px-2 py-1"
               />

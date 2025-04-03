@@ -1,27 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 type Categoria = {
-    id: number;
-    nombre: string;
-    descripcion: string;
+  categoria_id: number;
+  nombre: string;
+  descripcion: string;
 };
 
+
 export default function PantallaCategoria() {
-  const [categorias] = useState<Categoria[]>([
-    {
-      id: 1,
-      nombre: "Llanta",
-      descripcion: "Esta es una categoría de prueba",
-    },
-    {
-      id: 2,
-      nombre: "Llanta2",
-      descripcion: "Esta es otra categoría de prueba",
-    },
-  ]);
+  const [categorias, setCategoria] = useState<Categoria[]>([]);
+
+    useEffect(() => {
+      axios.get("http://localhost:8000/Categorias/")
+      .then (response => {
+        setCategoria(response.data)
+      }) 
+    },[])
+    
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -48,7 +47,7 @@ export default function PantallaCategoria() {
           </thead>
           <tbody>
             {categorias.map((categoria) => (
-              <tr key={categoria.id} className="border-b">
+              <tr key={categoria.categoria_id} className="border-b">
                 <td className="px-4 py-2">{categoria.nombre}</td>
                 <td className="px-4 py-2 text-center">{categoria.descripcion}</td>
               </tr>

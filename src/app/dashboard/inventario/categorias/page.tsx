@@ -7,7 +7,7 @@ import Headerv2 from "@/app/components/headerv2";           // Asegúrate de que
 
 
 type Categoria = {
-  id: number;
+  categoria_id: number;
   nombre: string;
   descripcion: string;
 };

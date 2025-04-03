@@ -3,21 +3,29 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-type Refaccion = {
+type Producto = {
   refaccion_id: number;
+  proveedor_id: string;
+  vehiculo_id: string;
   numero_parte: string;
   nombre: string;
   cantidad: number;
   stock_minimo: number;
   costo: number;
+  categoria_id: string;
+  imagen_refa: string;
+  empresa_id: string;
+  categoria: string;
+  proveedor: string;
+  empresa: string;
 };
 
 type Props = {
-  onModificar: (refaccion: Refaccion) => void;
+  onModificar: (producto: Producto) => void;
 };
 
 export default function Pantalla_refacciones({ onModificar }: Props) {
-  const [refacciones, setRefacciones] = useState<Refaccion[]>([]);
+  const [refacciones, setRefacciones] = useState<Producto[]>([]);
   const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
@@ -35,11 +43,19 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
 
         const refaccionesFiltradas = data.map((item: any) => ({
           refaccion_id: item.refaccion_id || item.id,
+          proveedor_id:item.proveedor_id || 0,
+          vehiculo_id:item.vehiculo_id || 0,
           numero_parte: item.numero_parte || "N/A",
           nombre: item.nombre || "Sin nombre",
           cantidad: Number(item.cantidad) || 0,
           stock_minimo: Number(item.stock_minimo) || 0,
           costo: Number(item.costo) || 0,
+          categoria_id: item.categoria_id || 0,
+          imagen_refa: item.imagen_refa || null,
+          empresa_id: item.empresa_id || 0,
+          categoria:item.categoria || "",
+          empresa: item.empresa || "",
+          proveedor: item.proveedor || "",
         }));
 
         setRefacciones(refaccionesFiltradas);
@@ -63,25 +79,45 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
   // Función para eliminar en lote las refacciones seleccionadas
   const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return;
+
     const confirmar = confirm("¿Estás seguro de eliminar las refacciones seleccionadas?");
-    if (confirmar) {
-      try {
+    if (!confirmar) return;
+
+    try {
         await Promise.all(
-          selectedItems.map(async (refaccion_id) => {
-            await fetch(`http://localhost:8000/Refacciones/delete/${refaccion_id}/`, {
-              method: "DELETE",
-            });
-          })
+            selectedItems.map(async (refaccion_id) => {
+                // Obtener la refacción eliminada para enviar su nombre en la segunda petición
+                const refaccion = refacciones.find((r) => r.refaccion_id === refaccion_id);
+
+                // Eliminar la refacción
+                await fetch(`http://localhost:8000/Refacciones/delete/${refaccion_id}/`, {
+                    method: "DELETE",
+                });
+
+                // Registrar movimiento de eliminación
+                await fetch("http://localhost:8000/Movimientos/create/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        tipo_movimiento: "eliminacion",
+                        user_id: localStorage.getItem("user_id"),
+                        nombre: refaccion?.nombre || "Desconocido", // Evita fallos si no encuentra la refacción
+                    }),
+                });
+            })
         );
 
+        // Actualizar la lista eliminando las refacciones seleccionadas
         setRefacciones((prev) => prev.filter((u) => !selectedItems.includes(u.refaccion_id)));
         setSelectedItems([]);
         setDeleteMode(false);
-      } catch (error) {
-        console.error("Error al eliminar refacciones:", error);
-      }
+    } catch (error) {
+        console.error("Error al eliminar refacciones y registrar movimientos:", error);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">

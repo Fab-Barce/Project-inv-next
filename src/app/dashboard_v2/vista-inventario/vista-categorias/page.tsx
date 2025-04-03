@@ -7,10 +7,10 @@ import Headerv2 from "@/app/components/headerv2";
 
 
 type Categoria = {
-  id: number;
-  nombre: string;
-  descripcion: string;
-};
+    categoria_id: number;
+    nombre: string;
+    descripcion: string;
+  };
 export default function Inventario() {
     const [modo, setModo] = useState<"listado" | "editar">("listado");  // Controla si muestra tabla o formulario
     const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState<Categoria | null>(null);
