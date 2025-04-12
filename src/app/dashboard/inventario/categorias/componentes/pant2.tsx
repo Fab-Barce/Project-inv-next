@@ -3,34 +3,56 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  ArrowsUpDownIcon
+} from "@heroicons/react/24/solid";
 
 type Categoria = {
-    categoria_id: number;
-    nombre: string;
-    descripcion: string;
+  categoria_id: number;
+  nombre: string;
+  descripcion: string;
 };
 
- 
 type Props = {
   onModificar: (categoria: Categoria) => void;
 };
 
 export default function PantallaCategoria({ onModificar }: Props) {
   const [categorias, setCategoria] = useState<Categoria[]>([]);
-
-  // Estado para el modo eliminación y los elementos seleccionados
+  const [filteredCategorias, setFilteredCategorias] = useState<Categoria[]>([]);
   const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>(""); // Variable de estado para la búsqueda
+  const [filterKey, setFilterKey] = useState<keyof Categoria>("nombre"); // Estado para almacenar el filtro seleccionado
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof Categoria | null;
+    direction: "asc" | "desc";
+  }>({
+    key: null,
+    direction: "asc",
+  });
 
   useEffect(() => {
-    axios.get("http://localhost:8000/Categorias/")
-    .then (response => {
-      setCategoria(response.data)
-    }) 
-  },[])
-  
+    axios.get("http://localhost:8000/Categorias/").then((response) => {
+      setCategoria(response.data);
+      setFilteredCategorias(response.data); // Inicializamos las categorías filtradas
+    });
+  }, []);
 
-  // Seleccionar o deseleccionar un vehículo para eliminación
+  useEffect(() => {
+    // Filtrar categorías según el campo de búsqueda y el filtro seleccionado
+    setFilteredCategorias(
+      categorias.filter((categoria) =>
+        categoria[filterKey]
+          .toString()
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [searchQuery, categorias, filterKey]); // Filtrar cuando cambien las categorías, la búsqueda o el filtro
+
   const handleSelect = (id: number) => {
     if (selectedItems.includes(id)) {
       setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
@@ -39,107 +61,153 @@ export default function PantallaCategoria({ onModificar }: Props) {
     }
   };
 
-  // Eliminación en lote de los vehículos seleccionados
   const handleBulkDelete = () => {
     if (selectedItems.length === 0) return;
     const confirmar = confirm(
-      "¿Estás seguro de eliminar las categorias seleccionadas?"
+      "¿Estás seguro de eliminar las categorías seleccionadas?"
     );
     if (confirmar) {
-      for (var i = 0; i < selectedItems.length; i+=1)
-      {
-        axios.delete(`http://localhost:8000/Categorias/delete/${selectedItems[i]}/`)
-        .then(res => {
-          console.log(res);
-          console.log(res.data);
-        })
+      for (var i = 0; i < selectedItems.length; i += 1) {
+        axios
+          .delete(`http://localhost:8000/Categorias/delete/${selectedItems[i]}/`)
+          .then((res) => {
+            console.log(res);
+            console.log(res.data);
+          });
       }
       setCategoria(categorias.filter((v) => !selectedItems.includes(v.categoria_id)));
       setSelectedItems([]);
       setDeleteMode(false);
     }
   };
-  // Eliminación individual (solo se muestra cuando NO está en modo eliminación)
-  const handleEliminar = (id: number) => {
-    const confirmar = confirm(`¿Estás seguro de eliminar el vehículo con ID ${id}?`);
-    if (confirmar) {
-        setCategoria(categorias.filter((v) => v.categoria_id !== id));
-      alert(`Vehículo con ID ${id} eliminado.`);
+
+  const handleSort = (key: keyof Categoria) => {
+    let direction: "asc" | "desc" = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
     }
+    setSortConfig({ key, direction });
   };
+
+  const getSortIcon = (key: keyof Categoria) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return <ArrowsUpDownIcon className="w-4 h-4 inline-block ml-1 text-gray-400" />;
+    }
+    return sortConfig.direction === "asc" ? (
+      <ArrowUpIcon className="w-4 h-4 inline-block ml-1 text-blue-500" />
+    ) : (
+      <ArrowDownIcon className="w-4 h-4 inline-block ml-1 text-blue-500" />
+    );
+  };
+
+  const sortedCategorias = [...filteredCategorias].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+
+    if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Título */}
-      <h1 className="text-xl text-black font-bold mb-4">Categorías</h1>
+      {/* Título principal */}
+      <h1 className="text-2xl font-bold text-black mb-6">Gestión de Categorías</h1>
 
-      {/* Área de botones */}
-      <div className="flex space-x-2 mb-4 bg-white p-2 shadow rounded-lg">
+      {/* Barra de acciones */}
+      <div className="flex flex-wrap items-center gap-3 mb-6 bg-white p-4 shadow-md rounded-lg">
         <Link href="/dashboard/inventario/categorias/nuevo">
-          <button className="flex items-center space-x-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+          <button className="flex items-center bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded transition duration-200">
             Nuevo
           </button>
         </Link>
 
-        {/* Botón para activar/desactivar el modo eliminación */}
         <button
           onClick={() => {
             setDeleteMode(!deleteMode);
-            // Reiniciamos la selección al cambiar de modo
             setSelectedItems([]);
           }}
-          className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+          className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded transition duration-200"
         >
           {deleteMode ? "Cancelar Eliminación" : "Eliminar"}
         </button>
 
-        {/* Botón para confirmar eliminación en modo borrado */}
         {deleteMode && (
           <button
             onClick={handleBulkDelete}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
             disabled={selectedItems.length === 0}
+            className={`${
+              selectedItems.length === 0
+                ? "bg-red-300 cursor-not-allowed"
+                : "bg-red-500 hover:bg-red-600"
+            } text-white font-semibold px-4 py-2 rounded transition duration-200`}
           >
             Confirmar Eliminación
           </button>
         )}
 
         <Link href="/dashboard/inventario">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+          <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded transition duration-200">
             Volver
           </button>
         </Link>
 
-        <div className="flex ml-auto space-x-2">
-          <div className="flex text-black items-center border rounded px-2">
-            <input
-              type="text"
-              placeholder="Buscar"
-              className="outline-none py-1 bg-transparent"
-            />
-            <span>🔍</span>
-          </div>
+        {/* Filtro */}
+        <div className="ml-auto flex items-center gap-2 border rounded px-3 py-1 bg-white shadow-sm">
+          <select
+            value={filterKey}
+            onChange={(e) => setFilterKey(e.target.value as keyof Categoria)}
+            className="outline-none bg-transparent text-black"
+          >
+            <option value="nombre">Nombre</option>
+            <option value="descripcion">Descripción</option>
+          </select>
+        </div>
+
+        {/* Buscador */}
+        <div className="ml-3 flex items-center gap-2 border rounded px-3 py-1 bg-white shadow-sm">
+          <input
+            type="text"
+            placeholder="Buscar..."
+            className="outline-none bg-transparent text-black placeholder-gray-500"
+            value={searchQuery} // Enlazamos el valor con el estado
+            onChange={(e) => setSearchQuery(e.target.value)} // Actualizamos el estado con el texto de búsqueda
+          />
+          <span>🔍</span>
         </div>
       </div>
 
-      {/* Tabla de vehículos */}
-      <div className="bg-white rounded shadow-md overflow-hidden">
-        <table className="w-full table-auto">
-          <thead className="bg-gray-200 text-gray-600">
+      {/* Tabla */}
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <table className="w-full table-auto text-sm">
+          <thead className="bg-gray-200 text-gray-700 font-semibold">
             <tr>
-              {/* Mostrar columna para checkboxes en modo eliminación */}
-              {deleteMode && <th className="px-4 py-2"></th>}
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-center">Descripcion</th>
-              {/* Columna de acciones solo se muestra cuando no está en modo eliminación */}
-              {!deleteMode && <th className="px-4 py-2 text-center">Acciones</th>}
+              {deleteMode && <th className="px-4 py-3 text-center">✓</th>}
+              <th
+                onClick={() => handleSort("nombre")}
+                className="px-4 py-3 text-left cursor-pointer select-none"
+              >
+                Nombre {getSortIcon("nombre")}
+              </th>
+              <th
+                onClick={() => handleSort("descripcion")}
+                className="px-4 py-3 text-left cursor-pointer select-none"
+              >
+                Descripción {getSortIcon("descripcion")}
+              </th>
+              {!deleteMode && <th className="px-4 py-3 text-center">Acciones</th>}
             </tr>
           </thead>
           <tbody>
-            {categorias.map((categoria) => (
-              <tr key={categoria.categoria_id} className="border-b">
+            {sortedCategorias.map((categoria) => (
+              <tr
+                key={categoria.categoria_id}
+                className="border-b hover:bg-gray-100"
+              >
                 {deleteMode && (
-                  <td className="px-4 py-2 text-center">
+                  <td className="px-4 py-3 text-center">
                     <input
                       type="checkbox"
                       checked={selectedItems.includes(categoria.categoria_id)}
@@ -147,24 +215,16 @@ export default function PantallaCategoria({ onModificar }: Props) {
                     />
                   </td>
                 )}
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => onModificar(categoria)}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {categoria.nombre}
-                  </button>
-                </td>
-                <td className="px-4 py-2 text-center">{categoria.descripcion}</td>
+                <td className="px-4 py-3">{categoria.nombre}</td>
+                <td className="px-4 py-3">{categoria.descripcion}</td>
                 {!deleteMode && (
-                  <td className="px-4 py-2 flex space-x-2 justify-center">
+                  <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => onModificar(categoria)}
                       className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                     >
-                      Ver Detalles
+                      Editar
                     </button>
-
                   </td>
                 )}
               </tr>
@@ -172,12 +232,6 @@ export default function PantallaCategoria({ onModificar }: Props) {
           </tbody>
         </table>
       </div>
-
-      {categorias.length === 0 && (
-        <div className="mt-4 text-gray-500">
-          No hay vehículos en el inventario.
-        </div>
-      )}
     </div>
   );
 }

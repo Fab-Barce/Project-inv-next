@@ -114,41 +114,13 @@ export default function PantallaCategoria({ onModificar }: Props) {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Título principal */}
-      <h1 className="text-2xl font-bold text-black mb-6">Gestión de Categorías</h1>
+      <h1 className="text-2xl font-bold text-black mb-6">Vista de Categorías</h1>
 
       {/* Barra de acciones */}
       <div className="flex flex-wrap items-center gap-3 mb-6 bg-white p-4 shadow-md rounded-lg">
-        <Link href="/dashboard_admin/inventario/categorias/nuevo">
-          <button className="flex items-center bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded transition duration-200">
-            Nuevo
-          </button>
-        </Link>
+        
 
-        <button
-          onClick={() => {
-            setDeleteMode(!deleteMode);
-            setSelectedItems([]);
-          }}
-          className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded transition duration-200"
-        >
-          {deleteMode ? "Cancelar Eliminación" : "Eliminar"}
-        </button>
-
-        {deleteMode && (
-          <button
-            onClick={handleBulkDelete}
-            disabled={selectedItems.length === 0}
-            className={`${
-              selectedItems.length === 0
-                ? "bg-red-300 cursor-not-allowed"
-                : "bg-red-500 hover:bg-red-600"
-            } text-white font-semibold px-4 py-2 rounded transition duration-200`}
-          >
-            Confirmar Eliminación
-          </button>
-        )}
-
-        <Link href="/dashboard_admin/inventario">
+        <Link href="/dashboard_v2/vista-inventario">
           <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded transition duration-200">
             Volver
           </button>
@@ -221,9 +193,9 @@ export default function PantallaCategoria({ onModificar }: Props) {
                   <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => onModificar(categoria)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                     >
-                      Editar
+                      Detalles
                     </button>
                   </td>
                 )}

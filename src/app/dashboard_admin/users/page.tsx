@@ -36,7 +36,6 @@ export default function UsuariosPage() {
             <Headerv2 />
             <div className="p-6 bg-gray-100 min-h-screen">
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-xl text-black font-bold">Gestión de Usuarios</h1>
 
                 </div>
 

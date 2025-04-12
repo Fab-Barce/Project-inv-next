@@ -53,7 +53,7 @@ export default function Categoria() {
       if (!response.ok) throw new Error("Error al actualizar la categoría");
 
       alert("Categoría actualizada correctamente");
-      router.push("/dashboard_admin/inventario/categorias");
+      router.push("/dashboard_v2/inventario/categorias");
     } catch (error) {
       console.error("Error al actualizar la categoría:", error);
     }
@@ -89,7 +89,7 @@ export default function Categoria() {
         </button>
 
         <button
-          onClick={() => router.push("/dashboard_admin/inventario/categorias")}
+          onClick={() => router.push("/dashboard_v2/inventario/categorias")}
           className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
         >
           Cancelar

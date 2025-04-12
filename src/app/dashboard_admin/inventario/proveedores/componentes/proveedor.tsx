@@ -82,52 +82,51 @@ export default function ProveedorDetalle({ proveedor, onCancelar }: Props) {
 
 
   return (
-    <div className="p-6 bg-gray-100 rounded-lg shadow-lg border border-gray-300 max-w-3xl mx-auto mt-6">
-      <h2 className="text-2xl font-bold text-blue-600 mb-4">Detalle de Proveedor</h2>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} editable={editable} />
-        <Field label="RFC" name="RFC" value={formData.RFC} onChange={handleInputChange} editable={editable} />
-        <Field label="Representante" name="nombre_representante" value={formData.nombre_representante} onChange={handleInputChange} editable={editable} />
-        <Field label="Dirección" name="direccion" value={formData.direccion} onChange={handleInputChange} editable={editable} />
-        <Field label="Descripción" name="descripcion" value={formData.descripcion} onChange={handleInputChange} editable={editable} />
-        <Field label="Teléfono" name="num_telef" value={formData.num_telef} onChange={handleInputChange} editable={editable} />
-      </div>
-
-      <div className="flex space-x-3 mt-6">
-        <button
-          type="button"
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
-          onClick={() => setEditable(!editable)}
-        >
-          {editable ? "Bloquear" : "Modificar"}
-        </button>
-
-        <button
-          type="button"
-          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold"
-          onClick={handleActualizar}
-          disabled={!editable}
-        >
-          Guardar
-        </button>
-
-        <button
-          type="button"
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
-          onClick={onCancelar}
-        >
-          Cancelar
-        </button>
-
-        <Link href="/dashboard_admin/inventario">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-            Volver a inventario
+    <div className="min-h-screen bg-gray-100 py-10 px-6">
+      <div className="max-w-3xl mx-auto bg-white p-10 rounded-lg shadow-md border border-gray-300">
+        
+        <h2 className="text-3xl font-bold text-blue-600 mb-8 text-center">Detalle de Proveedor</h2>
+  
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Field label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} editable={editable} />
+          <Field label="RFC" name="RFC" value={formData.RFC} onChange={handleInputChange} editable={editable} />
+          <Field label="Representante" name="nombre_representante" value={formData.nombre_representante} onChange={handleInputChange} editable={editable} />
+          <Field label="Dirección" name="direccion" value={formData.direccion} onChange={handleInputChange} editable={editable} />
+          <Field label="Descripción" name="descripcion" value={formData.descripcion} onChange={handleInputChange} editable={editable} />
+          <Field label="Teléfono" name="num_telef" value={formData.num_telef} onChange={handleInputChange} editable={editable} />
+        </div>
+  
+        {/* Botones de acción */}
+        <div className="flex justify-end space-x-4 mt-10">
+          <button
+            type="button"
+            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md font-semibold disabled:opacity-50"
+            onClick={handleActualizar}
+            disabled={!editable}
+          >
+            Guardar
           </button>
-        </Link>
+  
+          <button
+            type="button"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+            onClick={() => setEditable(!editable)}
+          >
+            {editable ? "Bloquear" : "Modificar"}
+          </button>
+  
+          <button
+            type="button"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+            onClick={onCancelar}
+          >
+            Volver
+          </button>
+        </div>
       </div>
     </div>
   );
+  
 }
 
 type FieldProps = {
@@ -140,14 +139,16 @@ type FieldProps = {
 
 const Field = ({ label, name, value, onChange, editable }: FieldProps) => (
   <div>
-    <label className="block text-gray-700 font-semibold">{label}:</label>
+    <label className="block text-gray-700 font-semibold mb-1">{label}:</label>
     <input
       type="text"
       name={name}
       value={value}
       onChange={onChange}
       disabled={!editable}
-      className={`w-full p-2 border rounded-md ${editable ? "bg-white" : "bg-gray-200 cursor-not-allowed"}`}
+      className={`w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none ${
+        editable ? "bg-white focus:ring-2 focus:ring-blue-400" : "bg-gray-200 cursor-not-allowed"
+      }`}
     />
   </div>
 );

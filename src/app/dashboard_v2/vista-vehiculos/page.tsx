@@ -19,16 +19,17 @@ type Vehiculo = {
 };
 
 
-export default function Vehiculos() {
-    const [modo, setModo] = useState<"listado" | "ver">("listado");  
+export default function Inventario() {
+    const [modo, setModo] = useState<"listado" | "editar">("listado");  // Controla si muestra tabla o formulario
     const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState<Vehiculo | null>(null);
 
-    const handleVerDetalles = (vehiculo: Vehiculo) => {
+    // Función que se pasa a PantallaVehiculos para activar el modo de edición
+    const handleModificar = (vehiculo: Vehiculo) => {
         setVehiculoSeleccionado(vehiculo);
-        setModo("ver");
+        setModo("editar");
     };
 
-    const handleCancelar = () => {
+    const handleCancelarEdicion = () => {
         setVehiculoSeleccionado(null);
         setModo("listado");
     };
@@ -37,9 +38,9 @@ export default function Vehiculos() {
         <div>
             <Headerv2 />
             {modo === "listado" ? (
-                <Pantalla_vehiculos onVerDetalles={handleVerDetalles} />
+                <Pantalla_vehiculos onModificar={handleModificar} />
             ) : (
-                <Vista_vehiculo vehiculo={vehiculoSeleccionado} onCancelar={handleCancelar} />
+                <Vista_vehiculo vehiculo={vehiculoSeleccionado} onCancelar={handleCancelarEdicion}/>
             )}
         </div>
     );

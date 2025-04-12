@@ -125,7 +125,7 @@ export default function PantallaCategorias() {
                 <td className="px-4 py-2">{categoria.descripcion}</td>
                 {!deleteMode && (
                   <td className="px-4 py-2">
-                    <Link href={`/dashboard_v2/vista-inventario/categorias/${categoria.id}`}>
+                    <Link href={`/dashboard_v2/inventario/categorias/${categoria.id}`}>
                       <button className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
                         Ver Detalles
                       </button>

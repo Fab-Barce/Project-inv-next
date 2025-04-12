@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import axios from "axios";
 
 type Operador = {
@@ -27,7 +26,7 @@ export default function OperadorDetalle({ operador, onCancelar }: Props) {
         empresa: "",
     });
 
-    const [editable, setEditable] = useState(false); // Controla si los campos son editables
+    const [editable, setEditable] = useState(false);
     const [originalData, setOriginalData] = useState<Operador | null>(null);
     const [empresas, setEmpresas] = useState<Empresa[]>([]);
 
@@ -40,10 +39,10 @@ export default function OperadorDetalle({ operador, onCancelar }: Props) {
 
     useEffect(() => {
         axios.get("http://localhost:8000/Empresas/")
-        .then (response => {
-            setEmpresas(response.data)
-        }) 
-    },[])
+            .then(response => {
+                setEmpresas(response.data)
+            });
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -52,19 +51,16 @@ export default function OperadorDetalle({ operador, onCancelar }: Props) {
 
     const getChangedFields = () => {
         if (!originalData) return {};
-    
         const changes: Partial<Operador> = {};
-    
+
         for (const key in formData) {
             const formValue = formData[key as keyof Operador];
             const originalValue = originalData[key as keyof Operador];
-        
-            // Convertir ambos valores a string para comparación precisa
             if (String(formValue) !== String(originalValue)) {
                 changes[key as keyof Operador] = formValue as Operador[keyof Operador];
             }
         }
-    
+
         return changes;
     };
 
@@ -81,86 +77,96 @@ export default function OperadorDetalle({ operador, onCancelar }: Props) {
             );
             alert("Operador actualizado con éxito.");
             setEditable(false);
-            setOriginalData(formData); // Actualizar originalData después de la actualización
+            setOriginalData(formData);
         } catch (error) {
             console.error("Error al actualizar:", error);
-            alert("Hubo un error al actualizar la categoria.");
+            alert("Hubo un error al actualizar el operador.");
         }
     };
 
     return (
-        <div className="p-6 bg-gray-100 rounded-lg shadow-lg border border-gray-300 max-w-3xl mx-auto mt-6">
-            <h2 className="text-2xl font-bold text-blue-600 mb-4">Detalle de Operador</h2>
+        <div className="min-h-screen bg-gray-100 py-10 px-6">
+            <div className="max-w-3xl mx-auto bg-white p-10 rounded-lg shadow-md border border-gray-300">
+                <h2 className="text-3xl font-bold text-blue-600 mb-8 text-center">Detalle de Operador</h2>
 
-            <div className="grid grid-cols-2 gap-4">
-                <Field label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} editable={editable} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Field
+                        label="Nombre"
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={handleInputChange}
+                        editable={editable}
+                    />
 
-                {editable ? (
-                    <div>
-                        <label className="block text-gray-700 font-semibold">Empresa:</label>
-                        <select
-                            name="empresa_id"
-                            value={formData?.empresa_id || ""}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border rounded-md bg-white"
-                        >
-                            {empresas.map((empresa: any) => (
-                                <option key={empresa.empresa_id} value={empresa.empresa_id}>{empresa.nombre}</option>
-                            ))}
-                        </select>
-                    </div>
-                ) : (
-                    <Field label="Empresa" name="empresa_id" value={formData?.empresa || ""} editable={false} />
-                )}
-            </div>
+                    {editable ? (
+                        <div>
+                            <label className="block text-gray-700 font-semibold">Empresa:</label>
+                            <select
+                                name="empresa_id"
+                                value={formData.empresa_id}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border rounded-md bg-white"
+                            >
+                                {empresas.map((empresa: Empresa) => (
+                                    <option key={empresa.empresa_id} value={empresa.empresa_id}>
+                                        {empresa.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    ) : (
+                        <Field
+                            label="Empresa"
+                            name="empresa"
+                            value={formData.empresa}
+                            editable={false}
+                        />
+                    )}
+                </div>
 
-            <div className="flex space-x-3 mt-6">
-                <button
-                    type="button"
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
-                    onClick={() => setEditable(!editable)}
-                >
-                    {editable ? "Bloquear" : "Modificar"}
-                </button>
+                <div className="flex justify-end space-x-4 mt-10">
+                    <button
+                        type="button"
+                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md font-semibold disabled:opacity-50"
+                        onClick={handleActualizar}
+                        disabled={!editable}
+                    >
+                        Guardar
+                    </button>
 
-                <button
-                    type="button"
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold"
-                    onClick={handleActualizar}
-                    disabled={!editable}
-                >
-                    Guardar
-                </button>
+                    <button
+                        type="button"
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+                        onClick={() => setEditable(!editable)}
+                    >
+                        {editable ? "Bloquear" : "Modificar"}
+                    </button>
 
-                <button
-                    type="button"
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
-                    onClick={onCancelar}
-                >
-                    Cancelar
-                </button>
-
-                <Link href="/dashboard_admin/vehiculos">
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <button
+                        type="button"
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+                        onClick={onCancelar}
+                    >
                         Volver
                     </button>
-                </Link>
+                </div>
             </div>
         </div>
     );
 }
 
-
 const Field = ({ label, name, value, onChange, editable }: any) => (
     <div>
-        <label className="block text-gray-700 font-semibold">{label}:</label>
-        <input
-            type="text"
-            name={name}
-            value={value}
-            onChange={onChange}
-            disabled={!editable}
-            className={`w-full p-2 border rounded-md ${editable ? 'bg-white' : 'bg-gray-200 cursor-not-allowed'}`}
-        />
+      <label className="block text-gray-700 font-semibold mb-1">{label}:</label>
+      <input
+        type="text"
+        name={name}
+        value={value}
+        onChange={onChange}
+        disabled={!editable}
+        className={`w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none ${
+          editable ? "bg-white focus:ring-2 focus:ring-blue-400" : "bg-gray-200 cursor-not-allowed"
+        }`}
+      />
     </div>
-);
+  );

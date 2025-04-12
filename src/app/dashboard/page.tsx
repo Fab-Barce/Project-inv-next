@@ -4,50 +4,44 @@ import Headerv2 from "../components/headerv2";
 export default function Home() {
     return (
         <div>
-            <Headerv2 />
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
-                
-                {/* Título */}
-                <h1 className="text-2xl font-bold mb-8">Texto de Bienvenida al Sistema</h1>
-
-
-                {/* Contenedor de los botones tipo tarjetas */}
-                <div className="grid grid-cols-2 gap-6">
-
-                    {/* Tarjeta Inventario con enlace a /inventario */}
-                    <Link href="dashboard/inventario" className="w-48 h-60">
-                        <div className="w-full h-full bg-white shadow-lg rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100">
-                            <div className="text-xl text-black font-bold">Inventario</div>
-                            <div className="mt-4">
-                                📦 {/* Icono simulado */}
-                            </div>
-                        </div>
-                    </Link>
-                    
-
-                    {/* Tarjeta Vehículos */}
-                    <Link href="dashboard/vehiculos" className="w-48 h-60">
-                        <div className="w-full h-full bg-white shadow-lg rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100">
-                            <div className="text-xl text-black font-bold">Vehículos</div>
-                            <div className="mt-4">
-                                🚗 {/* Icono simulado */}
-                            </div>
-                        </div>
-                    </Link>
-
-                    <Link href="dashboard/historial" className="w-48 h-60">
-                        <div className="w-full h-full bg-white shadow-lg rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100">
-                            <div className="text-xl text-black font-bold">Historial</div>
-                            <div className="mt-4">
-                                ⌛ {/* Icono simulado */}
-                            </div>
-                        </div>
-                    </Link>
-
-                    
-
+          <Headerv2 />
+          <div className="min-h-screen bg-gray-200 flex flex-col items-center justify-center py-12 px-6">
+            
+            {/* Título principal */}
+            <h1 className="text-4xl font-bold text-blue-600 mb-10 text-center">
+              Bienvenido al Sistema de Gestión
+            </h1>
+      
+            {/* Tarjetas de navegación */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-8">
+              
+              {/* Inventario */}
+              <Link href="/dashboard/inventario" className="group">
+                <div className="bg-white shadow-md rounded-xl p-15 flex flex-col items-center justify-center hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+                  <div className="text-4xl mb-4">📦</div>
+                  <h2 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600">Inventario</h2>
                 </div>
+              </Link>
+      
+              {/* Vehículos */}
+              <Link href="/dashboard/vehiculos" className="group">
+                <div className="bg-white shadow-md rounded-xl p-15 flex flex-col items-center justify-center hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+                  <div className="text-4xl mb-4">🚗</div>
+                  <h2 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600">Vehículos</h2>
+                </div>
+              </Link>
+      
+              {/* Historial */}
+              <Link href="/dashboard/historial" className="group">
+                <div className="bg-white shadow-md rounded-xl p-15 flex flex-col items-center justify-center hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+                  <div className="text-4xl mb-4">⌛</div>
+                  <h2 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600">Historial</h2>
+                </div>
+              </Link>
+      
             </div>
+          </div>
         </div>
-    );
+      );
+      
 }

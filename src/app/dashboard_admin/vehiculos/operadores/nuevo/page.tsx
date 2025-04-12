@@ -62,53 +62,86 @@ export default function NuevoOperador() {
   return (
     <div>
       <Headerv2 />
-      <div className="min-h-screen bg-gray-100 p-6">
-        <h1 className="text-xl font-bold mb-4">Nuevo Operador</h1>
-        <div className="bg-white p-4 rounded shadow-md grid grid-cols-2 gap-4">
-          {/* Campos del formulario */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-gray-700">Nombre</label>
-              <input
-                type="text"
+  
+      <div className="min-h-screen bg-gray-100 py-10 px-6">
+        <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md border border-gray-300">
+          <h1 className="text-2xl font-bold text-blue-600 mb-6 text-center">Nuevo Operador</h1>
+  
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Columna izquierda */}
+            <div className="space-y-4">
+              <Field
+                label="Nombre"
                 name="nombre"
                 value={formData.nombre}
                 onChange={handleInputChange}
-                className="w-full border px-2 py-1 rounded"
               />
             </div>
-
-            <div>
-            <label htmlFor="empresa_id" className="block text-gray-700">Empresa</label>
-              <select name="empresa_id" id="empresa_id" value={formData.empresa_id} onChange={handleEmpresaChange} className="w-full border px-2 py-1">
+  
+            {/* Columna derecha */}
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="empresa_id" className="block text-gray-700 font-semibold mb-1">
+                  Empresa
+                </label>
+                <select
+                  name="empresa_id"
+                  id="empresa_id"
+                  value={formData.empresa_id}
+                  onChange={handleEmpresaChange}
+                  className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                >
                   <option value="">Seleccione una empresa</option>
                   {empresas.map((empresa: { empresa_id: number; nombre: string }) => (
-                      <option key={empresa.empresa_id} value={empresa.empresa_id}>{empresa.nombre}</option>
+                    <option key={empresa.empresa_id} value={empresa.empresa_id}>
+                      {empresa.nombre}
+                    </option>
                   ))}
-              </select>
+                </select>
+              </div>
             </div>
-
-            {/* Botones */}
-            <div className="flex justify-end space-x-2">
-              <button
-                type="button"
-                className="bg-red-500 text-white px-4 py-2 rounded"
-                onClick={() => router.push('/dashboard_admin/vehiculos')}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="bg-green-500 text-white px-4 py-2 rounded"
-                onClick={handleSubmit}
-              >
-                Guardar
-              </button>
-            </div>
+          </div>
+  
+          {/* Botones */}
+          <div className="flex justify-end space-x-4 mt-8">
+            <button
+              type="button"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+              onClick={() => router.push('/dashboard_admin/vehiculos/operadores')}
+            >
+              Volver
+            </button>
+            <button
+              type="button"
+              className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md font-semibold"
+              onClick={handleSubmit}
+            >
+              Guardar
+            </button>
           </div>
         </div>
       </div>
     </div>
-
   );
+  
 }
+
+type FieldProps = {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
+const Field = ({ label, name, value, onChange }: FieldProps) => (
+  <div>
+    <label className="block text-gray-700 font-semibold mb-1">{label}:</label>
+    <input
+      type="text"
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+  </div>
+);

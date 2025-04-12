@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  ArrowsUpDownIcon,
+} from "@heroicons/react/24/solid";
 
 type Vehiculo = {
   vehiculo_id: number;
@@ -13,9 +18,8 @@ type Vehiculo = {
   empresa_id: number;
   marca: string;
   empresa: string;
-  operador:string;
+  operador: string;
 };
-
 
 type Props = {
   onModificar: (vehiculo: Vehiculo) => void;
@@ -23,199 +27,280 @@ type Props = {
 
 export default function PantallaVehiculos({ onModificar }: Props) {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
-  const [deleteMode, setDeleteMode] = useState<boolean>(false);
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [modoGaleria, setModoGaleria] = useState<boolean>(false);
+  const [modoEliminar, setModoEliminar] = useState<boolean>(false);
+  const [seleccionados, setSeleccionados] = useState<number[]>([]);
+  const [busqueda, setBusqueda] = useState("");
+  const [campoBusqueda, setCampoBusqueda] = useState<keyof Vehiculo>("placas");
+  const [campoOrden, setCampoOrden] = useState<keyof Vehiculo | null>(null);
+  const [direccionOrden, setDireccionOrden] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
-    const fetchVehiculos = async () => {
+    const obtenerVehiculos = async () => {
       try {
-        const response = await fetch("http://localhost:8000/Vehiculos/");
-        if (!response.ok) {
-          throw new Error("Error al obtener los vehiculos");
-        }
-        const data = await response.json();
-        console.log("Datos recibidos de la API:", data); // Debug
+        const res = await fetch("http://localhost:8000/Vehiculos/");
+        const data = await res.json();
         setVehiculos(data);
       } catch (error) {
-        console.error("Error al obtener vehiculos:", error);
+        console.error("Error al obtener vehículos:", error);
       }
     };
-    fetchVehiculos();
+    obtenerVehiculos();
   }, []);
 
-  // Seleccionar o deseleccionar un vehículo para eliminación
-  const handleSelect = (id: number) => {
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
-    } else {
-      setSelectedItems([...selectedItems, id]);
-    }
+  const toggleSeleccion = (id: number) => {
+    setSeleccionados((prev) =>
+      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
+    );
   };
 
-  // Eliminación en lote de los vehículos seleccionados
-  const handleBulkDelete = async () => {
-    if (selectedItems.length === 0) return;
-    const confirmar = confirm("¿Estás seguro de eliminar los vehículos seleccionados?");
-    if (confirmar) {
-      try {
-        await Promise.all(
-            selectedItems.map(async (vehiculo_id) => {
-                // Obtener la refacción eliminada para enviar su nombre en la segunda petición
-                const vehiculo = vehiculos.find((r) => r.vehiculo_id === vehiculo_id);
+  const eliminarSeleccionados = async () => {
+    if (seleccionados.length === 0) return;
+    if (!confirm("¿Estás seguro de eliminar los vehículos seleccionados?"))
+      return;
 
-                // Eliminar la refacción
-                await fetch(`http://localhost:8000/Vehiculos/delete/${vehiculo_id}/`, {
-                    method: "DELETE",
-                });
-
-                // Registrar movimiento de eliminación
-                await fetch("http://localhost:8000/Movimientos/create/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        tipo_movimiento: "eliminacion",
-                        user_id: localStorage.getItem("user_id"),
-                        nombre: vehiculo?.placas || "Desconocido", // Evita fallos si no encuentra la refacción
-                    }),
-                });
-            })
-        );
-
-        // Actualizar la lista eliminando las refacciones seleccionadas
-        setVehiculos((prev) => prev.filter((u) => !selectedItems.includes(u.vehiculo_id)));
-        setSelectedItems([]);
-        setDeleteMode(false);
+    try {
+      await Promise.all(
+        seleccionados.map(async (id) => {
+          const vehiculo = vehiculos.find((v) => v.vehiculo_id === id);
+          await fetch(`http://localhost:8000/Vehiculos/delete/${id}/`, {
+            method: "DELETE",
+          });
+          await fetch("http://localhost:8000/Movimientos/create/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tipo_movimiento: "eliminacion",
+              user_id: localStorage.getItem("user_id"),
+              nombre: vehiculo?.placas || "Desconocido",
+            }),
+          });
+        })
+      );
+      setVehiculos((prev) =>
+        prev.filter((v) => !seleccionados.includes(v.vehiculo_id))
+      );
+      setSeleccionados([]);
+      setModoEliminar(false);
     } catch (error) {
-        console.error("Error al eliminar vehiculos y registrar movimientos:", error);
-    }
+      console.error("Error al eliminar vehículos:", error);
     }
   };
 
+  const ordenarPor = (campo: keyof Vehiculo) => {
+    if (campoOrden === campo) {
+      setDireccionOrden(direccionOrden === "asc" ? "desc" : "asc");
+    } else {
+      setCampoOrden(campo);
+      setDireccionOrden("asc");
+    }
+  };
+
+  const listaFiltrada = [...vehiculos]
+    .filter((v) =>
+      v[campoBusqueda]
+        ?.toString()
+        .toLowerCase()
+        .includes(busqueda.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (!campoOrden) return 0;
+      const valA = a[campoOrden];
+      const valB = b[campoOrden];
+      if (typeof valA === "number" && typeof valB === "number") {
+        return direccionOrden === "asc" ? valA - valB : valB - valA;
+      }
+      return direccionOrden === "asc"
+        ? valA.toString().localeCompare(valB.toString())
+        : valB.toString().localeCompare(valA.toString());
+    });
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Título */}
-      <h1 className="text-xl text-black font-bold mb-4">Vehículos</h1>
+      {/* Cabecera */}
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-xl font-bold text-gray-800">
+          Gestión de Vehículos
+        </h1>
+      </div>
 
-      {/* Área de botones */}
-      <div className="flex space-x-2 mb-4 bg-white p-2 shadow rounded-lg">
+      {/* Botones de acción */}
+      <div className="flex flex-wrap gap-2 mb-4">
         <Link href="/dashboard_admin/vehiculos/nuevo">
-          <button className="flex items-center space-x-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-            Nuevo
+          <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Nuevo Vehículo
           </button>
         </Link>
-
-        {/* Botón para activar/desactivar el modo eliminación */}
         <button
           onClick={() => {
-            setDeleteMode(!deleteMode);
-            // Reiniciamos la selección al cambiar de modo
-            setSelectedItems([]);
+            setModoEliminar(!modoEliminar);
+            setSeleccionados([]);
           }}
           className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
         >
-          {deleteMode ? "Cancelar Eliminación" : "Eliminar"}
+          {modoEliminar ? "Cancelar Eliminación" : "Eliminar"}
         </button>
-
-        {/* Botón para confirmar eliminación en modo borrado */}
-        {deleteMode && (
+        {modoEliminar && (
           <button
-            onClick={handleBulkDelete}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            disabled={selectedItems.length === 0}
+            onClick={eliminarSeleccionados}
+            disabled={seleccionados.length === 0}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
             Confirmar Eliminación
           </button>
         )}
-
         <Link href="/dashboard_admin/vehiculos/operadores">
           <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
             Operadores
           </button>
         </Link>
-
         <Link href="/dashboard_admin">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Volver
           </button>
         </Link>
-
-        <div className="flex ml-auto space-x-2">
-          <div className="flex text-black items-center border rounded px-2">
-            <input
-              type="text"
-              placeholder="Buscar"
-              className="outline-none py-1 bg-transparent"
-            />
-            <span>🔍</span>
-          </div>
-        </div>
+        <button
+          onClick={() => setModoGaleria(!modoGaleria)}
+          className="ml-auto bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
+        >
+          {modoGaleria ? "Ver como tabla" : "Ver como galería"}
+        </button>
       </div>
 
-      {/* Tabla de vehículos */}
-      <div className="bg-white rounded shadow-md overflow-hidden">
-        <table className="w-full table-auto">
-          <thead className="bg-gray-200 text-gray-600">
-            <tr>
-              {/* Mostrar columna para checkboxes en modo eliminación */}
-              {deleteMode && <th className="px-4 py-2"></th>}
-              <th className="px-4 py-2 text-left">Número de Serie</th>
-              <th className="px-4 py-2 text-center">Placas</th>
-              <th className="px-4 py-2 text-center">Operador</th>
-              <th className="px-4 py-2 text-center">Empresa</th>
-              <th className="px-4 py-2 text-center">Marca</th>
-              <th className="px-4 py-2 text-center">Año</th>
-              {/* Columna de acciones solo se muestra cuando no está en modo eliminación */}
-              {!deleteMode && <th className="px-4 py-2 text-center">Acciones</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {vehiculos.map((vehiculo) => (
-              <tr key={vehiculo.vehiculo_id} className="border-b">
-                {deleteMode && (
-                  <td className="px-4 py-2 text-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.includes(vehiculo.vehiculo_id)}
-                      onChange={() => handleSelect(vehiculo.vehiculo_id)}
-                    />
-                  </td>
-                )}
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => onModificar(vehiculo)}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {vehiculo.num_serie}
-                  </button>
-                </td>
-                <td className="px-4 py-2 text-center">{vehiculo.placas}</td>
-                <td className="px-4 py-2 text-center">{vehiculo.operador}</td>
-                <td className="px-4 py-2 text-center">{vehiculo.empresa}</td>
-                <td className="px-4 py-2 text-center">{vehiculo.marca}</td>
-                <td className="px-4 py-2 text-center">{vehiculo.anio}</td>
-                {!deleteMode && (
-                  <td className="px-4 py-2 flex space-x-2 justify-center">
-                    <button
-                      onClick={() => onModificar(vehiculo)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                    >
-                      Ver Detalles
-                    </button>
+      {/* Búsqueda y filtros */}
+      <div className="bg-white p-4 rounded shadow flex gap-2 items-center mb-4">
+        <select
+          value={campoBusqueda}
+          onChange={(e) =>
+            setCampoBusqueda(e.target.value as keyof Vehiculo)
+          }
+          className="p-2 border rounded"
+        >
+          <option value="num_serie">Número de Serie</option>
+          <option value="placas">Placas</option>
+          <option value="empresa">Empresa</option>
+          <option value="operador">Operador</option>
+        </select>
+        <input
+          type="text"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          placeholder="Buscar..."
+          className="p-2 border rounded flex-1"
+        />
+      </div>
 
-                  </td>
+      {/* Vista: Galería o Tabla */}
+      {modoGaleria ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 bg-white p-4 rounded shadow-md">
+          {listaFiltrada.map((v) => (
+            <div
+              key={v.vehiculo_id}
+              className="border rounded shadow hover:shadow-md transition duration-200 p-4 flex flex-col items-center"
+            >
+              <img
+                src={v.imagen_vehi || "/placeholder.png"}
+                alt={v.num_serie}
+                className="h-32 w-32 object-contain mb-2"
+              />
+              <h3 className="text-lg font-semibold text-center">{v.placas}</h3>
+              <p className="text-sm text-gray-500 text-center">{v.num_serie}</p>
+              {!modoEliminar && (
+                <button
+                  onClick={() => onModificar(v)}
+                  className="mt-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                >
+                  Ver Detalles
+                </button>
+              )}
+              {modoEliminar && (
+                <div className="mt-2">
+                  <input
+                    type="checkbox"
+                    checked={seleccionados.includes(v.vehiculo_id)}
+                    onChange={() => toggleSeleccion(v.vehiculo_id)}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white rounded shadow overflow-auto">
+          <table className="w-full table-auto">
+            <thead className="bg-gray-200 text-gray-700">
+              <tr>
+                {modoEliminar && <th className="px-4 py-2"></th>}
+                {[
+                  { campo: "num_serie", label: "Número de Serie" },
+                  { campo: "placas", label: "Placas" },
+                  { campo: "operador", label: "Operador" },
+                  { campo: "empresa", label: "Empresa" },
+                  { campo: "marca", label: "Marca" },
+                  { campo: "anio", label: "Año" },
+                ].map(({ campo, label }) => (
+                  <th
+                    key={campo}
+                    onClick={() => ordenarPor(campo as keyof Vehiculo)}
+                    className="px-4 py-2 text-center cursor-pointer select-none"
+                  >
+                    <div className="flex justify-center items-center gap-1">
+                      {label}
+                      {campoOrden === campo ? (
+                        direccionOrden === "asc" ? (
+                          <ArrowUpIcon className="w-4 h-4" />
+                        ) : (
+                          <ArrowDownIcon className="w-4 h-4" />
+                        )
+                      ) : (
+                        <ArrowsUpDownIcon className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                ))}
+                {!modoEliminar && (
+                  <th className="px-4 py-2 text-center">Acciones</th>
                 )}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {listaFiltrada.map((v) => (
+                <tr key={v.vehiculo_id} className="border-t hover:bg-gray-50">
+                  {modoEliminar && (
+                    <td className="px-4 py-2 text-center">
+                      <input
+                        type="checkbox"
+                        checked={seleccionados.includes(v.vehiculo_id)}
+                        onChange={() => toggleSeleccion(v.vehiculo_id)}
+                      />
+                    </td>
+                  )}
+                  <td className="px-4 py-2">{v.num_serie}</td>
+                  <td className="px-4 py-2 text-center">{v.placas}</td>
+                  <td className="px-4 py-2 text-center">{v.operador}</td>
+                  <td className="px-4 py-2 text-center">{v.empresa}</td>
+                  <td className="px-4 py-2 text-center">{v.marca}</td>
+                  <td className="px-4 py-2 text-center">{v.anio}</td>
+                  {!modoEliminar && (
+                    <td className="px-4 py-2 text-center">
+                      <button
+                        onClick={() => onModificar(v)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                      >
+                        Editar
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {vehiculos.length === 0 && (
-        <div className="mt-4 text-gray-500">
-          No hay vehículos en el inventario.
+      {listaFiltrada.length === 0 && (
+        <div className="mt-4 text-center text-gray-500">
+          No hay vehículos que coincidan con la búsqueda.
         </div>
       )}
     </div>
