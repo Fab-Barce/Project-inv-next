@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaEdit } from "react-icons/fa";
 import { Dialog } from "@headlessui/react";
 import axios from "axios";
+import Button from "@/app/components/Button";
 
 // Definición del tipo de datos Producto
 type Producto = {
@@ -316,29 +317,26 @@ export default function Refaccion({ producto, onCancelar }: Props) {
       
             {/* Botones de acción */}
             <div className="flex justify-end space-x-4 mt-10">
-              <button
-                type="button"
-                className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md font-semibold disabled:opacity-50"
+              <Button
+                variant="green"
                 onClick={handleSave}
               >
                 Guardar
-              </button>
+              </Button>
       
-              <button
-                type="button"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+              <Button
+                variant="teal"
                 onClick={() => setEditable(!editable)}
               >
                 {editable ? "Bloquear" : "Modificar"}
-              </button>
+              </Button>
       
-              <button
-                type="button"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+              <Button
+                variant="blue"
                 onClick={onCancelar}
               >
                 Volver
-              </button>
+              </Button>
             </div>
       
             {/* Ventana Modal para modificar la cantidad */}
@@ -383,8 +381,8 @@ export default function Refaccion({ producto, onCancelar }: Props) {
                   </>
                 )}
                 <div className="mt-4 flex justify-end space-x-2">
-                  <button className="bg-gray-400 px-4 py-2 rounded-lg" onClick={() => setIsOpen(false)}>Cancelar</button>
-                  <button className="bg-green-500 px-4 py-2 text-white rounded-lg" onClick={handleGuardar}>Guardar</button>
+                  <Button variant="gray" onClick={() => setIsOpen(false)}>Cancelar</Button>
+                  <Button variant="green" onClick={handleGuardar}>Guardar</Button>
                 </div>
               </div>
             </Dialog>

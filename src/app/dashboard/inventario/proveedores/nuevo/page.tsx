@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Headerv2 from "@/app/components/headerv2";
 import axios from "axios";
+import Button from "@/app/components/Button";
 
 export default function NuevoProveedor() {
   const router = useRouter();
@@ -65,22 +66,20 @@ export default function NuevoProveedor() {
           </div>
   
           {/* Botones */}
-          <div className="flex justify space-x-4 mt-8">
-            <button
-              type="button"
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md font-semibold"
+          <div className="flex justify-end space-x-4 mt-8">
+            <Button
+              variant="green"
               onClick={handleSubmit}
             >
               Guardar
-            </button>
+            </Button>
   
-            <button
-              type="button"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+            <Button
+              variant="teal"
               onClick={() => router.push('/dashboard/inventario/proveedores/')}
             >
               Volver
-            </button>
+            </Button>
           </div>
         </div>
       </div>

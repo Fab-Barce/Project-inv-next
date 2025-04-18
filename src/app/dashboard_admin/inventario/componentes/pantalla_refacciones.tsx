@@ -7,6 +7,7 @@ import {
   ArrowDownIcon,
   ArrowsUpDownIcon,
 } from "@heroicons/react/24/solid";
+import Button from "@/app/components/Button";
 
 type Producto = {
   refaccion_id: number;
@@ -110,17 +111,13 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
         selectedItems.map(async (refaccion_id) => {
           const refa = refacciones.find((r) => r.refaccion_id === refaccion_id);
 
-          await fetch(`http://localhost:8000/Refacciones/delete/${refaccion_id}/`, {
-            method: "DELETE",
-          });
-
-          await fetch("http://localhost:8000/Movimientos/create/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+          await fetch(`http://localhost:8000/Refacciones/update/${refaccion_id}/`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
-              tipo_movimiento: "eliminacion",
-              user_id: localStorage.getItem("user_id"),
-              nombre: refa?.nombre || "Desconocido",
+              activo: false,
             }),
           });
         })
@@ -145,40 +142,40 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
       {/* Botones */}
       <div className="flex flex-wrap gap-2 mb-4">
         <Link href="/dashboard_admin/inventario/nuevo">
-          <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Nuevo</button>
+          <Button variant="green">Nuevo</Button>
         </Link>
         <Link href="/dashboard_admin/inventario/categorias">
-          <button className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Categorías</button>
+          <Button variant="purple">Categorías</Button>
         </Link>
         <Link href="/dashboard_admin/inventario/proveedores">
-          <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Proveedores</button>
+          <Button variant="yellow">Proveedores</Button>
         </Link>
-        <button
+        <Button
+          variant="orange"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]);
           }}
-          className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
         >
           {deleteMode ? "Cancelar Eliminación" : "Eliminar Refacción"}
-        </button>
+        </Button>
         {deleteMode && (
-          <button
+          <Button
+            variant="red"
             onClick={handleBulkDelete}
             disabled={selectedItems.length === 0}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
           >
             Confirmar Eliminación
-          </button>
+          </Button>
         )}
-        <button
+        <Button
+          variant="gray"
           onClick={() => setVistaGaleria(!vistaGaleria)}
-          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
         >
           {vistaGaleria ? "Vista Tabla" : "Vista Galería"}
-        </button>
+        </Button>
         <Link href="/dashboard_admin">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Volver</button>
+          <Button variant="blue">Volver</Button>
         </Link>
       </div>
 
@@ -262,12 +259,13 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                   </td>
                   {!deleteMode && (
                     <td className="px-4 py-2 text-center">
-                      <button
+                      <Button
+                        variant="tealLight"
+                        size="small"
                         onClick={() => onModificar(refa)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                       >
                         Editar
-                      </button>
+                      </Button>
                     </td>
                   )}
                 </tr>
@@ -291,12 +289,13 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
               <h3 className="text-lg font-semibold text-center">{refa.nombre}</h3>
               <p className="text-sm text-gray-600 text-center">{refa.numero_parte}</p>
               {!deleteMode && (
-                <button
+                <Button
+                  variant="blue"
+                  size="small"
                   onClick={() => onModificar(refa)}
-                  className="mt-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                 >
                   Editar
-                </button>
+                </Button>
               )}
               {deleteMode && (
                 <div className="mt-2">

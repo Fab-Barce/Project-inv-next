@@ -7,13 +7,13 @@ import Usuario from "./componentes/usuario";
 import Headerv2 from "@/app/components/headerv2";
 
 type Usuario = {
-    id: number;
+    user_id: number;
     nombre: string;
     correo: string; // Campo de correo añadido
     rol: "visualizacion" | "modificacion";
-    username: string;
-    password: string;
-};
+    contrasena: string;
+  };
+  
 
 export default function UsuariosPage() {
     const [modo, setModo] = useState<"listado" | "editar">("listado");

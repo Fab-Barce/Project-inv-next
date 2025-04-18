@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Headerv2 from "@/app/components/headerv2";
 import axios from "axios";
+import Button from "@/app/components/Button";
 
 type Proveedor = {
   proveedor_id: number;
@@ -265,20 +266,18 @@ return (
 
         {/* Botones de acción */}
         <div className="flex justify-end space-x-4 mt-8">
-          <button
-            type="button"
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
+          <Button
+            variant="blue"
             onClick={() => router.push("/dashboard_admin/inventario")}
           >
             Volver
-          </button>
-          <button
-            type="button"
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold"
+          </Button>
+          <Button
+            variant="green"
             onClick={handleSubmit}
           >
             Guardar
-          </button>
+          </Button>
         </div>
       </div>
     </div>

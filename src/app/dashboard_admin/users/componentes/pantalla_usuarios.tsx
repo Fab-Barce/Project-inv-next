@@ -7,15 +7,22 @@ import {
   ArrowDownIcon,
   ArrowsUpDownIcon,
 } from "@heroicons/react/24/solid";
+import Button from "@/app/components/Button";
 
 type Usuario = {
   user_id: number;
   nombre: string;
-  correo: string;
+  correo: string; // Campo de correo añadido
   rol: "visualizacion" | "modificacion";
+  contrasena: string;
 };
 
-export default function PantallaUsuarios() {
+type Props = {
+  onModificar: (usuario: Usuario) => void;
+};
+
+
+export default function PantallaUsuarios({ onModificar }: Props) {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
@@ -51,13 +58,19 @@ export default function PantallaUsuarios() {
 
   const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return;
-    const confirmar = confirm("¿Estás seguro de eliminar los usuarios seleccionados?");
+    const confirmar = confirm("Eliminar los usuarios seleccionados?");
     if (confirmar) {
       try {
         await Promise.all(
           selectedItems.map(async (id) => {
             await fetch(`http://localhost:8000/api/usuarios/${id}/`, {
-              method: "DELETE",
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                activo: false,
+              }),
             });
           })
         );
@@ -124,32 +137,32 @@ export default function PantallaUsuarios() {
       {/* Botones de acción */}
       <div className="flex flex-wrap gap-2 mb-4 bg-white p-2 shadow rounded-lg">
         <Link href="/dashboard_admin/users/nuevo">
-          <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+          <Button variant="green">
             Nuevo
-          </button>
+          </Button>
         </Link>
-        <button
+        <Button
+          variant="yellow"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]);
           }}
-          className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
         >
           {deleteMode ? "Cancelar Eliminación" : "Eliminar"}
-        </button>
+        </Button>
         {deleteMode && (
-          <button
+          <Button
+            variant="red"
             onClick={handleBulkDelete}
             disabled={selectedItems.length === 0}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
           >
             Confirmar Eliminación
-          </button>
+          </Button>
         )}
         <Link href="/dashboard_admin">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <Button variant="blue">
             Volver
-          </button>
+          </Button>
         </Link>
       </div>
 
@@ -222,11 +235,15 @@ export default function PantallaUsuarios() {
                 <td className="px-4 py-2">{usuario.correo}</td>
                 <td className="px-4 py-2">{usuario.rol}</td>
                 <td className="px-4 py-2 text-center">
-                  <Link href={`/dashboard_admin/users/${usuario.user_id}`}>
-                    <button className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
+                  <div className="flex justify-center">
+                    <Button
+                      variant="tealLight"
+                      size="small"
+                      onClick={() => onModificar(usuario)}
+                    >
                       Editar
-                    </button>
-                  </Link>
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}

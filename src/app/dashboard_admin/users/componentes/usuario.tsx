@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Button from "@/app/components/Button";
 
 type Usuario = {
-    id: number;
+    user_id: number;
     nombre: string;
     correo: string; // Campo de correo añadido
     rol: "visualizacion" | "modificacion";
-    username: string;
-    password: string;
-};
+    contrasena: string;
+  };
+  
 
 type Props = {
     usuario: Usuario | null;
@@ -18,12 +19,11 @@ type Props = {
 
 export default function Usuario({ usuario, onCancelar }: Props) {
     const [formData, setFormData] = useState<Usuario>({
-        id: 0,
+        user_id: 0,
         nombre: "",
         correo: "", // Inicialización del campo correo
         rol: "visualizacion",
-        username: "",
-        password: ""
+        contrasena: ""
     });
 
     const [editable, setEditable] = useState(false);
@@ -50,35 +50,33 @@ export default function Usuario({ usuario, onCancelar }: Props) {
                 <Field label="Nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} editable={editable} />
                 <Field label="Correo" name="correo" value={formData.correo} onChange={handleInputChange} editable={editable} /> {/* Campo de correo añadido */}
                 <Field label="Rol" name="rol" value={formData.rol} onChange={handleInputChange} editable={editable} />
-                <Field label="Usuario" name="username" value={formData.username} onChange={handleInputChange} editable={editable} />
-                <Field label="Contraseña" name="password" value={formData.password} onChange={handleInputChange} editable={editable} />
+                <Field label="Contraseña" name="password" value={formData.contrasena} onChange={handleInputChange} editable={editable} />
             </div>
 
-            <div className="flex space-x-3 mt-6">
-                <button
-                    type="button"
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
-                    onClick={() => setEditable(!editable)}
-                >
-                    {editable ? "Bloquear" : "Modificar"}
-                </button>
+            <div className="flex justify-end space-x-3 mt-6">
 
-                <button
-                    type="button"
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold"
+            <Button
+                    variant="green"
                     onClick={() => alert("Guardado")}
                     disabled={!editable}
                 >
                     Guardar
-                </button>
+                </Button>
+                <Button
+                    variant="teal"
+                    onClick={() => setEditable(!editable)}
+                >
+                    {editable ? "Bloquear" : "Modificar"}
+                </Button>
 
-                <button
-                    type="button"
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
+
+
+                <Button
+                    variant="blue"
                     onClick={onCancelar}
                 >
-                    Cancelar
-                </button>
+                    Volver
+                </Button>
             </div>
         </div>
     );

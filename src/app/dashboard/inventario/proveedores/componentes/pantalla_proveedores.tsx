@@ -8,6 +8,7 @@ import {
   ArrowDownIcon,
   ArrowsUpDownIcon
 } from "@heroicons/react/24/solid";
+import Button from "@/app/components/Button";
 
 type Proveedor = {
   proveedor_id: number;
@@ -123,39 +124,36 @@ export default function PantallaProveedor({ onModificar }: Props) {
       {/* Barra de acciones */}
       <div className="flex flex-wrap items-center gap-3 mb-6 bg-white p-4 shadow-md rounded-lg">
         <Link href="/dashboard/inventario/proveedores/nuevo">
-          <button className="flex items-center bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded transition duration-200">
+          <Button variant="lime">
             Nuevo
-          </button>
+          </Button>
         </Link>
 
-        <button
+        <Button
+          variant="green"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]);
           }}
-          className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded transition duration-200"
         >
           {deleteMode ? "Cancelar Eliminación" : "Eliminar"}
-        </button>
+        </Button>
 
         {deleteMode && (
-          <button
+          <Button
+            variant="red"
             onClick={handleBulkDelete}
             disabled={selectedItems.length === 0}
-            className={`${
-              selectedItems.length === 0
-                ? "bg-red-300 cursor-not-allowed"
-                : "bg-red-500 hover:bg-red-600"
-            } text-white font-semibold px-4 py-2 rounded transition duration-200`}
+            className={selectedItems.length === 0 ? "opacity-50 cursor-not-allowed" : ""}
           >
             Confirmar Eliminación
-          </button>
+          </Button>
         )}
 
         <Link href="/dashboard/inventario">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded transition duration-200">
+          <Button variant="emerald">
             Volver
-          </button>
+          </Button>
         </Link>
 
         {/* Filtro */}
@@ -255,12 +253,15 @@ export default function PantallaProveedor({ onModificar }: Props) {
                 <td className="px-4 py-3">{proveedor.num_telef}</td>
                 {!deleteMode && (
                   <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => onModificar(proveedor)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                    >
-                      Editar
-                    </button>
+                    <div className="flex justify-center">
+                      <Button
+                        variant="tealLight"
+                        size="small"
+                        onClick={() => onModificar(proveedor)}
+                      >
+                        Editar
+                      </Button>
+                    </div>
                   </td>
                 )}
               </tr>

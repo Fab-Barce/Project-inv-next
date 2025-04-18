@@ -7,6 +7,7 @@ import {
   ArrowDownIcon,
   ArrowsUpDownIcon,
 } from "@heroicons/react/24/solid";
+import Button from "@/app/components/Button";
 
 type Vehiculo = {
   vehiculo_id: number;
@@ -56,23 +57,20 @@ export default function PantallaVehiculos({ onModificar }: Props) {
 
   const eliminarSeleccionados = async () => {
     if (seleccionados.length === 0) return;
-    if (!confirm("¿Estás seguro de eliminar los vehículos seleccionados?"))
+    if (!confirm("¿Estás seguro de desactivar los vehículos seleccionados?"))
       return;
 
     try {
       await Promise.all(
         seleccionados.map(async (id) => {
           const vehiculo = vehiculos.find((v) => v.vehiculo_id === id);
-          await fetch(`http://localhost:8000/Vehiculos/delete/${id}/`, {
-            method: "DELETE",
-          });
-          await fetch("http://localhost:8000/Movimientos/create/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+          await fetch(`http://localhost:8000/Vehiculos/update/${id}/`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
-              tipo_movimiento: "eliminacion",
-              user_id: localStorage.getItem("user_id"),
-              nombre: vehiculo?.placas || "Desconocido",
+              activo: false,
             }),
           });
         })
@@ -83,7 +81,7 @@ export default function PantallaVehiculos({ onModificar }: Props) {
       setSeleccionados([]);
       setModoEliminar(false);
     } catch (error) {
-      console.error("Error al eliminar vehículos:", error);
+      console.error("Error al desactivar vehículos:", error);
     }
   };
 
@@ -127,44 +125,45 @@ export default function PantallaVehiculos({ onModificar }: Props) {
       {/* Botones de acción */}
       <div className="flex flex-wrap gap-2 mb-4">
         <Link href="/dashboard/vehiculos/nuevo">
-          <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-            Nuevo Vehículo
-          </button>
+          <Button variant="lime">
+            Nuevo
+          </Button>
         </Link>
-        <button
+        <Button
+          variant="green"
           onClick={() => {
             setModoEliminar(!modoEliminar);
             setSeleccionados([]);
           }}
-          className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
         >
           {modoEliminar ? "Cancelar Eliminación" : "Eliminar"}
-        </button>
+        </Button>
         {modoEliminar && (
-          <button
+          <Button
+            variant="red"
             onClick={eliminarSeleccionados}
             disabled={seleccionados.length === 0}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
             Confirmar Eliminación
-          </button>
+          </Button>
         )}
         <Link href="/dashboard/vehiculos/operadores">
-          <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+          <Button variant="emerald">
             Operadores
-          </button>
+          </Button>
         </Link>
         <Link href="/dashboard">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          <Button variant="teal">
             Volver
-          </button>
+          </Button>
         </Link>
-        <button
+        <Button
+          variant="cyan"
           onClick={() => setModoGaleria(!modoGaleria)}
-          className="ml-auto bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
+          className="ml-auto"
         >
           {modoGaleria ? "Ver como tabla" : "Ver como galería"}
-        </button>
+        </Button>
       </div>
 
       {/* Búsqueda y filtros */}
@@ -206,12 +205,13 @@ export default function PantallaVehiculos({ onModificar }: Props) {
               <h3 className="text-lg font-semibold text-center">{v.placas}</h3>
               <p className="text-sm text-gray-500 text-center">{v.num_serie}</p>
               {!modoEliminar && (
-                <button
+                <Button
+                  variant="tealLight"
+                  size="small"
                   onClick={() => onModificar(v)}
-                  className="mt-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                 >
-                  Ver Detalles
-                </button>
+                  Editar
+                </Button>
               )}
               {modoEliminar && (
                 <div className="mt-2">
@@ -283,12 +283,13 @@ export default function PantallaVehiculos({ onModificar }: Props) {
                   <td className="px-4 py-2 text-center">{v.anio}</td>
                   {!modoEliminar && (
                     <td className="px-4 py-2 text-center">
-                      <button
+                      <Button
+                        variant="tealLight"
+                        size="small"
                         onClick={() => onModificar(v)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                       >
                         Editar
-                      </button>
+                      </Button>
                     </td>
                   )}
                 </tr>

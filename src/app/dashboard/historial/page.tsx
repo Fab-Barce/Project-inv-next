@@ -8,6 +8,7 @@ import {
   ArrowDownIcon,
   ArrowsUpDownIcon,
 } from "@heroicons/react/24/solid";
+import Button from "@/app/components/Button";
 
 type Movimiento = {
   id_movimiento: number;
@@ -91,11 +92,11 @@ const HistorialMovimientos = () => {
           </h1>
 
           {/* Botón Volver */}
-          <div className="flex justify-end mb-6">
+          <div className="flex justify mb-6">
             <Link href="/dashboard">
-              <button className="bg-blue-500 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-600 shadow-sm">
+              <Button variant="lime">
                 Volver
-              </button>
+              </Button>
             </Link>
           </div>
 
