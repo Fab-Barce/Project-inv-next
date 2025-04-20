@@ -17,6 +17,7 @@ export default function NuevoProveedor() {
     descripcion: "",
     num_telef: "",
   }); 
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -32,6 +33,12 @@ export default function NuevoProveedor() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.nombre.trim() || !formData.direccion.trim() || !formData.RFC.trim() || !formData.nombre_representante.trim() || !formData.descripcion.trim() || !formData.num_telef.trim()) {
+      alert("Por favor, completa todos los campos antes de guardar.");
+      return; // Detiene el envío si falta algún campo
+    }
+    setIsSubmitting(true);
+
     console.log("Datos a guardar:", formData);
     axios.post(`http://localhost:8000/Proveedores/create/`, formData )
     .then(res => {
@@ -39,6 +46,9 @@ export default function NuevoProveedor() {
       console.log(res.data)
       alert("Proveedor almacenado correctamente")
   })
+  .finally(() => {
+    setIsSubmitting(false); // Desbloquea el botón
+  });
   };
 
   return (
@@ -70,6 +80,7 @@ export default function NuevoProveedor() {
             <Button
               variant="green"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
               Guardar
             </Button>

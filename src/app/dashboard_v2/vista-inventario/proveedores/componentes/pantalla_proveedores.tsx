@@ -17,6 +17,7 @@ type Proveedor = {
   nombre_representante: string;
   descripcion: string;
   num_telef: string;
+  activo: string;
 };
 
 type Props = {
@@ -40,10 +41,12 @@ export default function PantallaProveedor({ onModificar }: Props) {
 
   useEffect(() => {
     axios.get("http://localhost:8000/Proveedores/").then((response) => {
-      setProveedor(response.data);
-      setFilteredProveedores(response.data); // Inicializamos los proveedores filtrados
+      const proveedoresActivos = response.data.filter((cat: any) => cat.activo !== "false");
+      setProveedor(proveedoresActivos);
+      setFilteredProveedores(proveedoresActivos); // Inicializamos los proveedores filtrados
     });
   }, []);
+
 
   useEffect(() => {
     // Filtrar proveedores según el campo de búsqueda y el filtro seleccionado

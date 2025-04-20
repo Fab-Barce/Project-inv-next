@@ -18,6 +18,7 @@ type Proveedor = {
   nombre_representante: string;
   descripcion: string;
   num_telef: string;
+  activo: string;
 };
 
 type Props = {
@@ -41,8 +42,9 @@ export default function PantallaProveedor({ onModificar }: Props) {
 
   useEffect(() => {
     axios.get("http://localhost:8000/Proveedores/").then((response) => {
-      setProveedor(response.data);
-      setFilteredProveedores(response.data); // Inicializamos los proveedores filtrados
+      const proveedoresActivos = response.data.filter((cat: any) => cat.activo !== "false");
+      setProveedor(proveedoresActivos);
+      setFilteredProveedores(proveedoresActivos); // Inicializamos los proveedores filtrados
     });
   }, []);
 
@@ -72,17 +74,26 @@ export default function PantallaProveedor({ onModificar }: Props) {
       "¿Estás seguro de eliminar los proveedores seleccionados?"
     );
     if (confirmar) {
-      for (var i = 0; i < selectedItems.length; i += 1) {
-        axios
-          .delete(`http://localhost:8000/Proveedores/delete/${selectedItems[i]}/`)
-          .then((res) => {
-            console.log(res);
-            console.log(res.data);
-          });
-      }
-      setProveedor(proveedores.filter((v) => !selectedItems.includes(v.proveedor_id)));
-      setSelectedItems([]);
-      setDeleteMode(false);
+      // Usamos Promise.all para esperar a que terminen todas las peticiones
+      Promise.all(
+        selectedItems.map((id) =>
+          axios.patch(`http://localhost:8000/Proveedores/update/${id}/`, {
+            activo: "false",
+          })
+        )
+      )
+        .then(() => {
+          setProveedor((prevProveedores) =>
+            prevProveedores.filter((v) => !selectedItems.includes(v.proveedor_id))
+          );
+          setSelectedItems([]);
+          setDeleteMode(false);
+          alert("Proveedores desactivadas correctamente.");
+        })
+        .catch((error) => {
+          console.error("Error al desactivar proveedores:", error);
+          alert("Hubo un error al desactivar los proveedores.");
+        });
     }
   };
 

@@ -24,6 +24,7 @@ type Producto = {
   categoria: string;
   proveedor: string;
   empresa: string;
+  activo: string;
 };
 
 type Props = {
@@ -62,30 +63,36 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
       try {
         const response = await fetch("http://localhost:8000/Refacciones/");
         const data = await response.json();
-        const refaccionesFiltradas = data.map((item: any) => ({
-          refaccion_id: item.refaccion_id || item.id,
-          proveedor_id: item.proveedor_id || 0,
-          vehiculo_id: item.vehiculo_id || 0,
-          numero_parte: item.numero_parte || "N/A",
-          nombre: item.nombre || "Sin nombre",
-          cantidad: Number(item.cantidad) || 0,
-          stock_minimo: Number(item.stock_minimo) || 0,
-          costo: Number(item.costo) || 0,
-          categoria_id: item.categoria_id || 0,
-          imagen_refa: item.imagen_refa || "",
-          empresa_id: item.empresa_id || 0,
-          categoria: item.categoria || "",
-          empresa: item.empresa || "",
-          proveedor: item.proveedor || "",
-        }));
+  
+        const refaccionesFiltradas = data
+          .filter((item: any) => item.activo !== 'false') // Filtra los inactivos
+          .map((item: any) => ({
+            refaccion_id: item.refaccion_id || item.id,
+            proveedor_id: item.proveedor_id || 0,
+            vehiculo_id: item.vehiculo_id || 0,
+            numero_parte: item.numero_parte || "N/A",
+            nombre: item.nombre || "Sin nombre",
+            cantidad: Number(item.cantidad) || 0,
+            stock_minimo: Number(item.stock_minimo) || 0,
+            costo: Number(item.costo) || 0,
+            categoria_id: item.categoria_id || 0,
+            imagen_refa: item.imagen_refa || "",
+            empresa_id: item.empresa_id || 0,
+            categoria: item.categoria || "",
+            empresa: item.empresa || "",
+            proveedor: item.proveedor || "",
+            activo: item.activo || "",
+          }));
+  
         setRefacciones(refaccionesFiltradas);
       } catch (error) {
         console.error("Error al obtener refacciones:", error);
       }
     };
-
+  
     fetchRefacciones();
   }, []);
+  
 
   const filteredAndSorted = [...refacciones]
     .filter((r) =>
@@ -134,7 +141,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              activo: false,
+              activo: 'false',
             }),
           });
         })

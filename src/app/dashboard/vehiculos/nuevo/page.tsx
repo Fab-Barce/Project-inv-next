@@ -15,6 +15,7 @@ type Operador = {
   operador_id: number;
   nombre: string;
   empresa_id: number;
+  activo: string;
 };
 
 export default function NuevoVehiculo() {
@@ -25,12 +26,14 @@ export default function NuevoVehiculo() {
     placas: "",
     anio: "",
     marca: "",
+    linea:""
   });
   const [operadores, setOperadores] = useState<Operador[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [id_operador, setIdOperador] = useState(0);
   const [id_empresa, setIdEmpresa] = useState(0);
   const [imagen_vehi, setImagen_vehi] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
   // Obtener empresas
   useEffect(() => {
@@ -49,7 +52,8 @@ export default function NuevoVehiculo() {
     axios
       .get("http://localhost:8000/Operadores/")
       .then((response) => {
-        setOperadores(response.data);
+        const operadoresActivos = response.data.filter((cat: any) => cat.activo !== "false");
+        setOperadores(operadoresActivos);
       })
       .catch((error) => {
         console.error("Error al obtener operadores:", error);
@@ -86,6 +90,19 @@ export default function NuevoVehiculo() {
   };
 
   const handleSubmit = async () => {
+    if (
+      !id_operador ||
+      !formDatas.num_serie?.trim() ||
+      !formDatas.placas?.trim() ||
+      !formDatas.marca?.trim() ||
+      !formDatas.anio?.trim() ||
+      !formDatas.linea?.trim() ||
+      !id_empresa
+    ) {
+      alert("Por favor, completa todos los campos obligatorios antes de guardar.");
+      return; // Detiene la ejecución si falta algún dato
+    }
+    setIsSubmitting(true);
     try {
       const formData = new FormData();
       formData.append("num_serie", formDatas.num_serie);
@@ -95,8 +112,9 @@ export default function NuevoVehiculo() {
       formData.append("empresa_id", id_empresa.toString());
       formData.append("marca", formDatas.marca);
       formData.append("anio", formDatas.anio);
+      formData.append("linea", formDatas.linea);
 
-      // Crear vehículo
+      // Crear vehículo 
       const response = await axios.post(
         `http://localhost:8000/Vehiculos/create/`,
         formData,
@@ -128,6 +146,9 @@ export default function NuevoVehiculo() {
       console.error("Error al guardar el vehículo:", error);
       alert("Hubo un problema al guardar el vehículo.");
     }
+    finally {
+      setIsSubmitting(false); // Desbloquea el botón
+    };
   };
 
   return (
@@ -251,6 +272,18 @@ export default function NuevoVehiculo() {
                   className="w-full border px-4 py-2 rounded-md hover:bg-gray-100 focus:outline-none"
                 />
               </div>
+              <div>
+                <label className="block text-gray-700 font-semibold">
+                  Linea
+                </label>
+                <input
+                  type="text"
+                  name="linea"
+                  value={formDatas.linea}
+                  onChange={handleInputChange}
+                  className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
 
             </div>
                         
@@ -266,6 +299,7 @@ export default function NuevoVehiculo() {
                       <Button
                         variant="green"
                         onClick={handleSubmit}
+                        disabled={isSubmitting}
                       >
                         Guardar
                       </Button>

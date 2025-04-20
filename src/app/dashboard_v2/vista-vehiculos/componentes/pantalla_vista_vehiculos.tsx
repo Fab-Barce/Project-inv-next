@@ -19,6 +19,7 @@ type Vehiculo = {
   marca: string;
   empresa: string;
   operador: string;
+  activo: string;
 };
 
 type Props = {
@@ -40,7 +41,8 @@ export default function PantallaVehiculos({ onModificar }: Props) {
       try {
         const res = await fetch("http://localhost:8000/Vehiculos/");
         const data = await res.json();
-        setVehiculos(data);
+        const vehiculosActivos = data.filter((cat: any) => cat.activo !== "false");
+        setVehiculos(vehiculosActivos);
       } catch (error) {
         console.error("Error al obtener vehículos:", error);
       }

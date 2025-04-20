@@ -26,10 +26,12 @@ type Producto = {
 type Proveedor = {
     proveedor_id: number;
     nombre: string;
+    activo: string
   };
   type Categoria = {
     categoria_id: number;
     nombre: string;
+    activo: string
   };
   type Empresa = {
     empresa_id: number;
@@ -38,6 +40,7 @@ type Proveedor = {
   type Vehiculo = {
     vehiculo_id: number;
     placas: string;
+    activo:string
   };
 
 type Props = {
@@ -88,14 +91,16 @@ export default function Refaccion({ producto, onCancelar }: Props) {
     useEffect(() => {
         axios.get("http://localhost:8000/Proveedores/")
         .then (response => {
-          setProveedor(response.data)
+          const proveedoresActivos = response.data.filter((cat: any) => cat.activo !== "false");
+          setProveedor(proveedoresActivos)
         }) 
       },[])
     
       useEffect(() => {
         axios.get("http://localhost:8000/Categorias/")
         .then (response => {
-          setCategoria(response.data)
+          const categoriasActivas = response.data.filter((cat: any) => cat.activo !== "false");
+          setCategoria(categoriasActivas)
         }) 
       },[])
     
@@ -109,7 +114,8 @@ export default function Refaccion({ producto, onCancelar }: Props) {
     useEffect(() => {
     axios.get("http://localhost:8000/Vehiculos/")
     .then (response => {
-        setVehiculos(response.data)
+      const vehiculosActivos = response.data.filter((cat: any) => cat.activo !== "false");
+        setVehiculos(vehiculosActivos)
     }) 
     },[])
 
@@ -125,50 +131,53 @@ export default function Refaccion({ producto, onCancelar }: Props) {
     };
 
     const handleSave = async () => {
-        if (!formData) return;
-
-        const updatedFields: Partial<Producto> = {};
-        Object.keys(formData).forEach(key => {
-            if (formData[key as keyof Producto] !== initialData?.[key as keyof Producto]) {
-                updatedFields[key as keyof Producto] = formData[key as keyof Producto];
-            }
-        });
-
-        const formDataToSend = new FormData();
-        for (const key in updatedFields) {
-            formDataToSend.append(key, updatedFields[key as keyof Producto] as string);
-        }
-        if (file) {
-            formDataToSend.append("imagen_refa", file);
-        }
-
-        try {
-            await axios.patch(`http://localhost:8000/Refacciones/update/${producto.refaccion_id}/`, formDataToSend, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
-            try{
-                axios.post(`http://localhost:8000/Movimientos/create/`, 
-                {
-                    refaccion_id:producto.refaccion_id,
-                    tipo_movimiento:"actualizacion",
-                    user_id:userId,
-                }
-                )
-                .then(res => {
-
-                console.log(res);
-                alert("Movimiento almacenado correctamente")
-            })
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Hubo un problema al guardar el movimiento");
-            }
-            alert("Producto actualizado con éxito");
-            setEditable(false);
-        } catch (error) {
-            console.error("Error al actualizar el producto", error);
-        }
-    };
+      if (!formData || !initialData) return;
+  
+      const updatedFields: Partial<Producto> = {};
+      let hasChanges = false;
+  
+      Object.keys(formData).forEach(key => {
+          const current = formData[key as keyof Producto];
+          const original = initialData[key as keyof Producto];
+  
+          if (current !== original) {
+              updatedFields[key as keyof Producto] = current;
+              hasChanges = true;
+          }
+      });
+  
+      if (!hasChanges && !file) {
+          alert("No se han realizado cambios.");
+          return;
+      }
+  
+      const formDataToSend = new FormData();
+      for (const key in updatedFields) {
+          formDataToSend.append(key, updatedFields[key as keyof Producto] as string);
+      }
+  
+      if (file) {
+          formDataToSend.append("imagen_refa", file);
+      }
+  
+      try {
+          await axios.patch(`http://localhost:8000/Refacciones/update/${producto.refaccion_id}/`, formDataToSend, {
+              headers: { "Content-Type": "multipart/form-data" }
+          });
+  
+          await axios.post(`http://localhost:8000/Movimientos/create/`, {
+              refaccion_id: producto.refaccion_id,
+              tipo_movimiento: "actualizacion",
+              user_id: userId,
+          });
+  
+          alert("Producto actualizado con éxito");
+          setEditable(false);
+      } catch (error) {
+          console.error("Error al actualizar el producto", error);
+      }
+  };
+  
 
     const handleVehiculoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setIdVehiculo(Number(e.target.value));
@@ -176,54 +185,60 @@ export default function Refaccion({ producto, onCancelar }: Props) {
 
       const handleGuardar = async () => {
         try {
-            // Verifica que la cantidad modificada sea válida
-            if (!cantidadModificada || cantidadModificada < 0) {
+            const cantidadOriginal = Number(producto.cantidad);
+            const nuevaCantidad = Number(cantidadModificada);
+    
+            if (isNaN(nuevaCantidad) || nuevaCantidad < 0) {
                 alert("Por favor, ingresa una cantidad válida.");
                 return;
             }
     
-            // Buscar el vehículo seleccionado por su ID
+            // ❗ Solo proceder si la cantidad cambió
+            if (cantidadOriginal === nuevaCantidad) {
+                alert("No hubo cambios en la cantidad.");
+                return;
+            }
+    
+            // 🧠 Generar motivo automático si es salida
             const vehiculoSeleccionado = vehiculos.find(v => v.vehiculo_id === id_vehiculo);
             const placaVehiculo = vehiculoSeleccionado ? vehiculoSeleccionado.placas : "desconocido";
-    
-            // Si el tipo de movimiento es "salida", se genera el motivo automáticamente
             let motivoFinal = datosMovimiento.motivo;
+    
             if (tipoMovimiento === "salida") {
                 motivoFinal = `Pieza ${producto.nombre} establecida en vehículo ${placaVehiculo}`;
             }
     
-            // 1️⃣ PATCH - Actualizar la cantidad en Refacciones
+            // 1️⃣ PATCH - Actualizar la cantidad
             await axios.patch(`http://localhost:8000/Refacciones/update/${producto.refaccion_id}/`, {
-                cantidad: cantidadModificada
+                cantidad: nuevaCantidad
             });
     
-            // 2️⃣ Si el tipo de movimiento es "salida", actualizar vehiculo_id
-            if (tipoMovimiento === "salida") {
-                await axios.patch(`http://localhost:8000/Refacciones/update/${producto.refaccion_id}/`, {
-                    vehiculo_id: id_vehiculo
-                });
-            }
-    
-            // 3️⃣ POST - Crear un nuevo movimiento
+            // 2️⃣ POST - Registrar movimiento
             const movimientoData = {
                 refaccion_id: producto.refaccion_id,
-                cantidad: cantidadModificada,
+                cantidad: nuevaCantidad,
                 tipo_movimiento: tipoMovimiento,
                 motivo: motivoFinal,
                 user_id: userId,
             };
-            console.log("envindo", movimientoData)
     
             await axios.post("http://localhost:8000/Movimientos/create/", movimientoData);
     
             alert("Operación realizada con éxito");
-            setIsOpen(false); // Cierra el modal después de guardar
+            setIsOpen(false);
     
         } catch (error) {
-            console.error("Error al guardar los cambios", error);
+            if (axios.isAxiosError(error)) {
+                console.error("Error al guardar los cambios", error.response?.data || error.message);
+            } else {
+                console.error("Error al guardar los cambios", error);
+            }
             alert("Hubo un error al guardar los cambios.");
         }
     };
+    
+    
+    
 
     return (
         <div className="min-h-screen bg-gray-100 py-10 px-6">

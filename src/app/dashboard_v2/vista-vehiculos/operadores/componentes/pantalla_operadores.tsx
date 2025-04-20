@@ -14,6 +14,7 @@ type Operador = {
   nombre: string;
   // unidad: string;
   empresa: string;
+  activo:string;
 };
 
 type Props = {
@@ -34,7 +35,8 @@ export default function PantallaOperador({ onModificar }: Props) {
   useEffect(() => {
     axios.get("http://localhost:8000/Operadores/")
       .then(response => {
-        setOperadores(response.data);
+        const operadoresActivos = response.data.filter((cat: any) => cat.activo !== "false");
+        setOperadores(operadoresActivos);
       })
       .catch(error => {
         console.error("Error al obtener operadores:", error);

@@ -11,6 +11,7 @@ type Operador = {
     operador_id: number;
     nombre: string;
     empresa_id: number;
+    activo:string
 };
 
 type Vehiculo = {
@@ -24,6 +25,8 @@ type Vehiculo = {
     marca: string;
     empresa: string;
     operador: string;
+    linea: string;
+    activo: string;
 };
 
 type Props = {
@@ -64,7 +67,8 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
     useEffect(() => {
         axios.get("http://localhost:8000/Operadores/")
             .then(response => {
-                setOperadores(response.data)
+                const operadoresActivos = response.data.filter((cat: any) => cat.activo !== "false");
+                setOperadores(operadoresActivos)
             })
     }, []);
 
@@ -81,14 +85,24 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
 
     const handleSave = async () => {
         if (!formData) return;
-
+    
         const updatedFields: Partial<Vehiculo> = {};
+    
+        // Detectar solo campos modificados
         Object.keys(formData).forEach(key => {
             if (formData[key as keyof Vehiculo] !== initialData?.[key as keyof Vehiculo]) {
                 updatedFields[key as keyof Vehiculo] = formData[key as keyof Vehiculo];
             }
         });
-
+    
+        // Si no hubo cambios y no se subió archivo, no hacer nada
+        const noChanges = Object.keys(updatedFields).length === 0 && !file;
+        if (noChanges) {
+            alert("No se realizaron cambios.");
+            return;
+        }
+    
+        // Preparar FormData
         const formDataToSend = new FormData();
         for (const key in updatedFields) {
             formDataToSend.append(key, updatedFields[key as keyof Vehiculo] as string);
@@ -96,33 +110,29 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
         if (file) {
             formDataToSend.append("imagen_vehi", file);
         }
-
+    
         try {
+            // PATCH solo si hubo cambios
             await axios.patch(`http://localhost:8000/Vehiculos/update/${vehiculo.vehiculo_id}/`, formDataToSend, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
-            try {
-                axios.post(`http://localhost:8000/Movimientos/create/`,
-                    {
-                        vehiculo_id: vehiculo.vehiculo_id,
-                        tipo_movimiento: "actualizacion",
-                        user_id: userId,
-                    }
-                )
-                    .then(res => {
-                        console.log(res);
-                        alert("Movimiento almacenado correctamente")
-                    })
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Hubo un problema al guardar el movimiento");
-            }
+    
+            // POST del movimiento
+            await axios.post(`http://localhost:8000/Movimientos/create/`, {
+                vehiculo_id: vehiculo.vehiculo_id,
+                tipo_movimiento: "actualizacion",
+                user_id: userId,
+            });
+    
             alert("Producto actualizado con éxito");
             setEditable(false);
+    
         } catch (error) {
             console.error("Error al actualizar el producto", error);
+            alert("Hubo un error al guardar los cambios.");
         }
     };
+    
 
     return (
         <div className="min-h-screen bg-gray-100 py-10 px-6">
@@ -171,13 +181,14 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
 
                     <Field label="Marca" name="marca" value={formData?.marca || ""} onChange={handleInputChange} editable={editable} />
                     <Field label="Año" name="anio" value={formData?.anio || ""} onChange={handleInputChange} editable={editable} />
+                    <Field label="Linea" name="linea" value={formData?.linea || ""} onChange={handleInputChange} editable={editable} />
 
                     <div className="flex justify-center flex-col items-center">
                         {editable && (
                             <input
                                 type="file"
                                 onChange={handleFileChange}
-                                className="border border-gray-300 rounded-md p-2 cursor-pointer hover:bg-gray-200"
+                                className="border border-gray-300 rounded-md p-2 cursor-pointer hover:bg-gray-200 w-48"
                             />
                         )}
                         {formData?.imagen_vehi && (

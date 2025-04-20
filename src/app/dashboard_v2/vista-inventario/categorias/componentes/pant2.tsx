@@ -13,6 +13,7 @@ type Categoria = {
   categoria_id: number;
   nombre: string;
   descripcion: string;
+  activo: string;
 };
 
 type Props = {
@@ -36,10 +37,12 @@ export default function PantallaCategoria({ onModificar }: Props) {
 
   useEffect(() => {
     axios.get("http://localhost:8000/Categorias/").then((response) => {
-      setCategoria(response.data);
-      setFilteredCategorias(response.data); // Inicializamos las categorías filtradas
+      const categoriasActivas = response.data.filter((cat: any) => cat.activo !== "false");
+      setCategoria(categoriasActivas);
+      setFilteredCategorias(categoriasActivas); // Inicializamos las categorías filtradas
     });
   }, []);
+  
 
   useEffect(() => {
     // Filtrar categorías según el campo de búsqueda y el filtro seleccionado

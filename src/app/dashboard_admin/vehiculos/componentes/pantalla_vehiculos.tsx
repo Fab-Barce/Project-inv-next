@@ -20,6 +20,7 @@ type Vehiculo = {
   marca: string;
   empresa: string;
   operador: string;
+  activo: string;
 };
 
 type Props = {
@@ -41,7 +42,8 @@ export default function PantallaVehiculos({ onModificar }: Props) {
       try {
         const res = await fetch("http://localhost:8000/Vehiculos/");
         const data = await res.json();
-        setVehiculos(data);
+        const vehiculosActivos = data.filter((cat: any) => cat.activo !== "false");
+        setVehiculos(vehiculosActivos);
       } catch (error) {
         console.error("Error al obtener vehículos:", error);
       }
@@ -57,18 +59,20 @@ export default function PantallaVehiculos({ onModificar }: Props) {
 
   const eliminarSeleccionados = async () => {
     if (seleccionados.length === 0) return;
-    if (!confirm("¿Eliimnar los vehículos seleccionados?")) return;
+    if (!confirm("¿Estás seguro de desactivar los vehículos seleccionados?"))
+      return;
 
     try {
       await Promise.all(
         seleccionados.map(async (id) => {
+          const vehiculo = vehiculos.find((v) => v.vehiculo_id === id);
           await fetch(`http://localhost:8000/Vehiculos/update/${id}/`, {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              activo: false,
+              activo: 'false',
             }),
           });
         })
@@ -79,7 +83,7 @@ export default function PantallaVehiculos({ onModificar }: Props) {
       setSeleccionados([]);
       setModoEliminar(false);
     } catch (error) {
-      console.error("Error al eliminar vehículos:", error);
+      console.error("Error al desactivar vehículos:", error);
     }
   };
 

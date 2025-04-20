@@ -13,6 +13,7 @@ export default function NuevaCategoria() {
     nombre: "",
     descripcion: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -26,15 +27,33 @@ export default function NuevaCategoria() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+  
+    // Validación previa
+    if (!formData.nombre.trim() || !formData.descripcion.trim()) {
+      alert("Por favor, completa todos los campos antes de guardar.");
+      return; // Detiene el envío si falta algún campo
+    }
 
+    setIsSubmitting(true);
+  
     console.log("Datos a guardar:", formData);
+  
     axios.post(`http://localhost:8000/Categorias/create/`, formData)
       .then(res => {
         console.log(res);
         console.log(res.data);
-        alert("Categoria almacenada correctamente");
+        alert("Categoría almacenada correctamente");
+        router.push("/dashboard/inventario/categorias"); // Redirige después de guardar
+      })
+      .catch(error => {
+        console.error("Error al guardar la categoría:", error);
+        alert("Hubo un problema al guardar la categoría.");
+      })
+      .finally(() => {
+        setIsSubmitting(false); // Desbloquea el botón
       });
   };
+  
 
   return (
     <div>
@@ -61,6 +80,7 @@ export default function NuevaCategoria() {
             <Button
               variant="green"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
               Guardar
             </Button>

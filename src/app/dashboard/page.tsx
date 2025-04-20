@@ -1,7 +1,9 @@
+"use client";
 import Link from "next/link";
 import Headerv2 from "../components/headerv2";
+import withAuth from "../utils/withAuth";
 
-export default function Home() {
+function Home() {
     return (
         <div>
           <Headerv2 />
@@ -45,3 +47,4 @@ export default function Home() {
       );
       
 }
+export default withAuth(Home, "modificacion");

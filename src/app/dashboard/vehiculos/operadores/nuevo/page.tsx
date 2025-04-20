@@ -14,6 +14,7 @@ export default function NuevoOperador() {
   const router = useRouter();
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [id_empresa, setIdEmpresa] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     empresa_id: id_empresa,
@@ -30,7 +31,14 @@ export default function NuevoOperador() {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); 
+
+    if (!formData.nombre.trim() || !formData.empresa_id) {
+      alert("Por favor, completa todos los campos antes de guardar.");
+      return; // Detiene el envío si falta algún campo
+    }
+
+    setIsSubmitting(true);
 
     console.log("Datos a guardar:", formData);
     axios.post(`http://localhost:8000/Operadores/create/`, formData )
@@ -39,6 +47,9 @@ export default function NuevoOperador() {
       console.log(res.data)
       alert("Operador almacenado correctamente")
   })
+  .finally(() => {
+    setIsSubmitting(false); // Desbloquea el botón
+  });
   };
 
   const handleEmpresaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -115,6 +126,7 @@ export default function NuevoOperador() {
               type="button"
               className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md font-semibold"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
               Guardar
             </button>

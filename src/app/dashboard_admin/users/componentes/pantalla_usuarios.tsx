@@ -15,6 +15,7 @@ type Usuario = {
   correo: string; // Campo de correo añadido
   rol: "visualizacion" | "modificacion";
   contrasena: string;
+  activo: string;
 };
 
 type Props = {
@@ -39,7 +40,8 @@ export default function PantallaUsuarios({ onModificar }: Props) {
         const response = await fetch("http://localhost:8000/api/usuarios/");
         if (!response.ok) throw new Error("Error al obtener los usuarios");
         const data = await response.json();
-        setUsuarios(data);
+        const usersActivos = data.filter((cat: any) => cat.activo !== "false");
+        setUsuarios(usersActivos);
       } catch (error) {
         console.error("Error al obtener usuarios:", error);
       }
@@ -63,13 +65,13 @@ export default function PantallaUsuarios({ onModificar }: Props) {
       try {
         await Promise.all(
           selectedItems.map(async (id) => {
-            await fetch(`http://localhost:8000/api/usuarios/${id}/`, {
+            await fetch(`http://localhost:8000/api/usuarios/update/${id}/`, {
               method: "PATCH",
               headers: {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                activo: false,
+                activo: "false",
               }),
             });
           })

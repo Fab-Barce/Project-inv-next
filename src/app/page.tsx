@@ -36,6 +36,7 @@ export default function Login() {
                 // El login fue exitoso, puedes almacenar el token
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("user_id", data.user_id);
+                localStorage.setItem("rol", data.rol);
                 // Redirige al usuario según el rol
                 if (data.rol === "modificacion") {
                   router.push("/dashboard");

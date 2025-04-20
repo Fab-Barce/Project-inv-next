@@ -14,6 +14,7 @@ type Categoria = {
   categoria_id: number;
   nombre: string;
   descripcion: string;
+  activo: string;
 };
 
 type Props = {
@@ -37,8 +38,9 @@ export default function PantallaCategoria({ onModificar }: Props) {
 
   useEffect(() => {
     axios.get("http://localhost:8000/Categorias/").then((response) => {
-      setCategoria(response.data);
-      setFilteredCategorias(response.data); // Inicializamos las categorías filtradas
+      const categoriasActivas = response.data.filter((cat: any) => cat.activo !== "false");
+      setCategoria(categoriasActivas);
+      setFilteredCategorias(categoriasActivas); // Inicializamos las categorías filtradas
     });
   }, []);
 
@@ -64,21 +66,33 @@ export default function PantallaCategoria({ onModificar }: Props) {
 
   const handleBulkDelete = () => {
     if (selectedItems.length === 0) return;
+  
     const confirmar = confirm(
-      "¿Estás seguro de eliminar las categorías seleccionadas?"
+      "¿Estás seguro de desactivar las categorías seleccionadas?"
     );
+  
     if (confirmar) {
-      for (var i = 0; i < selectedItems.length; i += 1) {
-        axios
-          .delete(`http://localhost:8000/Categorias/delete/${selectedItems[i]}/`)
-          .then((res) => {
-            console.log(res);
-            console.log(res.data);
-          });
-      }
-      setCategoria(categorias.filter((v) => !selectedItems.includes(v.categoria_id)));
-      setSelectedItems([]);
-      setDeleteMode(false);
+      // Usamos Promise.all para esperar a que terminen todas las peticiones
+      Promise.all(
+        selectedItems.map((id) =>
+          axios.patch(`http://localhost:8000/Categorias/update/${id}/`, {
+            activo: "false",
+          })
+        )
+      )
+        .then(() => {
+          // Filtra las categorías desactivadas del estado
+          setCategoria((prevCategorias) =>
+            prevCategorias.filter((v) => !selectedItems.includes(v.categoria_id))
+          );
+          setSelectedItems([]);
+          setDeleteMode(false);
+          alert("Categorías desactivadas correctamente.");
+        })
+        .catch((error) => {
+          console.error("Error al desactivar categorías:", error);
+          alert("Hubo un error al desactivar las categorías.");
+        });
     }
   };
 

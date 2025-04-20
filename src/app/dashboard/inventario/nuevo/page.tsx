@@ -9,10 +9,12 @@ import Button from "@/app/components/Button";
 type Proveedor = {
   proveedor_id: number;
   nombre: string;
+  activo: string;
 };
 type Categoria = {
   categoria_id: number;
   nombre: string;
+  activo: string;
 };
 type Empresa = {
   empresa_id: number;
@@ -29,6 +31,7 @@ export default function NuevoRefaccion() {
     stock_minimo: 0,
     costo: 0,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false); 
   const [proveedores, setProveedor] = useState<Proveedor[]>([]);
   const [categorias, setCategoria] = useState<Categoria[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
@@ -38,18 +41,20 @@ export default function NuevoRefaccion() {
   const [imagen_refa, setImagen_refa] = useState(null);
   const [userId, setUserId] = useState<string | null>(null);
 
-
+ 
   useEffect(() => {
     axios.get("http://localhost:8000/Proveedores/")
     .then (response => {
-      setProveedor(response.data)
+      const proveedoresActivos = response.data.filter((cat: any) => cat.activo !== "false");
+      setProveedor(proveedoresActivos)
     }) 
   },[])
 
   useEffect(() => {
     axios.get("http://localhost:8000/Categorias/")
     .then (response => {
-      setCategoria(response.data)
+      const categoriasActivas = response.data.filter((cat: any) => cat.activo !== "false");
+      setCategoria(categoriasActivas)
     }) 
   },[])
 
@@ -91,48 +96,68 @@ export default function NuevoRefaccion() {
   };
 
   const handleSubmit = async () => {
+    // Validación previa
+    if (
+      !id_proveedor ||
+      !formDatas.numero_parte?.trim() ||
+      !formDatas.nombre?.trim() ||
+      !formDatas.cantidad ||
+      !formDatas.stock_minimo ||
+      !formDatas.costo ||
+      !id_categoria ||
+      !id_empresa
+    ) {
+      alert("Por favor, completa todos los campos obligatorios antes de guardar.");
+      return; // Detiene la ejecución si falta algún dato
+    }
+
+    setIsSubmitting(true);
+  
     try {
       const formData = new FormData();
-      formData.append('proveedor_id', id_proveedor.toString());
-      formData.append('numero_parte', formDatas.numero_parte);
-      formData.append('nombre', formDatas.nombre );
-      formData.append('cantidad', formDatas.cantidad.toString());
-      formData.append('stock_minimo', formDatas.stock_minimo.toString());
-      formData.append('costo', formDatas.costo.toString());
-      formData.append('categoria_id', id_categoria.toString());
-      formData.append('imagen_refa', imagen_refa || '');
-      formData.append('empresa_id', id_empresa.toString());
-      // Crear materia
-      const response = await axios.post(`http://localhost:8000/Refacciones/create/`, formData,{
-          headers: {
-              'Content-Type': 'multipart/form-data'
-          }
+      formData.append("proveedor_id", id_proveedor.toString());
+      formData.append("numero_parte", formDatas.numero_parte);
+      formData.append("nombre", formDatas.nombre);
+      formData.append("cantidad", formDatas.cantidad.toString());
+      formData.append("stock_minimo", formDatas.stock_minimo.toString());
+      formData.append("costo", formDatas.costo.toString());
+      formData.append("categoria_id", id_categoria.toString());
+      formData.append("imagen_refa", imagen_refa || "");
+      formData.append("empresa_id", id_empresa.toString());
+  
+      // Crear refacción
+      const response = await axios.post(`http://localhost:8000/Refacciones/create/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
+  
       alert("Refacción guardada correctamente.");
-      router.push("/dashboard/inventario"); // Redirige al listado después de guardar
-      console.log(response)
-      try{
-        axios.post(`http://localhost:8000/Movimientos/create/`, 
-          {
-            refaccion_id:response.data.refaccion_id,
-            cantidad: formDatas.cantidad,
-            tipo_movimiento:"entrada",
-            user_id:userId,
-          }
-        )
-        .then(res => {
-          console.log(res);
-          alert("Movimiento almacenado correctamente")
-      })
+      router.push("/dashboard/inventario");
+      console.log(response);
+  
+      // Registrar movimiento
+      try {
+        await axios.post(`http://localhost:8000/Movimientos/create/`, {
+          refaccion_id: response.data.refaccion_id,
+          cantidad: formDatas.cantidad,
+          tipo_movimiento: "entrada",
+          user_id: userId,
+        });
+        alert("Movimiento almacenado correctamente");
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error al registrar el movimiento:", error);
         alert("Hubo un problema al guardar el movimiento");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error al guardar la refacción:", error);
       alert("Hubo un problema al guardar la refacción.");
     }
+    finally {
+      setIsSubmitting(false); // Desbloquea el botón
+    };
   };
+  
 
   const handleArchivoChange = (e:any) => {
     setImagen_refa(e.target.files[0]); // Usar el archivo seleccionado
@@ -276,8 +301,8 @@ return (
             variant="green"
             onClick={() => {
               handleSubmit();
-              router.push("/dashboard/inventario");
             }}
+            disabled={isSubmitting}
           >
             Guardar
           </Button>

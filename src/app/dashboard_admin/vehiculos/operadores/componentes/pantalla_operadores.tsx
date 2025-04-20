@@ -15,6 +15,7 @@ type Operador = {
   nombre: string;
   // unidad: string;
   empresa: string;
+  activo:string;
 };
 
 type Props = {
@@ -35,7 +36,8 @@ export default function PantallaOperador({ onModificar }: Props) {
   useEffect(() => {
     axios.get("http://localhost:8000/Operadores/")
       .then(response => {
-        setOperadores(response.data);
+        const operadoresActivos = response.data.filter((cat: any) => cat.activo !== "false");
+        setOperadores(operadoresActivos);
       })
       .catch(error => {
         console.error("Error al obtener operadores:", error);
@@ -56,18 +58,27 @@ export default function PantallaOperador({ onModificar }: Props) {
     if (selectedItems.length === 0) return;
     const confirmar = confirm("¿Estás seguro de eliminar los operadores seleccionados?");
     if (confirmar) {
-      selectedItems.forEach((id) => {
-        axios.delete(`http://localhost:8000/Operadores/delete/${id}/`)
-          .then(res => {
-            console.log(res.data);
+      // Usamos Promise.all para esperar a que terminen todas las peticiones
+      Promise.all(
+        selectedItems.map((id) =>
+          axios.patch(`http://localhost:8000/Operadores/update/${id}/`, {
+            activo: "false",
           })
-          .catch(error => {
-            console.error("Error al eliminar operador:", error);
-          });
-      });
-      setOperadores(operadores.filter((v) => !selectedItems.includes(v.operador_id)));
-      setSelectedItems([]);
-      setDeleteMode(false);
+        )
+      )
+        .then(() => {
+          // Filtra las categorías desactivadas del estado
+          setOperadores((prevOperadores) =>
+            prevOperadores.filter((v) => !selectedItems.includes(v.operador_id))
+          );
+          setSelectedItems([]);
+          setDeleteMode(false);
+          alert("Operadores desactivados correctamente.");
+        })
+        .catch((error) => {
+          console.error("Error al desactivar operadores:", error);
+          alert("Hubo un error al desactivar los operadores.");
+        });
     }
   };
 
