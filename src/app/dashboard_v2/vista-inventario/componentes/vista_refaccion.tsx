@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaEdit } from "react-icons/fa";
 import { Dialog } from "@headlessui/react";
 import axios from "axios";
+import Button from "@/app/components/Button";   
 
 // Definición del tipo de datos Producto
 type Producto = {
@@ -19,6 +20,7 @@ type Producto = {
     categoria: string;
     proveedor: string;
     empresa: string;
+    marca: string;
 };
 
 type Proveedor = {
@@ -283,10 +285,12 @@ export default function Refaccion({ producto, onCancelar }: Props) {
               ) : (
                 <Field label="Empresa" name="empresa_id" value={formData?.empresa || ""} editable={false} />
               )}
+
+              <Field label="Marca" name="marca" value={formData?.marca || ""} onChange={handleInputChange} editable={editable} />
       
               <div className="flex items-center space-x-2">
                 <Field label="Cantidad" name="cantidad" value={formData?.cantidad || 0} onChange={handleInputChange} editable={false} />
->
+
               </div>
 
               <div className="flex justify-center flex-col items-center">
@@ -311,13 +315,12 @@ export default function Refaccion({ producto, onCancelar }: Props) {
             {/* Botones de acción */}
             <div className="flex justify-end space-x-4 mt-10">
       
-              <button
-                type="button"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+              <Button
+                variant="blue"
                 onClick={onCancelar}
               >
                 Volver
-              </button>
+              </Button>
             </div>
       
             {/* Ventana Modal para modificar la cantidad */}

@@ -20,6 +20,7 @@ type Producto = {
     categoria: string;
     proveedor: string;
     empresa: string;
+    marca: string;
 };
 
 export default function Inventario() {

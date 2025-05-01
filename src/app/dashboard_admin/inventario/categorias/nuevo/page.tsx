@@ -45,7 +45,7 @@ export default function NuevaCategoria() {
         console.log(res);
         console.log(res.data);
         alert("Categoría almacenada correctamente");
-        router.push("/dashboard/inventario/categorias"); // Redirige después de guardar
+        router.push("/dashboard_admin/inventario/categorias"); // Redirige después de guardar
       })
       .catch(error => {
         console.error("Error al guardar la categoría:", error);

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
+import Button from "@/app/components/Button";
 
 type Operador = {
     operador_id: number;
@@ -59,9 +60,9 @@ export default function PantallaOperador({ onModificar }: Props) {
             <div className="flex space-x-2 mb-4 bg-white p-2 shadow rounded-lg">
 
                 <Link href="/dashboard_v2/vista-vehiculos/">
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <Button variant="blue">
                         Volver
-                    </button>
+                    </Button>
                 </Link>
 
                 <div className="flex ml-auto space-x-2">
@@ -113,12 +114,13 @@ export default function PantallaOperador({ onModificar }: Props) {
                                 <td className="px-4 py-2">{operador.empresa}</td>
                                 {!deleteMode && (
                                     <td className="px-4 py-2 flex space-x-2 justify-center">
-                                        <button
+                                        <Button
                                             onClick={() => onModificar(operador)}
-                                            className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                                            variant="blue"
+                                            size="small"
                                         >
                                             Ver Detalles
-                                        </button>
+                                        </Button>
                                     </td>
                                 )}
                             </tr>

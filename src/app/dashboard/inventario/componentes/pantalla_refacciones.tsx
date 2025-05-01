@@ -25,27 +25,11 @@ type Producto = {
   proveedor: string;
   empresa: string;
   activo: string;
+  marca: string;
 };
 
 type Props = {
   onModificar: (producto: Producto) => void;
-};
-
-// Estilo base para todos los botones
-const buttonBaseStyle = "text-white px-4 py-2 rounded-md font-semibold shadow-sm shadow-md rounded-xl p-15 flex flex-col items-center justify-center hover:shadow-xl transition duration-300 transform hover:-translate-y-1";
-
-const buttonBaseStyle2 = "text-white px-3 py-1 rounded-md font-semibold shadow-sm shadow-md rounded-xl p-15 flex flex-col items-center justify-center hover:shadow-xl transition duration-300 transform hover:-translate-y-1";
-
-// Objeto con variantes de colores para los botones
-const buttonVariants = {
-  lime: `bg-lime-500 hover:bg-lime-600 ${buttonBaseStyle}`,
-  green: `bg-green-500 hover:bg-green-600 ${buttonBaseStyle}`,
-  emerald: `bg-emerald-500 hover:bg-emerald-600 ${buttonBaseStyle}`,
-  teal: `bg-teal-500 hover:bg-teal-600 ${buttonBaseStyle}`,
-  orange: `bg-orange-500 hover:bg-orange-600 ${buttonBaseStyle}`,
-  cyan: `bg-cyan-500 hover:bg-cyan-600 ${buttonBaseStyle}`,
-  sky: `bg-sky-500 hover:bg-sky-600 ${buttonBaseStyle}`,
-  tealLight: `bg-teal-400 hover:bg-teal-600 ${buttonBaseStyle2}`,
 };
 
 export default function Pantalla_refacciones({ onModificar }: Props) {
@@ -54,9 +38,10 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchField, setSearchField] = useState<keyof Producto>("nombre");
-  const [sortField, setSortField] = useState<keyof Producto | null>(null);
+  const [sortField, setSortField] = useState<keyof Producto | "total" | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [vistaGaleria, setVistaGaleria] = useState<boolean>(false);
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRefacciones = async () => {
@@ -82,6 +67,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
             empresa: item.empresa || "",
             proveedor: item.proveedor || "",
             activo: item.activo || "",
+            marca: item.marca || "",
           }));
   
         setRefacciones(refaccionesFiltradas);
@@ -100,6 +86,14 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
     )
     .sort((a, b) => {
       if (!sortField) return 0;
+      
+      // Manejo especial para el campo "total"
+      if (sortField === "total") {
+        const totalA = a.costo * a.cantidad;
+        const totalB = b.costo * b.cantidad;
+        return sortDirection === "asc" ? totalA - totalB : totalB - totalA;
+      }
+      
       const valA = a[sortField];
       const valB = b[sortField];
       if (typeof valA === "number" && typeof valB === "number") {
@@ -110,7 +104,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
         : valB.toString().localeCompare(valA.toString());
     });
 
-  const handleSort = (field: keyof Producto) => {
+  const handleSort = (field: keyof Producto | "total") => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -166,16 +160,16 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
       {/* Botones */}
       <div className="flex flex-wrap gap-2 mb-4">
         <Link href="/dashboard/inventario/nuevo">
-          <Button variant="lime">Nuevo</Button>
+          <Button variant="green">Nuevo</Button>
         </Link>
         <Link href="/dashboard/inventario/categorias">
-          <Button variant="green">Categorías</Button>
+          <Button variant="purple">Categorías</Button>
         </Link>
         <Link href="/dashboard/inventario/proveedores">
-          <Button variant="emerald">Proveedores</Button>
+          <Button variant="yellow">Proveedores</Button>
         </Link>
         <Button
-          variant="teal"
+          variant="orange"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]);
@@ -185,22 +179,24 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
         </Button>
         {deleteMode && (
           <Button
-            variant="orange"
+            variant="red"
             onClick={handleBulkDelete}
             disabled={selectedItems.length === 0}
           >
             Confirmar Eliminación
           </Button>
         )}
+
+        <Link href="/dashboard">
+          <Button variant="blue">Volver</Button>
+        </Link>
         <Button
-          variant="cyan"
+          variant="sky"
           onClick={() => setVistaGaleria(!vistaGaleria)}
+          className="ml-auto"
         >
           {vistaGaleria ? "Vista Tabla" : "Vista Galería"}
         </Button>
-        <Link href="/dashboard">
-          <Button variant="sky">Volver</Button>
-        </Link>
       </div>
 
       {/* Filtros */}
@@ -230,10 +226,12 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
           <table className="w-full table-auto">
             <thead className="bg-gray-200 text-gray-700">
               <tr>
-                {deleteMode && <th className="px-4 py-2"></th>}
+                {deleteMode && <th className="px-4 py-2 text-center"></th>}
                 {[
                   { key: "numero_parte", label: "Número de Parte" },
                   { key: "nombre", label: "Nombre" },
+                  { key: "proveedor", label: "Proveedor" },
+                  { key: "marca", label: "Marca" },
                   { key: "cantidad", label: "Cantidad" },
                   { key: "stock_minimo", label: "Stock Mínimo" },
                   { key: "costo", label: "Costo" },
@@ -241,9 +239,9 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                   <th
                     key={key}
                     onClick={() => handleSort(key as keyof Producto)}
-                    className="px-4 py-2 cursor-pointer select-none"
+                    className="px-4 py-2 cursor-pointer select-none text-center"
                   >
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-center gap-1">
                       {label}
                       {sortField === key ? (
                         sortDirection === "asc" ? (
@@ -257,8 +255,24 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                     </div>
                   </th>
                 ))}
-                <th className="px-4 py-2">Total</th>
-                {!deleteMode && <th className="px-4 py-2">Acciones</th>}
+                <th 
+                  onClick={() => handleSort("total")}
+                  className="px-4 py-2 cursor-pointer select-none text-center"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    Total
+                    {sortField === "total" ? (
+                      sortDirection === "asc" ? (
+                        <ArrowUpIcon className="w-4 h-4 text-gray-600" />
+                      ) : (
+                        <ArrowDownIcon className="w-4 h-4 text-gray-600" />
+                      )
+                    ) : (
+                      <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                    )}
+                  </div>
+                </th>
+                {!deleteMode && <th className="px-4 py-2 text-center">Acciones</th>}
               </tr>
             </thead>
             <tbody>
@@ -278,9 +292,21 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                       </div>
                     </td>
                   )}
-                  <td className="px-4 py-2">{refa.numero_parte}</td>
-                  <td className="px-4 py-2">{refa.nombre}</td>
-                  <td className="px-4 py-2 text-center">{refa.cantidad}</td>
+                  <td className="px-4 py-2 text-center">{refa.numero_parte}</td>
+                  <td className="px-4 py-2 text-center">{refa.nombre}</td>
+                  <td className="px-4 py-2 text-center">{refa.proveedor}</td>
+                  <td className="px-4 py-2 text-center">{refa.marca}</td>
+                  <td className="px-4 py-2 text-center">
+                    <span className={`font-semibold ${
+                      refa.cantidad > refa.stock_minimo 
+                        ? 'text-green-600' 
+                        : refa.cantidad === refa.stock_minimo 
+                          ? 'text-yellow-600' 
+                          : 'text-red-600'
+                    }`}>
+                      {refa.cantidad}
+                    </span>
+                  </td>
                   <td className="px-4 py-2 text-center">{refa.stock_minimo}</td>
                   <td className="px-4 py-2 text-center">${refa.costo.toFixed(2)}</td>
                   <td className="px-4 py-2 text-center">${(refa.costo * refa.cantidad).toFixed(2)}</td>
@@ -288,7 +314,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                     <td className="px-4 py-2 text-center">
                       <div className="flex justify-center">
                         <Button
-                          variant="tealLight"
+                          variant="blue"
                           size="small"
                           onClick={() => onModificar(refa)}
                         >
@@ -313,14 +339,15 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
               <img
                 src={refa.imagen_refa || "/placeholder.png"}
                 alt={refa.nombre}
-                className="h-32 w-32 object-contain mb-2"
+                className="h-32 w-32 object-contain mb-2 p-2 rounded-lg transition-all duration-200 hover:bg-gray-100 hover:shadow-md cursor-pointer"
+                onClick={() => setExpandedImage(refa.imagen_refa || "/placeholder.png")}
               />
               <h3 className="text-lg font-semibold text-center">{refa.nombre}</h3>
               <p className="text-sm text-gray-600 text-center">{refa.numero_parte}</p>
               {!deleteMode && (
                 <div className="mt-2">
                   <Button
-                    variant="tealLight"
+                    variant="blue"
                     size="small"
                     onClick={() => onModificar(refa)}
                   >
@@ -348,6 +375,28 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
 
       {filteredAndSorted.length === 0 && (
         <div className="mt-4 text-center text-gray-500">No hay refacciones que coincidan.</div>
+      )}
+
+      {/* Modal para imagen expandida */}
+      {expandedImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setExpandedImage(null)}
+        >
+          <div className="relative max-w-4xl w-full p-4">
+            <button 
+              className="absolute top-4 right-4 text-white text-2xl hover:text-gray-300"
+              onClick={() => setExpandedImage(null)}
+            >
+              ×
+            </button>
+            <img 
+              src={expandedImage} 
+              alt="Imagen expandida" 
+              className="max-h-[80vh] w-auto mx-auto rounded-lg shadow-xl"
+            />
+          </div>
+        </div>
       )}
     </div>
   );

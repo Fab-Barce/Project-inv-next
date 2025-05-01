@@ -7,6 +7,7 @@ import {
   ArrowDownIcon,
   ArrowsUpDownIcon,
 } from "@heroicons/react/24/solid";
+import Button from "@/app/components/Button";
 
 type Producto = {
   refaccion_id: number;
@@ -23,6 +24,7 @@ type Producto = {
   categoria: string;
   proveedor: string;
   empresa: string;
+  marca: string;
   activo: string;
 };
 
@@ -39,6 +41,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
   const [sortField, setSortField] = useState<keyof Producto | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [vistaGaleria, setVistaGaleria] = useState<boolean>(false);
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRefacciones = async () => {
@@ -64,6 +67,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
             empresa: item.empresa || "",
             proveedor: item.proveedor || "",
             activo: item.activo || "",
+            marca: item.marca || "",
           }));
   
         setRefacciones(refaccionesFiltradas);
@@ -153,21 +157,24 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
       <div className="flex flex-wrap gap-2 mb-4">
 
       <Link href="/dashboard_v2/vista-inventario/categorias">
-          <button className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Categorías</button>
+          <Button variant="purple">Categorías</Button>
         </Link>
         <Link href="/dashboard_v2/vista-inventario/proveedores">
-          <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Proveedores</button>
+          <Button variant="yellow">Proveedores</Button>
         </Link>
 
-        <button
+
+        <Link href="/dashboard_v2">
+          <Button variant="blue">Volver</Button>
+        </Link>
+
+        <Button
           onClick={() => setVistaGaleria(!vistaGaleria)}
-          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+          variant="sky"
+          className="ml-auto"
         >
           {vistaGaleria ? "Vista Tabla" : "Vista Galería"}
-        </button>
-        <Link href="/dashboard_v2">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Volver</button>
-        </Link>
+        </Button>
       </div>
 
       {/* Filtros */}
@@ -197,10 +204,12 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
           <table className="w-full table-auto">
             <thead className="bg-gray-200 text-gray-700">
               <tr>
-                {deleteMode && <th className="px-4 py-2"></th>}
+                {deleteMode && <th className="px-4 py-2 text-center"></th>}
                 {[
                   { key: "numero_parte", label: "Número de Parte" },
                   { key: "nombre", label: "Nombre" },
+                  { key: "proveedor", label: "Proveedor" },
+                  { key: "marca", label: "Marca" },
                   { key: "cantidad", label: "Cantidad" },
                   { key: "stock_minimo", label: "Stock Mínimo" },
                   { key: "costo", label: "Costo" },
@@ -208,9 +217,9 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                   <th
                     key={key}
                     onClick={() => handleSort(key as keyof Producto)}
-                    className="px-4 py-2 cursor-pointer select-none"
+                    className="px-4 py-2 cursor-pointer select-none text-center"
                   >
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-center gap-1">
                       {label}
                       {sortField === key ? (
                         sortDirection === "asc" ? (
@@ -224,8 +233,8 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                     </div>
                   </th>
                 ))}
-                <th className="px-4 py-2">Total</th>
-                {!deleteMode && <th className="px-4 py-2">Acciones</th>}
+                <th className="px-4 py-2 text-center">Total</th>
+                {!deleteMode && <th className="px-4 py-2 text-center">Acciones</th>}
               </tr>
             </thead>
             <tbody>
@@ -240,9 +249,21 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                       />
                     </td>
                   )}
-                  <td className="px-4 py-2">{refa.numero_parte}</td>
-                  <td className="px-4 py-2">{refa.nombre}</td>
-                  <td className="px-4 py-2 text-center">{refa.cantidad}</td>
+                  <td className="px-4 py-2 text-center">{refa.numero_parte}</td>
+                  <td className="px-4 py-2 text-center">{refa.nombre}</td>
+                  <td className="px-4 py-2 text-center">{refa.proveedor}</td>
+                  <td className="px-4 py-2 text-center">{refa.marca}</td>
+                  <td className="px-4 py-2 text-center">
+                    <span className={`font-semibold ${
+                      refa.cantidad > refa.stock_minimo 
+                        ? 'text-green-600' 
+                        : refa.cantidad === refa.stock_minimo 
+                          ? 'text-yellow-600' 
+                          : 'text-red-600'
+                    }`}>
+                      {refa.cantidad}
+                    </span>
+                  </td>
                   <td className="px-4 py-2 text-center">{refa.stock_minimo}</td>
                   <td className="px-4 py-2 text-center">${refa.costo.toFixed(2)}</td>
                   <td className="px-4 py-2 text-center">
@@ -250,12 +271,13 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                   </td>
                   {!deleteMode && (
                     <td className="px-4 py-2 text-center">
-                      <button
+                      <Button
                         onClick={() => onModificar(refa)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                        variant="blue"
+                        size="small"
                       >
                         Detalles
-                      </button>
+                      </Button>
                     </td>
                   )}
                 </tr>
@@ -274,17 +296,19 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
               <img
                 src={refa.imagen_refa || "/placeholder.png"}
                 alt={refa.nombre}
-                className="h-32 w-32 object-contain mb-2"
+                className="h-32 w-32 object-contain mb-2 p-2 rounded-lg transition-all duration-200 hover:bg-gray-100 hover:shadow-md cursor-pointer"
+                onClick={() => setExpandedImage(refa.imagen_refa || "/placeholder.png")}
               />
               <h3 className="text-lg font-semibold text-center">{refa.nombre}</h3>
               <p className="text-sm text-gray-600 text-center">{refa.numero_parte}</p>
               {!deleteMode && (
-                <button
+                <Button
                   onClick={() => onModificar(refa)}
-                  className="mt-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                  variant="blue"
+                  size="small"
                 >
                   Detalles
-                </button>
+                </Button>
               )}
             </div>
           ))}
@@ -293,6 +317,31 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
 
       {filteredAndSorted.length === 0 && (
         <div className="mt-4 text-center text-gray-500">No hay refacciones que coincidan.</div>
+      )}
+
+      {/* Modal para imagen expandida */}
+      {expandedImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setExpandedImage(null)}
+        >
+          <div className="relative max-w-4xl w-full p-4">
+            <button 
+              className="absolute top-4 right-4 text-white text-2xl hover:text-gray-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpandedImage(null);
+              }}
+            >
+              ×
+            </button>
+            <img 
+              src={expandedImage} 
+              alt="Imagen expandida" 
+              className="max-h-[80vh] w-auto mx-auto rounded-lg shadow-xl"
+            />
+          </div>
+        </div>
       )}
     </div>
   );

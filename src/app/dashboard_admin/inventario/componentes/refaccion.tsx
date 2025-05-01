@@ -20,6 +20,7 @@ type Producto = {
     categoria: string;
     proveedor: string;
     empresa: string;
+    marca: string;
 };
 
 type Proveedor = {
@@ -297,6 +298,9 @@ export default function Refaccion({ producto, onCancelar }: Props) {
               ) : (
                 <Field label="Empresa" name="empresa_id" value={formData?.empresa || ""} editable={false} />
               )}
+
+              <Field label="Marca" name="marca" value={formData?.marca || ""} onChange={handleInputChange} editable={editable} />
+
       
               <div className="flex items-center space-x-2">
                 <Field label="Cantidad" name="cantidad" value={formData?.cantidad || 0} onChange={handleInputChange} editable={false} />

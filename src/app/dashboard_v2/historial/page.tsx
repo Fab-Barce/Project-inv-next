@@ -7,34 +7,45 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
   ArrowsUpDownIcon,
+  CalendarIcon,
+  ClockIcon,
+  UserIcon,
+  TagIcon,
+  TruckIcon,
+  WrenchIcon,
+  ArrowPathIcon,
+  FunnelIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/solid";
+import Button from "@/app/components/Button";
 
 type Movimiento = {
   id_movimiento: number;
-  nombre_refaccion?: string;
-  nombre?: string;
-  placas?: string;
-  placa_vehiculo?: string;
-  cantidad?: string;
+  nombre_refaccion?: string | null;
+  nombre?: string | null;
+  placas?: string | null;
+  placa_vehiculo?: string | null;
+  cantidad?: string | null;
   fecha: string;
   hora: string;
-  motivo?: string;
+  motivo?: string | null;
   tipo_movimiento: string;
   user_nombre: string;
+  cantidad_restante?: number | null;
 };
 
 type CampoBusqueda = keyof Movimiento;
 
-const campos: { label: string; value: CampoBusqueda }[] = [
-  { label: "ID Movimiento", value: "id_movimiento" },
-  { label: "Refacción", value: "nombre_refaccion" },
-  { label: "Vehículo", value: "placa_vehiculo" },
-  { label: "Cantidad", value: "cantidad" },
-  { label: "Fecha", value: "fecha" },
-  { label: "Hora", value: "hora" },
-  { label: "Motivo", value: "motivo" },
-  { label: "Tipo Movimiento", value: "tipo_movimiento" },
-  { label: "Usuario", value: "user_nombre" },
+const campos: { label: string; value: CampoBusqueda; icon: any }[] = [
+  { label: "ID Movimiento", value: "id_movimiento", icon: TagIcon },
+  { label: "Refacción", value: "nombre_refaccion", icon: WrenchIcon },
+  { label: "Vehículo", value: "placa_vehiculo", icon: TruckIcon },
+  { label: "Cantidad", value: "cantidad", icon: ArrowPathIcon },
+  { label: "Fecha", value: "fecha", icon: CalendarIcon },
+  { label: "Hora", value: "hora", icon: ClockIcon },
+  { label: "Motivo", value: "motivo", icon: TagIcon },
+  { label: "Tipo Movimiento", value: "tipo_movimiento", icon: ArrowPathIcon },
+  { label: "Usuario", value: "user_nombre", icon: UserIcon },
 ];
 
 const HistorialMovimientos = () => {
@@ -43,12 +54,57 @@ const HistorialMovimientos = () => {
   const [searchField, setSearchField] = useState<CampoBusqueda>("nombre_refaccion");
   const [sortField, setSortField] = useState<CampoBusqueda | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [viewMode, setViewMode] = useState<"timeline" | "table">("timeline");
+  const [dateFilter, setDateFilter] = useState<{ start: string; end: string }>({
+    start: "",
+    end: "",
+  });
+  const [tipoFilter, setTipoFilter] = useState<string>("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [inventarioActual, setInventarioActual] = useState<Record<string, number>>({});
+  const [movementType, setMovementType] = useState<"all" | "vehicles" | "inventory">("all");
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/Movimientos/")
-      .then((response) => setMovimientos(response.data))
-      .catch((error) => console.error("Error al obtener movimientos:", error));
+    axios.get("http://localhost:8000/Movimientos/")
+      .then(response => {
+        const movimientosData = response.data;
+        setMovimientos(movimientosData);
+        
+        // Calculate current inventory based on movements
+        const inventario: Record<string, number> = {};
+        
+        // Sort movements by date and time to process them chronologically
+        const movimientosOrdenados = [...movimientosData].sort((a, b) => {
+          const fechaA = new Date(`${a.fecha} ${a.hora}`);
+          const fechaB = new Date(`${b.fecha} ${b.hora}`);
+          return fechaA.getTime() - fechaB.getTime();
+        });
+        
+        // Process each movement to calculate remaining inventory
+        movimientosOrdenados.forEach(movimiento => {
+          const nombre = movimiento.nombre || movimiento.nombre_refaccion;
+          if (!nombre) return;
+          
+          if (!inventario[nombre]) {
+            inventario[nombre] = 0;
+          }
+          
+          const cantidad = parseInt(movimiento.cantidad || "0");
+          
+          if (movimiento.tipo_movimiento.toLowerCase() === "entrada") {
+            inventario[nombre] += cantidad;
+          } else if (movimiento.tipo_movimiento.toLowerCase() === "salida") {
+            inventario[nombre] -= cantidad;
+          }
+          
+          // Add the remaining quantity to the movement object
+          movimiento.cantidad_restante = inventario[nombre];
+        });
+        
+        setInventarioActual(inventario);
+        setMovimientos(movimientosOrdenados);
+      })
+      .catch(error => console.error("Error al obtener los movimientos:", error));
   }, []);
 
   const handleSort = (campo: CampoBusqueda) => {
@@ -60,25 +116,92 @@ const HistorialMovimientos = () => {
     }
   };
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    setDateFilter({ start: "", end: "" });
+    setTipoFilter("");
+  };
+
   const movimientosFiltrados = movimientos.filter((movimiento) => {
-    const valor = (movimiento[searchField] ?? "").toString().toLowerCase();
-    return valor.includes(searchTerm.toLowerCase());
+    // Text search filter
+    const textMatch = (movimiento[searchField] ?? "").toString().toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Date range filter
+    const fecha = new Date(movimiento.fecha);
+    const startDate = dateFilter.start ? new Date(dateFilter.start) : null;
+    const endDate = dateFilter.end ? new Date(dateFilter.end) : null;
+    
+    const dateMatch = (!startDate || fecha >= startDate) && (!endDate || fecha <= endDate);
+    
+    // Type filter
+    const typeMatch = !tipoFilter || movimiento.tipo_movimiento === tipoFilter;
+    
+    // Movement type filter (vehicles vs inventory)
+    let movementTypeMatch = true;
+    if (movementType === "vehicles") {
+      movementTypeMatch = !!(movimiento.placa_vehiculo || movimiento.placas);
+    } else if (movementType === "inventory") {
+      movementTypeMatch = !(movimiento.placa_vehiculo || movimiento.placas);
+    }
+    
+    return textMatch && dateMatch && typeMatch && movementTypeMatch;
   });
 
   const movimientosOrdenados = sortField
     ? [...movimientosFiltrados].sort((a, b) => {
-        const aVal = a[sortField] ?? "";
-        const bVal = b[sortField] ?? "";
+        const aValue = a[sortField] ?? "";
+        const bValue = b[sortField] ?? "";
 
-        if (typeof aVal === "number" && typeof bVal === "number") {
-          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        if (typeof aValue === "number" && typeof bValue === "number") {
+          return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
         }
 
         return sortDirection === "asc"
-          ? aVal.toString().localeCompare(bVal.toString())
-          : bVal.toString().localeCompare(aVal.toString());
+          ? aValue.toString().localeCompare(bValue.toString())
+          : bValue.toString().localeCompare(aValue.toString());
       })
     : movimientosFiltrados;
+
+  // Group movements by date for timeline view
+  const movimientosAgrupados = movimientosOrdenados.reduce((acc, movimiento) => {
+    const fecha = movimiento.fecha;
+    if (!acc[fecha]) {
+      acc[fecha] = [];
+    }
+    acc[fecha].push(movimiento);
+    return acc;
+  }, {} as Record<string, Movimiento[]>);
+
+  const fechasOrdenadas = Object.keys(movimientosAgrupados).sort((a, b) => 
+    new Date(b).getTime() - new Date(a).getTime()
+  );
+
+  // Get unique movement types for filter
+  const tiposMovimiento = [...new Set(movimientos.map(m => m.tipo_movimiento))];
+
+  // Get color based on movement type
+  const getColorForType = (tipo: string) => {
+    switch (tipo.toLowerCase()) {
+      case "entrada":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "salida":
+        return "bg-red-100 text-red-800 border-red-300";
+      case "ajuste":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      default:
+        return "bg-blue-100 text-blue-800 border-blue-300";
+    }
+  };
+
+  // Format quantity with sign for better readability
+  const formatQuantity = (cantidad: string | null | undefined, tipo: string) => {
+    if (!cantidad) return "0";
+    const num = parseInt(cantidad);
+    if (tipo.toLowerCase() === "salida") {
+      return `-${num}`;
+    }
+    return `+${num}`;
+  };
 
   return (
     <div>
@@ -93,48 +216,300 @@ const HistorialMovimientos = () => {
           {/* Botón Volver */}
           <div className="flex justify-end mb-6">
             <Link href="/dashboard_v2">
-              <button className="bg-blue-500 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-600 shadow-sm">
+              <Button variant="blue">
                 Volver
-              </button>
+              </Button>
             </Link>
           </div>
 
-          {/* Filtros */}
-          <div className="bg-white p-4 rounded shadow mb-6 flex gap-4 items-center">
-            <select
-              value={searchField}
-              onChange={(e) => setSearchField(e.target.value as CampoBusqueda)}
-              className="p-2 border rounded"
-            >
-              {campos.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar..."
-              className="p-2 border rounded flex-1"
-            />
+          {/* Movement Type Toggle */}
+          <div className="bg-white p-4 rounded shadow mb-6">
+            <h3 className="text-lg font-semibold mb-3">Tipo de Movimientos</h3>
+            <div className="flex gap-3">
+              <Button 
+                variant={movementType === "all" ? "blue" : "gray"}
+                onClick={() => setMovementType("all")}
+              >
+                Todos los Movimientos
+              </Button>
+              <Button 
+                variant={movementType === "vehicles" ? "blue" : "gray"}
+                onClick={() => setMovementType("vehicles")}
+              >
+                <TruckIcon className="w-5 h-5 mr-1" />
+                Movimientos de Vehículos
+              </Button>
+              <Button 
+                variant={movementType === "inventory" ? "blue" : "gray"}
+                onClick={() => setMovementType("inventory")}
+              >
+                <WrenchIcon className="w-5 h-5 mr-1" />
+                Movimientos de Inventario
+              </Button>
+            </div>
           </div>
 
-          {/* Tabla */}
+          {/* View Toggle and Filters */}
+          <div className="bg-white p-4 rounded shadow mb-6 flex flex-wrap gap-4 items-center justify-between">
+            <div className="flex gap-2">
+              <Button 
+                variant={viewMode === "timeline" ? "blue" : "gray"}
+                onClick={() => setViewMode("timeline")}
+              >
+                Vista Timeline
+              </Button>
+              <Button 
+                variant={viewMode === "table" ? "blue" : "gray"}
+                onClick={() => setViewMode("table")}
+              >
+                Vista Tabla
+              </Button>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button 
+                variant="gray"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <FunnelIcon className="w-5 h-5 mr-1" />
+                Filtros
+              </Button>
+              {showFilters && (
+                <Button 
+                  variant="red"
+                  onClick={clearFilters}
+                >
+                  <XMarkIcon className="w-5 h-5 mr-1" />
+                  Limpiar
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Advanced Filters */}
+          {showFilters && (
+            <div className="bg-white p-4 rounded shadow mb-6">
+              <h3 className="text-lg font-semibold mb-4">Filtros Avanzados</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Buscar por</label>
+                  <select
+                    value={searchField}
+                    onChange={(e) => setSearchField(e.target.value as CampoBusqueda)}
+                    className="w-full p-2 border rounded"
+                  >
+                    {campos.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Término de búsqueda</label>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar..."
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Movimiento</label>
+                  <select
+                    value={tipoFilter}
+                    onChange={(e) => setTipoFilter(e.target.value)}
+                    className="w-full p-2 border rounded"
+                  >
+                    <option value="">Todos</option>
+                    {tiposMovimiento.map((tipo) => (
+                      <option key={tipo} value={tipo}>
+                        {tipo}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                  <input
+                    type="date"
+                    value={dateFilter.start}
+                    onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                  <input
+                    type="date"
+                    value={dateFilter.end}
+                    onChange={(e) => setDateFilter({...dateFilter, end: e.target.value})}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Timeline View */}
+          {viewMode === "timeline" && (
+            <div className="space-y-8">
+              {fechasOrdenadas.map((fecha) => (
+                <div key={fecha} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="bg-blue-600 text-white p-3 font-semibold">
+                    {new Date(fecha).toLocaleDateString('es-ES', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </div>
+                  <div className="p-4">
+                    <div className="space-y-4">
+                      {movimientosAgrupados[fecha].map((movimiento) => (
+                        <div 
+                          key={movimiento.id_movimiento} 
+                          className={`border-l-4 p-4 rounded-md ${getColorForType(movimiento.tipo_movimiento)}`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold">
+                                {movementType === "vehicles" 
+                                  ? `Vehículo: ${movimiento.placa_vehiculo || movimiento.placas || "Sin placa"}`
+                                  : (movimiento.nombre || movimiento.nombre_refaccion || "Sin nombre")}
+                              </h3>
+                              <p className="text-sm mt-1">
+                                {movimiento.placa_vehiculo || movimiento.placas ? 
+                                  (movementType === "vehicles" 
+                                    ? `Tipo: ${movimiento.tipo_movimiento}`
+                                    : `Vehículo: ${movimiento.placa_vehiculo || movimiento.placas}`) : 
+                                  `Cantidad: ${formatQuantity(movimiento.cantidad, movimiento.tipo_movimiento)}`}
+                              </p>
+                              {movimiento.motivo && (
+                                <p className="text-sm mt-1">Motivo: {movimiento.motivo}</p>
+                              )}
+                              {movementType !== "vehicles" && (
+                                <p className="text-sm mt-1 font-medium">
+                                  Inventario restante: <span className="font-bold">{movimiento.cantidad_restante || 0}</span>
+                                </p>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <span className="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-white">
+                                {movimiento.tipo_movimiento}
+                              </span>
+                              <p className="text-sm mt-1">{movimiento.hora}</p>
+                              <p className="text-sm">Por: {movimiento.user_nombre}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Table View */}
+          {viewMode === "table" && (
           <div className="bg-white rounded-lg shadow-md overflow-auto border border-gray-300">
-            <table className="min-w-full text-sm text-left">
+              <table className="min-w-full text-sm">
               <thead className="bg-gray-100 text-gray-700 border-b">
                 <tr>
-                  {campos.map(({ label, value }) => (
+                    {movementType !== "vehicles" && (
+                      <th
+                        className="px-4 py-3 cursor-pointer select-none text-center"
+                        onClick={() => handleSort("nombre_refaccion")}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          <WrenchIcon className="w-4 h-4" />
+                          Refacción
+                          {sortField === "nombre_refaccion" ? (
+                            sortDirection === "asc" ? (
+                              <ArrowUpIcon className="w-4 h-4" />
+                            ) : (
+                              <ArrowDownIcon className="w-4 h-4" />
+                            )
+                          ) : (
+                            <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                      </th>
+                    )}
+                    {movementType !== "inventory" && (
+                      <th
+                        className="px-4 py-3 cursor-pointer select-none text-center"
+                        onClick={() => handleSort("placa_vehiculo")}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          <TruckIcon className="w-4 h-4" />
+                          Vehículo
+                          {sortField === "placa_vehiculo" ? (
+                            sortDirection === "asc" ? (
+                              <ArrowUpIcon className="w-4 h-4" />
+                            ) : (
+                              <ArrowDownIcon className="w-4 h-4" />
+                            )
+                          ) : (
+                            <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                      </th>
+                    )}
+                    {movementType !== "vehicles" && (
+                      <>
+                        <th
+                          className="px-4 py-3 cursor-pointer select-none text-center"
+                          onClick={() => handleSort("cantidad")}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <ArrowPathIcon className="w-4 h-4" />
+                            Cantidad
+                            {sortField === "cantidad" ? (
+                              sortDirection === "asc" ? (
+                                <ArrowUpIcon className="w-4 h-4" />
+                              ) : (
+                                <ArrowDownIcon className="w-4 h-4" />
+                              )
+                            ) : (
+                              <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                            )}
+                          </div>
+                        </th>
+                        <th
+                          className="px-4 py-3 cursor-pointer select-none text-center"
+                          onClick={() => handleSort("cantidad_restante")}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <ArrowPathIcon className="w-4 h-4" />
+                            Inventario Restante
+                            {sortField === "cantidad_restante" ? (
+                              sortDirection === "asc" ? (
+                                <ArrowUpIcon className="w-4 h-4" />
+                              ) : (
+                                <ArrowDownIcon className="w-4 h-4" />
+                              )
+                            ) : (
+                              <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                            )}
+                          </div>
+                        </th>
+                      </>
+                    )}
                     <th
-                      key={value}
-                      className="px-4 py-3 cursor-pointer select-none"
-                      onClick={() => handleSort(value)}
+                      className="px-4 py-3 cursor-pointer select-none text-center"
+                      onClick={() => handleSort("fecha")}
                     >
-                      <div className="flex items-center gap-1">
-                        {label}
-                        {sortField === value ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <CalendarIcon className="w-4 h-4" />
+                        Fecha
+                        {sortField === "fecha" ? (
                           sortDirection === "asc" ? (
                             <ArrowUpIcon className="w-4 h-4" />
                           ) : (
@@ -145,26 +520,116 @@ const HistorialMovimientos = () => {
                         )}
                       </div>
                     </th>
-                  ))}
+                    <th
+                      className="px-4 py-3 cursor-pointer select-none text-center"
+                      onClick={() => handleSort("hora")}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        <ClockIcon className="w-4 h-4" />
+                        Hora
+                        {sortField === "hora" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUpIcon className="w-4 h-4" />
+                          ) : (
+                            <ArrowDownIcon className="w-4 h-4" />
+                          )
+                        ) : (
+                          <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                        )}
+                      </div>
+                    </th>
+                    {movementType !== "vehicles" && (
+                      <th
+                        className="px-4 py-3 cursor-pointer select-none text-center"
+                        onClick={() => handleSort("motivo")}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          <TagIcon className="w-4 h-4" />
+                          Motivo
+                          {sortField === "motivo" ? (
+                            sortDirection === "asc" ? (
+                              <ArrowUpIcon className="w-4 h-4" />
+                            ) : (
+                              <ArrowDownIcon className="w-4 h-4" />
+                            )
+                          ) : (
+                            <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                      </th>
+                    )}
+                    <th
+                      className="px-4 py-3 cursor-pointer select-none text-center"
+                      onClick={() => handleSort("tipo_movimiento")}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        <ArrowPathIcon className="w-4 h-4" />
+                        Tipo Movimiento
+                        {sortField === "tipo_movimiento" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUpIcon className="w-4 h-4" />
+                          ) : (
+                            <ArrowDownIcon className="w-4 h-4" />
+                          )
+                        ) : (
+                          <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="px-4 py-3 cursor-pointer select-none text-center"
+                      onClick={() => handleSort("user_nombre")}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        <UserIcon className="w-4 h-4" />
+                        Usuario
+                        {sortField === "user_nombre" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUpIcon className="w-4 h-4" />
+                          ) : (
+                            <ArrowDownIcon className="w-4 h-4" />
+                          )
+                        ) : (
+                          <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                        )}
+                      </div>
+                    </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-300">
                 {movimientosOrdenados.map((m) => (
                   <tr key={m.id_movimiento} className="hover:bg-gray-100">
-                    <td className="px-4 py-2">{m.id_movimiento}</td>
-                    <td className="px-4 py-2">{m.nombre || m.nombre_refaccion || "-"}</td>
-                    <td className="px-4 py-2">{m.placa_vehiculo || m.placas || "-"}</td>
-                    <td className="px-4 py-2">{m.cantidad || "-"}</td>
-                    <td className="px-4 py-2">{m.fecha}</td>
-                    <td className="px-4 py-2">{m.hora}</td>
-                    <td className="px-4 py-2">{m.motivo || "-"}</td>
-                    <td className="px-4 py-2">{m.tipo_movimiento}</td>
-                    <td className="px-4 py-2">{m.user_nombre}</td>
+                      {movementType !== "vehicles" && (
+                        <td className="px-4 py-2 text-center">{m.nombre || m.nombre_refaccion || "-"}</td>
+                      )}
+                      {movementType !== "inventory" && (
+                        <td className="px-4 py-2 text-center">{m.placa_vehiculo || m.placas || "-"}</td>
+                      )}
+                      {movementType !== "vehicles" && (
+                        <>
+                          <td className="px-4 py-2 text-center">{formatQuantity(m.cantidad, m.tipo_movimiento)}</td>
+                          <td className="px-4 py-2 text-center font-medium">
+                            {m.cantidad_restante || 0}
+                          </td>
+                        </>
+                      )}
+                      <td className="px-4 py-2 text-center">{m.fecha}</td>
+                      <td className="px-4 py-2 text-center">{m.hora}</td>
+                      {movementType !== "vehicles" && (
+                        <td className="px-4 py-2 text-center">{m.motivo || "-"}</td>
+                      )}
+                      <td className="px-4 py-2 text-center">
+                        <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${getColorForType(m.tipo_movimiento)}`}>
+                          {m.tipo_movimiento}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-center">{m.user_nombre}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          )}
 
           {movimientos.length === 0 && (
             <div className="mt-4 text-center text-gray-500">No hay movimientos registrados.</div>

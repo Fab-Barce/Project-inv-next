@@ -30,6 +30,7 @@ export default function NuevoRefaccion() {
     cantidad: 0,
     stock_minimo: 0,
     costo: 0,
+    marca: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false); 
   const [proveedores, setProveedor] = useState<Proveedor[]>([]);
@@ -105,7 +106,8 @@ export default function NuevoRefaccion() {
       !formDatas.stock_minimo ||
       !formDatas.costo ||
       !id_categoria ||
-      !id_empresa
+      !id_empresa ||
+      !formDatas.marca?.trim()
     ) {
       alert("Por favor, completa todos los campos obligatorios antes de guardar.");
       return; // Detiene la ejecución si falta algún dato
@@ -124,6 +126,7 @@ export default function NuevoRefaccion() {
       formData.append("categoria_id", id_categoria.toString());
       formData.append("imagen_refa", imagen_refa || "");
       formData.append("empresa_id", id_empresa.toString());
+      formData.append("marca", formDatas.marca);
   
       // Crear refacción
       const response = await axios.post(`http://localhost:8000/Refacciones/create/`, formData, {
@@ -277,6 +280,16 @@ return (
               />
             </div>
             <div>
+              <label className="block text-gray-700 font-semibold">Marca</label>
+              <input
+                type="text"
+                name="marca"
+                value={formDatas.marca}
+                onChange={handleInputChange}
+                className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div>
               <label htmlFor="imagen" className="block text-gray-700 font-semibold">Imagen</label>
               <input
                 type="file"
@@ -292,7 +305,7 @@ return (
         {/* Botones de acción */}
         <div className="flex justify-end space-x-4 mt-8">
           <Button
-            variant="lime"
+            variant="blue"
             onClick={() => router.push("/dashboard/inventario")}
           >
             Volver

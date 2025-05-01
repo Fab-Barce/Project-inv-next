@@ -16,6 +16,9 @@ type Vehiculo = {
     marca: string;
     empresa: string;
     operador:string;
+    linea:string;
+    activo:string;
+    num_unidad:string;
 };
 
 export default function Inventario() {

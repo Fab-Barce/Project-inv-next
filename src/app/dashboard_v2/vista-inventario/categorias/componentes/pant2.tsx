@@ -8,7 +8,7 @@ import {
   ArrowDownIcon,
   ArrowsUpDownIcon
 } from "@heroicons/react/24/solid";
-
+import Button from "@/app/components/Button";
 type Categoria = {
   categoria_id: number;
   nombre: string;
@@ -124,9 +124,9 @@ export default function PantallaCategoria({ onModificar }: Props) {
         
 
         <Link href="/dashboard_v2/vista-inventario">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded transition duration-200">
+          <Button variant="blue">
             Volver
-          </button>
+          </Button>
         </Link>
 
         {/* Filtro */}
@@ -162,13 +162,13 @@ export default function PantallaCategoria({ onModificar }: Props) {
               {deleteMode && <th className="px-4 py-3 text-center">✓</th>}
               <th
                 onClick={() => handleSort("nombre")}
-                className="px-4 py-3 text-left cursor-pointer select-none"
+                className="px-4 py-3 text-center cursor-pointer select-none"
               >
                 Nombre {getSortIcon("nombre")}
               </th>
               <th
                 onClick={() => handleSort("descripcion")}
-                className="px-4 py-3 text-left cursor-pointer select-none"
+                className="px-4 py-3 text-center cursor-pointer select-none"
               >
                 Descripción {getSortIcon("descripcion")}
               </th>
@@ -190,16 +190,19 @@ export default function PantallaCategoria({ onModificar }: Props) {
                     />
                   </td>
                 )}
-                <td className="px-4 py-3">{categoria.nombre}</td>
-                <td className="px-4 py-3">{categoria.descripcion}</td>
+                <td className="px-4 py-3 text-center">{categoria.nombre}</td>
+                <td className="px-4 py-3 text-center">{categoria.descripcion}</td>
                 {!deleteMode && (
                   <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => onModificar(categoria)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                      Detalles
-                    </button>
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={() => onModificar(categoria)}
+                        variant="blue"
+                        size="small"
+                      >
+                        Detalles
+                      </Button>
+                    </div>
                   </td>
                 )}
               </tr>

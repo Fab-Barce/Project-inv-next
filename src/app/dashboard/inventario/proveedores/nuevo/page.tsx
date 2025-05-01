@@ -86,7 +86,7 @@ export default function NuevoProveedor() {
             </Button>
   
             <Button
-              variant="teal"
+              variant="blue"
               onClick={() => router.push('/dashboard/inventario/proveedores/')}
             >
               Volver

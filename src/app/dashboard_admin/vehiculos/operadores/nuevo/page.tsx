@@ -115,19 +115,21 @@ export default function NuevoOperador() {
   
           {/* Botones */}
           <div className="flex justify-end space-x-4 mt-8">
-            <Button
-              variant="blue"
-              onClick={() => router.push('/dashboard_admin/vehiculos/operadores')}
-            >
-              Volver
-            </Button>
-            <Button
+
+           <Button
               variant="green"
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
               Guardar
             </Button>
+            <Button
+              variant="blue"
+              onClick={() => router.push('/dashboard_admin/vehiculos/operadores')}
+            >
+              Volver
+            </Button>
+
           </div>
         </div>
       </div>

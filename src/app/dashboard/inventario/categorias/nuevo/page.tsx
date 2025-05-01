@@ -72,7 +72,7 @@ export default function NuevaCategoria() {
           {/* Botones */}
           <div className="flex space-x-4 mt-8 justify-end">
             <Button
-              variant="lime"
+              variant="blue"
               onClick={() => router.push('/dashboard/inventario/categorias')}
             >
               Volver

@@ -18,9 +18,11 @@ type Vehiculo = {
   anio: number;
   empresa_id: number;
   marca: string;
+  linea: string;
   empresa: string;
   operador: string;
   activo: string;
+  num_unidad: string;
 };
 
 type Props = {
@@ -36,6 +38,7 @@ export default function PantallaVehiculos({ onModificar }: Props) {
   const [campoBusqueda, setCampoBusqueda] = useState<keyof Vehiculo>("placas");
   const [campoOrden, setCampoOrden] = useState<keyof Vehiculo | null>(null);
   const [direccionOrden, setDireccionOrden] = useState<"asc" | "desc">("asc");
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const obtenerVehiculos = async () => {
@@ -96,17 +99,36 @@ export default function PantallaVehiculos({ onModificar }: Props) {
     }
   };
 
+  const extraerNumero = (str: string) => {
+    const matches = str.match(/\d+/);
+    return matches ? parseInt(matches[0]) : 0;
+  };
+
   const listaFiltrada = [...vehiculos]
-    .filter((v) =>
-      v[campoBusqueda]
-        ?.toString()
-        .toLowerCase()
-        .includes(busqueda.toLowerCase())
-    )
+    .filter((v) => {
+      if (campoBusqueda === "num_unidad") {
+        // Para números de unidad, normalizamos la búsqueda y el valor
+        const busquedaNormalizada = busqueda.toLowerCase().replace(/\s+/g, '');
+        const valorNormalizado = v[campoBusqueda]?.toString().toLowerCase().replace(/\s+/g, '') || '';
+        return valorNormalizado.includes(busquedaNormalizada);
+      } else {
+        return v[campoBusqueda]
+          ?.toString()
+          .toLowerCase()
+          .includes(busqueda.toLowerCase());
+      }
+    })
     .sort((a, b) => {
       if (!campoOrden) return 0;
       const valA = a[campoOrden];
       const valB = b[campoOrden];
+
+      if (campoOrden === "num_unidad") {
+        const numA = extraerNumero(valA?.toString() || "0");
+        const numB = extraerNumero(valB?.toString() || "0");
+        return direccionOrden === "asc" ? numA - numB : numB - numA;
+      }
+
       if (typeof valA === "number" && typeof valB === "number") {
         return direccionOrden === "asc" ? valA - valB : valB - valA;
       }
@@ -128,11 +150,11 @@ export default function PantallaVehiculos({ onModificar }: Props) {
       <div className="flex flex-wrap gap-2 mb-4">
         <Link href="/dashboard_admin/vehiculos/nuevo">
           <Button variant="green">
-            Nuevo Vehículo
+             Nuevo
           </Button>
         </Link>
         <Button
-          variant="yellow"
+          variant="orange"
           onClick={() => {
             setModoEliminar(!modoEliminar);
             setSeleccionados([]);
@@ -150,7 +172,7 @@ export default function PantallaVehiculos({ onModificar }: Props) {
           </Button>
         )}
         <Link href="/dashboard_admin/vehiculos/operadores">
-          <Button variant="orange">
+          <Button variant="cyan">
             Operadores
           </Button>
         </Link>
@@ -160,7 +182,7 @@ export default function PantallaVehiculos({ onModificar }: Props) {
           </Button>
         </Link>
         <Button
-          variant="gray"
+          variant="sky"
           onClick={() => setModoGaleria(!modoGaleria)}
           className="ml-auto"
         >
@@ -181,6 +203,9 @@ export default function PantallaVehiculos({ onModificar }: Props) {
           <option value="placas">Placas</option>
           <option value="empresa">Empresa</option>
           <option value="operador">Operador</option>
+          <option value="marca">Marca</option>
+          <option value="linea">Línea</option>
+          <option value="num_unidad">Número de Unidad</option>
         </select>
         <input
           type="text"
@@ -202,13 +227,14 @@ export default function PantallaVehiculos({ onModificar }: Props) {
               <img
                 src={v.imagen_vehi || "/placeholder.png"}
                 alt={v.num_serie}
-                className="h-32 w-32 object-contain mb-2"
+                className="h-32 w-32 object-contain mb-2 p-2 rounded-lg transition-all duration-200 hover:bg-gray-100 hover:shadow-md cursor-pointer"
+                onClick={() => setExpandedImage(v.imagen_vehi || "/placeholder.png")}
               />
-              <h3 className="text-lg font-semibold text-center">{v.placas}</h3>
-              <p className="text-sm text-gray-500 text-center">{v.num_serie}</p>
+              <h3 className="text-lg font-semibold text-center">{v.num_unidad}</h3>
+              <p className="text-sm text-gray-900 text-center">{v.placas}</p>
               {!modoEliminar && (
                 <Button
-                  variant="tealLight"
+                  variant="blue"
                   size="small"
                   onClick={() => onModificar(v)}
                 >
@@ -234,12 +260,14 @@ export default function PantallaVehiculos({ onModificar }: Props) {
               <tr>
                 {modoEliminar && <th className="px-4 py-2"></th>}
                 {[
-                  { campo: "num_serie", label: "Número de Serie" },
+                  { campo: "num_unidad", label: "Número de Unidad" },
+                  { campo: "num_serie", label: "Número de Motor" },
                   { campo: "placas", label: "Placas" },
                   { campo: "operador", label: "Operador" },
                   { campo: "empresa", label: "Empresa" },
                   { campo: "marca", label: "Marca" },
-                  { campo: "anio", label: "Año" },
+                  { campo: "linea", label: "Línea" },
+                  { campo: "anio", label: "Modelo" },
                 ].map(({ campo, label }) => (
                   <th
                     key={campo}
@@ -277,17 +305,19 @@ export default function PantallaVehiculos({ onModificar }: Props) {
                       />
                     </td>
                   )}
-                  <td className="px-4 py-2">{v.num_serie}</td>
+                  <td className="px-4 py-2 text-center">{v.num_unidad}</td>
+                  <td className="px-4 py-2 text-center">{v.num_serie}</td>
                   <td className="px-4 py-2 text-center">{v.placas}</td>
                   <td className="px-4 py-2 text-center">{v.operador}</td>
                   <td className="px-4 py-2 text-center">{v.empresa}</td>
                   <td className="px-4 py-2 text-center">{v.marca}</td>
+                  <td className="px-4 py-2 text-center">{v.linea}</td>
                   <td className="px-4 py-2 text-center">{v.anio}</td>
                   {!modoEliminar && (
                     <td className="px-4 py-2 text-center">
                       <div className="flex justify-center">
                         <Button
-                          variant="tealLight"
+                          variant="blue"
                           size="small"
                           onClick={() => onModificar(v)}
                         >
@@ -306,6 +336,31 @@ export default function PantallaVehiculos({ onModificar }: Props) {
       {listaFiltrada.length === 0 && (
         <div className="mt-4 text-center text-gray-500">
           No hay vehículos que coincidan con la búsqueda.
+        </div>
+      )}
+
+      {/* Modal para imagen expandida */}
+      {expandedImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setExpandedImage(null)}
+        >
+          <div className="relative max-w-4xl w-full p-4">
+            <button 
+              className="absolute top-4 right-4 text-white text-2xl hover:text-gray-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpandedImage(null);
+              }}
+            >
+              ×
+            </button>
+            <img 
+              src={expandedImage} 
+              alt="Imagen expandida" 
+              className="max-h-[80vh] w-auto mx-auto rounded-lg shadow-xl"
+            />
+          </div>
         </div>
       )}
     </div>

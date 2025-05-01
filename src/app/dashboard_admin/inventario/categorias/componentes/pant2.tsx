@@ -140,7 +140,7 @@ export default function PantallaCategoria({ onModificar }: Props) {
         </Link>
 
         <Button
-          variant="yellow"
+          variant="orange"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]);
@@ -195,7 +195,22 @@ export default function PantallaCategoria({ onModificar }: Props) {
         <table className="w-full table-auto text-sm">
           <thead className="bg-gray-200 text-gray-700 font-semibold">
             <tr>
-              {deleteMode && <th className="px-4 py-3 text-center">✓</th>}
+              {deleteMode && (
+                <th className="px-4 py-3 text-center w-16">
+                  <input
+                    type="checkbox"
+                    className="w-5 h-5 cursor-pointer"
+                    checked={selectedItems.length === sortedCategorias.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedItems(sortedCategorias.map(cat => cat.categoria_id));
+                      } else {
+                        setSelectedItems([]);
+                      }
+                    }}
+                  />
+                </th>
+              )}
               <th
                 onClick={() => handleSort("nombre")}
                 className="px-4 py-3 text-left cursor-pointer select-none"
@@ -219,11 +234,14 @@ export default function PantallaCategoria({ onModificar }: Props) {
               >
                 {deleteMode && (
                   <td className="px-4 py-3 text-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.includes(categoria.categoria_id)}
-                      onChange={() => handleSelect(categoria.categoria_id)}
-                    />
+                    <label className="flex items-center justify-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="w-5 h-5 cursor-pointer"
+                        checked={selectedItems.includes(categoria.categoria_id)}
+                        onChange={() => handleSelect(categoria.categoria_id)}
+                      />
+                    </label>
                   </td>
                 )}
                 <td className="px-4 py-3">{categoria.nombre}</td>
@@ -232,7 +250,7 @@ export default function PantallaCategoria({ onModificar }: Props) {
                   <td className="px-4 py-3 text-center">
                     <div className="flex justify-center">
                       <Button
-                        variant="tealLight"
+                        variant="blue"
                         size="small"
                         onClick={() => onModificar(categoria)}
                       >

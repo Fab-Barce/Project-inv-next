@@ -8,7 +8,7 @@ import {
   ArrowDownIcon,
   ArrowsUpDownIcon,
 } from "@heroicons/react/24/solid";
-
+import Button from "@/app/components/Button";
 type Operador = {
   operador_id: number;
   nombre: string;
@@ -111,9 +111,9 @@ export default function PantallaOperador({ onModificar }: Props) {
       <div className="flex flex-wrap gap-2 mb-4 bg-white p-2 shadow rounded-lg">
        
         <Link href="/dashboard_v2/vista-vehiculos">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <Button variant="blue">
             Volver
-          </button>
+          </Button>
         </Link>
         {/* Filtros: Seleccionar campo de búsqueda e input */}
         <div className="flex ml-auto gap-2">
@@ -140,12 +140,12 @@ export default function PantallaOperador({ onModificar }: Props) {
         <table className="w-full table-auto">
           <thead className="bg-gray-200 text-gray-600">
             <tr>
-              {deleteMode && <th className="px-4 py-2"></th>}
+              {deleteMode && <th className="px-4 py-2 text-center"></th>}
               <th
-                className="px-4 py-2 text-left cursor-pointer select-none"
+                className="px-4 py-2 text-center cursor-pointer select-none"
                 onClick={() => handleSort("nombre")}
               >
-                <div className="flex items-center gap-1">
+                <div className="flex items-center justify-center gap-1">
                   Nombre
                   {sortField === "nombre" ? (
                     sortDirection === "asc" ? (
@@ -158,12 +158,12 @@ export default function PantallaOperador({ onModificar }: Props) {
                   )}
                 </div>
               </th>
-              <th className="px-4 py-2 text-left">Unidad</th>
+              <th className="px-4 py-2 text-center">Unidad</th>
               <th
-                className="px-4 py-2 text-left cursor-pointer select-none"
+                className="px-4 py-2 text-center cursor-pointer select-none"
                 onClick={() => handleSort("empresa")}
               >
-                <div className="flex items-center gap-1">
+                <div className="flex items-center justify-center gap-1">
                   Empresa
                   {sortField === "empresa" ? (
                     sortDirection === "asc" ? (
@@ -193,24 +193,26 @@ export default function PantallaOperador({ onModificar }: Props) {
                     />
                   </td>
                 )}
-                <td className="px-4 py-2">
+                <td className="px-4 py-2 text-center">
                   <button
                     onClick={() => onModificar(operador)}
-                    className="text-blue-600 hover:underline"
                   >
                     {operador.nombre}
                   </button>
                 </td>
-                <td className="px-4 py-2">NA</td>
-                <td className="px-4 py-2">{operador.empresa}</td>
+                <td className="px-4 py-2 text-center">NA</td>
+                <td className="px-4 py-2 text-center">{operador.empresa}</td>
                 {!deleteMode && (
                   <td className="px-4 py-2 text-center">
-                    <button
-                      onClick={() => onModificar(operador)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                    >
-                      Detalles
-                    </button>
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={() => onModificar(operador)}
+                        variant="blue"
+                        size="small"
+                      >
+                        Detalles
+                      </Button>
+                    </div>
                   </td>
                 )}
               </tr>

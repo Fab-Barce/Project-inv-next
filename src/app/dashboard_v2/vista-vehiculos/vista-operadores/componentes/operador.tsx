@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-
+import Button from "@/app/components/Button";
 type Operador = {
     operador_id: number;
     nombre: string;
@@ -62,19 +62,14 @@ export default function OperadorDetalle({ operador, onCancelar }: Props) {
             <div className="flex space-x-3 mt-6">
 
 
-                <button
-                    type="button"
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
+                <Button
+                    variant="blue"
                     onClick={onCancelar}
                 >
                     Volver
-                </button>
+                </Button>
 
-                <Link href="/dashboard_v2/vista-vehiculos">
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                        Volver a vehiculos
-                    </button>
-                </Link>
+
             </div>
         </div>
     );

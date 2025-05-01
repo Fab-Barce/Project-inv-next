@@ -14,8 +14,11 @@ type Vehiculo = {
     anio: number;
     empresa_id: number;
     marca: string;
-    empresa: string;
+    empresa: string;        
     operador:string;
+    linea:string;
+    activo:string;
+    num_unidad:string;
 };
 
 

@@ -125,7 +125,7 @@ export default function PantallaOperador({ onModificar }: Props) {
           </Button>
         </Link>
         <Button
-          variant="yellow"
+          variant="orange"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]); // Reiniciamos la selección al cambiar de modo
@@ -239,7 +239,7 @@ export default function PantallaOperador({ onModificar }: Props) {
                   <td className="px-4 py-2 text-center">
                     <div className="flex justify-center">
                       <Button
-                        variant="tealLight"
+                        variant="blue"
                         size="small"
                         onClick={() => onModificar(operador)}
                       >

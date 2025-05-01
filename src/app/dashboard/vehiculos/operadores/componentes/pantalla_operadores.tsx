@@ -9,6 +9,9 @@ import {
   ArrowsUpDownIcon,
 } from "@heroicons/react/24/solid";
 
+import Button from "@/app/components/Button";
+
+
 type Operador = {
   operador_id: number;
   nombre: string;
@@ -119,32 +122,32 @@ export default function PantallaOperador({ onModificar }: Props) {
       {/* Área de botones y filtros */}
       <div className="flex flex-wrap gap-2 mb-4 bg-white p-2 shadow rounded-lg">
         <Link href="/dashboard/vehiculos/operadores/nuevo">
-          <button className="flex items-center space-x-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+          <Button variant="green">
             Nuevo
-          </button>
+          </Button>
         </Link>
-        <button
+        <Button
+          variant="orange"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]); // Reiniciamos la selección al cambiar de modo
           }}
-          className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
         >
           {deleteMode ? "Cancelar Eliminación" : "Eliminar"}
-        </button>
+        </Button>
         {deleteMode && (
-          <button
+          <Button
+            variant="red"
             onClick={handleBulkDelete}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
             disabled={selectedItems.length === 0}
           >
             Confirmar Eliminación
-          </button>
+          </Button>
         )}
         <Link href="/dashboard/vehiculos">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+           <Button variant="blue">
             Volver
-          </button>
+          </Button>
         </Link>
         {/* Filtros: Seleccionar campo de búsqueda e input */}
         <div className="flex ml-auto gap-2">
@@ -236,12 +239,13 @@ export default function PantallaOperador({ onModificar }: Props) {
                 <td className="px-4 py-2">{operador.empresa}</td>
                 {!deleteMode && (
                   <td className="px-4 py-2 text-center">
-                    <button
+                    <Button
                       onClick={() => onModificar(operador)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                      variant="blue"
+                      size="small"
                     >
                       Editar
-                    </button>
+                    </Button>
                   </td>
                 )}
               </tr>

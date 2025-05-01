@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-
+import Button from "@/app/components/Button";
 type Empresa = {
     empresa_id: number;
     nombre: string;
@@ -23,6 +23,9 @@ type Vehiculo = {
     marca: string;
     empresa: string;
     operador: string;
+    linea: string;
+    activo: string;
+    num_unidad: string;
 };
 
 type Props = {
@@ -129,6 +132,7 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
                 <h2 className="text-3xl font-bold text-blue-600 mb-8 text-center">Detalle de Vehículo</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Field label="Número de Unidad" name="num_unidad" value={formData?.num_unidad || ""} onChange={handleInputChange} editable={editable} />
                     <Field label="Número de Serie" name="num_serie" value={formData?.num_serie || ""} onChange={handleInputChange} editable={editable} />
                     <Field label="Placas" name="placas" value={formData?.placas || ""} onChange={handleInputChange} editable={editable} />
 
@@ -169,7 +173,8 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
                     )}
 
                     <Field label="Marca" name="marca" value={formData?.marca || ""} onChange={handleInputChange} editable={editable} />
-                    <Field label="Año" name="anio" value={formData?.anio || ""} onChange={handleInputChange} editable={editable} />
+                    <Field label="Línea" name="linea" value={formData?.linea || ""} onChange={handleInputChange} editable={editable} />
+                    <Field label="Modelo" name="anio" value={formData?.anio || ""} onChange={handleInputChange} editable={editable} />
 
                     <div className="flex justify-center flex-col items-center">
                         {editable && (
@@ -192,13 +197,12 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
                 <div className="flex justify-end space-x-4 mt-10">
                    
 
-                    <button
-                        type="button"
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold"
+                    <Button
+                        variant="blue"
                         onClick={onCancelar}
                     >
                         Volver
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

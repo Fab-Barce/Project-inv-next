@@ -136,13 +136,13 @@ export default function PantallaCategoria({ onModificar }: Props) {
       {/* Barra de acciones */}
       <div className="flex flex-wrap items-center gap-3 mb-6 bg-white p-4 shadow-md rounded-lg">
         <Link href="/dashboard/inventario/categorias/nuevo">
-          <Button variant="lime">
+          <Button variant="green">
             Nuevo
           </Button>
         </Link>
 
         <Button
-          variant="green"
+          variant="orange"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]);
@@ -163,7 +163,7 @@ export default function PantallaCategoria({ onModificar }: Props) {
         )}
 
         <Link href="/dashboard/inventario">
-          <Button variant="emerald">
+          <Button variant="blue">
             Volver
           </Button>
         </Link>
@@ -235,7 +235,7 @@ export default function PantallaCategoria({ onModificar }: Props) {
                   <td className="px-4 py-3 text-center">
                     <div className="flex justify-center">
                       <Button
-                        variant="tealLight"
+                        variant="blue"
                         size="small"
                         onClick={() => onModificar(categoria)}
                       >

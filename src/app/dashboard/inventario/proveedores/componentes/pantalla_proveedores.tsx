@@ -122,6 +122,18 @@ export default function PantallaProveedor({ onModificar }: Props) {
     const aValue = a[sortConfig.key];
     const bValue = b[sortConfig.key];
 
+    // Special handling for phone numbers
+    if (sortConfig.key === 'num_telef') {
+      // Convert to string and remove all non-numeric characters
+      const aStr = String(aValue).replace(/\D/g, '');
+      const bStr = String(bValue).replace(/\D/g, '');
+      // Convert to numbers for comparison
+      const aNum = parseInt(aStr) || 0;
+      const bNum = parseInt(bStr) || 0;
+      return sortConfig.direction === "asc" ? aNum - bNum : bNum - aNum;
+    }
+
+    // Default string comparison for other fields
     if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
     if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
     return 0;
@@ -135,13 +147,13 @@ export default function PantallaProveedor({ onModificar }: Props) {
       {/* Barra de acciones */}
       <div className="flex flex-wrap items-center gap-3 mb-6 bg-white p-4 shadow-md rounded-lg">
         <Link href="/dashboard/inventario/proveedores/nuevo">
-          <Button variant="lime">
+          <Button variant="green">
             Nuevo
           </Button>
         </Link>
 
         <Button
-          variant="green"
+          variant="orange"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]);
@@ -162,7 +174,7 @@ export default function PantallaProveedor({ onModificar }: Props) {
         )}
 
         <Link href="/dashboard/inventario">
-          <Button variant="emerald">
+          <Button variant="blue">
             Volver
           </Button>
         </Link>
@@ -204,37 +216,37 @@ export default function PantallaProveedor({ onModificar }: Props) {
               {deleteMode && <th className="px-4 py-3 text-center">✓</th>}
               <th
                 onClick={() => handleSort("nombre")}
-                className="px-4 py-3 text-left cursor-pointer select-none"
+                className="px-4 py-3 text-center cursor-pointer select-none"
               >
                 Nombre {getSortIcon("nombre")}
               </th>
               <th
                 onClick={() => handleSort("RFC")}
-                className="px-4 py-3 text-left cursor-pointer select-none"
+                className="px-4 py-3 text-center cursor-pointer select-none"
               >
                 RFC {getSortIcon("RFC")}
               </th>
               <th
                 onClick={() => handleSort("nombre_representante")}
-                className="px-4 py-3 text-left cursor-pointer select-none"
+                className="px-4 py-3 text-center cursor-pointer select-none"
               >
                 Representante {getSortIcon("nombre_representante")}
               </th>
               <th
                 onClick={() => handleSort("direccion")}
-                className="px-4 py-3 text-left cursor-pointer select-none"
+                className="px-4 py-3 text-center cursor-pointer select-none"
               >
                 Dirección {getSortIcon("direccion")}
               </th>
               <th
                 onClick={() => handleSort("descripcion")}
-                className="px-4 py-3 text-left cursor-pointer select-none"
+                className="px-4 py-3 text-center cursor-pointer select-none"
               >
                 Descripción {getSortIcon("descripcion")}
               </th>
               <th
                 onClick={() => handleSort("num_telef")}
-                className="px-4 py-3 text-left cursor-pointer select-none"
+                className="px-4 py-3 text-center cursor-pointer select-none"
               >
                 Teléfono {getSortIcon("num_telef")}
               </th>
@@ -256,17 +268,17 @@ export default function PantallaProveedor({ onModificar }: Props) {
                     />
                   </td>
                 )}
-                <td className="px-4 py-3">{proveedor.nombre}</td>
-                <td className="px-4 py-3">{proveedor.RFC}</td>
-                <td className="px-4 py-3">{proveedor.nombre_representante}</td>
-                <td className="px-4 py-3">{proveedor.direccion}</td>
-                <td className="px-4 py-3">{proveedor.descripcion}</td>
-                <td className="px-4 py-3">{proveedor.num_telef}</td>
+                <td className="px-4 py-3 text-center">{proveedor.nombre}</td>
+                <td className="px-4 py-3 text-center">{proveedor.RFC}</td>
+                <td className="px-4 py-3 text-center">{proveedor.nombre_representante}</td>
+                <td className="px-4 py-3 text-center">{proveedor.direccion}</td>
+                <td className="px-4 py-3 text-center">{proveedor.descripcion}</td>
+                <td className="px-4 py-3 text-center">{proveedor.num_telef}</td>
                 {!deleteMode && (
                   <td className="px-4 py-3 text-center">
                     <div className="flex justify-center">
                       <Button
-                        variant="tealLight"
+                        variant="blue"
                         size="small"
                         onClick={() => onModificar(proveedor)}
                       >

@@ -26,7 +26,8 @@ export default function NuevoVehiculo() {
     placas: "",
     anio: "",
     marca: "",
-    linea:""
+    linea: "",
+    num_unidad: ""
   });
   const [operadores, setOperadores] = useState<Operador[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
@@ -97,10 +98,11 @@ export default function NuevoVehiculo() {
       !formDatas.marca?.trim() ||
       !formDatas.anio?.trim() ||
       !formDatas.linea?.trim() ||
+      !formDatas.num_unidad?.trim() ||
       !id_empresa
     ) {
       alert("Por favor, completa todos los campos obligatorios antes de guardar.");
-      return; // Detiene la ejecución si falta algún dato
+      return;
     }
 
     setIsSubmitting(true);
@@ -114,6 +116,7 @@ export default function NuevoVehiculo() {
       formData.append("marca", formDatas.marca);
       formData.append("anio", formDatas.anio);
       formData.append("linea", formDatas.linea);
+      formData.append("num_unidad", formDatas.num_unidad);
 
       // Crear vehículo 
       const response = await axios.post(
@@ -165,67 +168,16 @@ export default function NuevoVehiculo() {
             <div className="space-y-6">
               <div>
                 <label className="block text-gray-700 font-semibold">
-                  Número de Serie
+                  Número de Unidad
                 </label>
                 <input
                   type="text"
-                  name="num_serie"
-                  value={formDatas.num_serie}
+                  name="num_unidad"
+                  value={formDatas.num_unidad}
                   onChange={handleInputChange}
                   className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
-              <div>
-                <label className="block text-gray-700 font-semibold">
-                  Placas
-                </label>
-                <input
-                  type="text"
-                  name="placas"
-                  value={formDatas.placas}
-                  onChange={handleInputChange}
-                  className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="operador"
-                  className="block text-gray-700 font-semibold"
-                >
-                  Operador
-                </label>
-                <select
-                  id="operador"
-                  value={id_operador}
-                  onChange={handleOperadorChange}
-                  className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                >
-                  <option value="">Seleccione un operador</option>
-                  {operadores.map((operador) => (
-                    <option
-                      key={operador.operador_id}
-                      value={operador.operador_id}
-                    >
-                      {operador.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-gray-700 font-semibold">
-                  Año
-                </label>
-                <input
-                  type="number"
-                  name="anio"
-                  value={formDatas.anio}
-                  onChange={handleInputChange}
-                  className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-            </div>
-            {/* Columna Derecha */}
-            <div className="space-y-6">
               <div>
                 <label
                   htmlFor="empresa"
@@ -252,12 +204,24 @@ export default function NuevoVehiculo() {
               </div>
               <div>
                 <label className="block text-gray-700 font-semibold">
-                  Marca
+                  Linea
                 </label>
                 <input
                   type="text"
-                  name="marca"
-                  value={formDatas.marca}
+                  name="linea"
+                  value={formDatas.linea}
+                  onChange={handleInputChange}
+                  className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-semibold">
+                  Número de Motor
+                </label>
+                <input
+                  type="text"
+                  name="num_serie"
+                  value={formDatas.num_serie}
                   onChange={handleInputChange}
                   className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
@@ -273,30 +237,74 @@ export default function NuevoVehiculo() {
                   className="w-full border px-4 py-2 rounded-md hover:bg-gray-100 focus:outline-none"
                 />
               </div>
+            </div>
+            {/* Columna Derecha */}
+            <div className="space-y-6">
+              <div>
+                <label
+                  htmlFor="operador"
+                  className="block text-gray-700 font-semibold"
+                >
+                  Operador
+                </label>
+                <select
+                  id="operador"
+                  value={id_operador}
+                  onChange={handleOperadorChange}
+                  className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                >
+                  <option value="">Seleccione un operador</option>
+                  {operadores.map((operador) => (
+                    <option
+                      key={operador.operador_id}
+                      value={operador.operador_id}
+                    >
+                      {operador.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label className="block text-gray-700 font-semibold">
-                  Linea
+                  Marca
                 </label>
                 <input
                   type="text"
-                  name="linea"
-                  value={formDatas.linea}
+                  name="marca"
+                  value={formDatas.marca}
                   onChange={handleInputChange}
                   className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
-
+              <div>
+                <label className="block text-gray-700 font-semibold">
+                  Modelo
+                </label>
+                <input
+                  type="number"
+                  name="anio"
+                  value={formDatas.anio}
+                  onChange={handleInputChange}
+                  className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-semibold">
+                  Placas
+                </label>
+                <input
+                  type="text"
+                  name="placas"
+                  value={formDatas.placas}
+                  onChange={handleInputChange}
+                  className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
             </div>
-                        
           </div>
 
                   <div className="flex justify-end space-x-4 mt-8">
-                      <Button
-                        variant="blue"
-                        onClick={() => router.push("/dashboard_admin/vehiculos")}
-                      >
-                        Volver
-                      </Button>
+
                       <Button
                         variant="green"
                         onClick={handleSubmit}
@@ -304,6 +312,14 @@ export default function NuevoVehiculo() {
                       >
                         Guardar
                       </Button>
+                      
+                      <Button
+                        variant="blue"
+                        onClick={() => router.push("/dashboard_admin/vehiculos")}
+                      >
+                        Volver
+                      </Button>
+
                     </div>
 
         </div>

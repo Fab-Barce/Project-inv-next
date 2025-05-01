@@ -21,6 +21,7 @@ type Producto = {
     categoria: string;
     proveedor: string;
     empresa: string;
+    marca: string;
 };
 
 type Proveedor = {
@@ -305,8 +306,13 @@ export default function Refaccion({ producto, onCancelar }: Props) {
                   </select>
                 </div>
               ) : (
+                
                 <Field label="Empresa" name="empresa_id" value={formData?.empresa || ""} editable={false} />
+
               )}
+
+              <Field label="Marca" name="marca" value={formData?.marca || ""} onChange={handleInputChange} editable={editable} />
+
       
               <div className="flex items-center space-x-2">
                 <Field label="Cantidad" name="cantidad" value={formData?.cantidad || 0} onChange={handleInputChange} editable={false} />
@@ -341,7 +347,7 @@ export default function Refaccion({ producto, onCancelar }: Props) {
             {/* Botones de acción */}
             <div className="flex justify-end space-x-4 mt-10">
               <Button
-                variant="lime"
+                variant="green"
                 onClick={handleSave}
                 disabled={!editable}
               >
@@ -349,14 +355,14 @@ export default function Refaccion({ producto, onCancelar }: Props) {
               </Button>
       
               <Button
-                variant="green"
+                variant="teal"
                 onClick={() => setEditable(!editable)}
               >
                 {editable ? "Bloquear" : "Modificar"}
               </Button>
       
               <Button
-                variant="emerald"
+                variant="blue"
                 onClick={onCancelar}
               >
                 Volver

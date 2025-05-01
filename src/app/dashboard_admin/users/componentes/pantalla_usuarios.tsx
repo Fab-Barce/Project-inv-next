@@ -144,7 +144,7 @@ export default function PantallaUsuarios({ onModificar }: Props) {
           </Button>
         </Link>
         <Button
-          variant="yellow"
+          variant="orange"
           onClick={() => {
             setDeleteMode(!deleteMode);
             setSelectedItems([]);
@@ -202,9 +202,9 @@ export default function PantallaUsuarios({ onModificar }: Props) {
                 <th
                   key={campo}
                   onClick={() => handleSort(campo as keyof Usuario)}
-                  className="px-4 py-2 text-left cursor-pointer select-none"
+                  className="px-4 py-2 text-center cursor-pointer select-none"
                 >
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     {label}
                     {sortField === campo ? (
                       sortDirection === "asc" ? (
@@ -233,13 +233,13 @@ export default function PantallaUsuarios({ onModificar }: Props) {
                     />
                   </td>
                 )}
-                <td className="px-4 py-2">{usuario.nombre}</td>
-                <td className="px-4 py-2">{usuario.correo}</td>
-                <td className="px-4 py-2">{usuario.rol}</td>
+                <td className="px-4 py-2 text-center">{usuario.nombre}</td>
+                <td className="px-4 py-2 text-center">{usuario.correo}</td>
+                <td className="px-4 py-2 text-center">{usuario.rol}</td>
                 <td className="px-4 py-2 text-center">
                   <div className="flex justify-center">
                     <Button
-                      variant="tealLight"
+                      variant="blue"
                       size="small"
                       onClick={() => onModificar(usuario)}
                     >

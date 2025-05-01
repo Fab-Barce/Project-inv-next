@@ -97,7 +97,7 @@ export default function CategoriaDetalle({ categoria, onCancelar }: Props) {
         {/* Botones de acción */}
         <div className="flex justify-end space-x-4 mt-10">
           <Button
-            variant="lime"
+            variant="green"
             onClick={handleActualizar}
             disabled={!editable}
           >
@@ -105,14 +105,14 @@ export default function CategoriaDetalle({ categoria, onCancelar }: Props) {
           </Button>
   
           <Button
-            variant="green"
+            variant="teal"
             onClick={() => setEditable(!editable)}
           >
             {editable ? "Bloquear" : "Modificar"}
           </Button>
   
           <Button
-            variant="emerald"
+            variant="blue"
             onClick={onCancelar}
           >
             Volver
