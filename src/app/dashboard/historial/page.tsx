@@ -217,7 +217,7 @@ const HistorialMovimientos = () => {
 
           {/* Botón Volver */}
           <div className="flex justify-end mb-6">
-            <Link href="/dashboard">
+            <Link href="/dashboard_admin">
               <Button variant="blue">
                 Volver
               </Button>
