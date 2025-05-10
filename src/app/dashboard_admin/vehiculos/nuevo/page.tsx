@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Headerv2 from "@/app/components/headerv2";
+import Header_admin from "@/app/components/header_admin";
 import axios from "axios";
 import Button from "@/app/components/Button";
 
@@ -157,7 +157,7 @@ export default function NuevoVehiculo() {
 
   return (
     <div>
-      <Headerv2 />
+      <Header_admin />
       <div className="min-h-screen bg-gray-100 py-10 px-6">
         <div className="max-w-4xl mx-auto bg-white p-10 rounded-lg shadow-md border border-gray-300">
           <h1 className="text-3xl font-bold text-blue-600 mb-8 text-center">

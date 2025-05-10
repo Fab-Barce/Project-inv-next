@@ -3,7 +3,7 @@
 import { useState } from "react";
 import PantallaProveedor from "./componentes/pantalla_proveedores";  // Asegúrate de que el archivo se llame así
 import ProveedorDetalle from "./componentes/proveedor";              // Asegúrate de que el archivo se llame así
-import Headerv2 from "@/app/components/headerv2";
+import Header_admin from "@/app/components/header_admin";
 
 
 type Proveedor = {
@@ -35,7 +35,7 @@ export default function Inventario() {
 
     return (
         <div>
-            <Headerv2 />
+            <Header_admin />
             {modo === "listado" ? (
                 <PantallaProveedor onModificar={handleModificar} />
             ) : (

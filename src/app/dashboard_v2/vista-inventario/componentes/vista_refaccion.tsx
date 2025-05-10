@@ -21,6 +21,7 @@ type Producto = {
     proveedor: string;
     empresa: string;
     marca: string;
+    num_unidad: string;
 };
 
 type Proveedor = {
@@ -38,6 +39,7 @@ type Proveedor = {
   type Vehiculo = {
     vehiculo_id: number;
     placas: string;
+    num_unidad: string;
   };
 
 type Props = {
@@ -265,6 +267,34 @@ export default function Refaccion({ producto, onCancelar }: Props) {
               
               <Field label="Costo" name="costo" value={formData?.costo || ""} onChange={handleInputChange} editable={editable} />
               <Field label="Stock Mínimo" name="stock_minimo" value={formData?.stock_minimo || ""} onChange={handleInputChange} editable={editable} />
+
+
+              {editable ? (
+                <div>
+                  <label className="block text-gray-700 font-semibold">Unidad:</label>
+                  <select
+                    name="vehiculo_id"
+                    value={formData?.vehiculo_id || ""}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      const selectedVehiculo = vehiculos.find(v => v.vehiculo_id === Number(e.target.value));
+                      if (selectedVehiculo) {
+                        setFormData(prev => (prev ? { ...prev, num_unidad: selectedVehiculo.num_unidad } : null));
+                      }
+                    }}
+                    className="w-full p-2 border rounded-md bg-white"
+                  >
+                    <option value="">Seleccione un vehículo</option>
+                    {vehiculos.map((vehiculo) => (
+                      <option key={vehiculo.vehiculo_id} value={vehiculo.vehiculo_id}>
+                        {vehiculo.num_unidad}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <Field label="Unidad" name="vehiculo_id" value={formData?.num_unidad || ""} editable={false} />
+              )}
       
              
       

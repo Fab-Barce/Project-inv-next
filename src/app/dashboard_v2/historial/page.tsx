@@ -1,11 +1,11 @@
 "use client";
-import Headerv2 from "@/app/components/headerv2";
+import Header_viewer from "@/app/components/header_viewer";
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   ArrowUpIcon,
-  ArrowDownIcon,
+  ArrowDownIcon, 
   ArrowsUpDownIcon,
   CalendarIcon,
   ClockIcon,
@@ -18,6 +18,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import Button from "@/app/components/Button";
+
 
 type Movimiento = {
   id_movimiento: number;
@@ -32,6 +33,7 @@ type Movimiento = {
   tipo_movimiento: string;
   user_nombre: string;
   cantidad_restante?: number | null;
+  num_unidad?: string | null,
 };
 
 type CampoBusqueda = keyof Movimiento;
@@ -39,7 +41,7 @@ type CampoBusqueda = keyof Movimiento;
 const campos: { label: string; value: CampoBusqueda; icon: any }[] = [
   { label: "ID Movimiento", value: "id_movimiento", icon: TagIcon },
   { label: "Refacción", value: "nombre_refaccion", icon: WrenchIcon },
-  { label: "Vehículo", value: "placa_vehiculo", icon: TruckIcon },
+  { label: "Vehículo", value: "num_unidad", icon: TruckIcon },
   { label: "Cantidad", value: "cantidad", icon: ArrowPathIcon },
   { label: "Fecha", value: "fecha", icon: CalendarIcon },
   { label: "Hora", value: "hora", icon: ClockIcon },
@@ -139,9 +141,9 @@ const HistorialMovimientos = () => {
     // Movement type filter (vehicles vs inventory)
     let movementTypeMatch = true;
     if (movementType === "vehicles") {
-      movementTypeMatch = !!(movimiento.placa_vehiculo || movimiento.placas);
+      movementTypeMatch = !!(movimiento.num_unidad);
     } else if (movementType === "inventory") {
-      movementTypeMatch = !(movimiento.placa_vehiculo || movimiento.placas);
+      movementTypeMatch = !(movimiento.num_unidad);
     }
     
     return textMatch && dateMatch && typeMatch && movementTypeMatch;
@@ -205,7 +207,7 @@ const HistorialMovimientos = () => {
 
   return (
     <div>
-      <Headerv2 />
+      <Header_viewer />
 
       <div className="min-h-screen bg-gray-100 py-10 px-6">
         <div className="max-w-7xl mx-auto">
@@ -293,26 +295,26 @@ const HistorialMovimientos = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Buscar por</label>
-                  <select
-                    value={searchField}
-                    onChange={(e) => setSearchField(e.target.value as CampoBusqueda)}
+            <select
+              value={searchField}
+              onChange={(e) => setSearchField(e.target.value as CampoBusqueda)}
                     className="w-full p-2 border rounded"
-                  >
-                    {campos.map((c) => (
-                      <option key={c.value} value={c.value}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
+            >
+              {campos.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Término de búsqueda</label>
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Buscar..."
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar..."
                     className="w-full p-2 border rounded"
                   />
                 </div>
@@ -340,9 +342,9 @@ const HistorialMovimientos = () => {
                     value={dateFilter.start}
                     onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
                     className="w-full p-2 border rounded"
-                  />
-                </div>
-                
+            />
+          </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
                   <input
@@ -380,22 +382,22 @@ const HistorialMovimientos = () => {
                             <div>
                               <h3 className="font-semibold">
                                 {movementType === "vehicles" 
-                                  ? `Vehículo: ${movimiento.placa_vehiculo || movimiento.placas || "Sin placa"}`
+                                  ? `Vehículo: ${movimiento.num_unidad || "Sin unidad"}`
                                   : (movimiento.nombre || movimiento.nombre_refaccion || "Sin nombre")}
                               </h3>
                               <p className="text-sm mt-1">
-                                {movimiento.placa_vehiculo || movimiento.placas ? 
+                                {movimiento.num_unidad ? 
                                   (movementType === "vehicles" 
                                     ? `Tipo: ${movimiento.tipo_movimiento}`
-                                    : `Vehículo: ${movimiento.placa_vehiculo || movimiento.placas}`) : 
+                                    : `Vehículo: ${movimiento.num_unidad}`) : 
                                   `Cantidad: ${formatQuantity(movimiento.cantidad, movimiento.tipo_movimiento)}`}
                               </p>
                               {movimiento.motivo && (
                                 <p className="text-sm mt-1">Motivo: {movimiento.motivo}</p>
                               )}
-                              {movementType !== "vehicles" && (
+                              {movimiento.nombre_refaccion && (
                                 <p className="text-sm mt-1 font-medium">
-                                  Inventario restante: <span className="font-bold">{movimiento.cantidad_restante || 0}</span>
+                                  Inventarios restante: <span className="font-bold">{movimiento.cantidad_restante || 0}</span>
                                 </p>
                               )}
                             </div>
@@ -538,7 +540,6 @@ const HistorialMovimientos = () => {
                         )}
                       </div>
                     </th>
-                    {movementType !== "vehicles" && (
                       <th
                         className="px-4 py-3 cursor-pointer select-none text-center"
                         onClick={() => handleSort("motivo")}
@@ -557,7 +558,6 @@ const HistorialMovimientos = () => {
                           )}
                         </div>
                       </th>
-                    )}
                     <th
                       className="px-4 py-3 cursor-pointer select-none text-center"
                       onClick={() => handleSort("tipo_movimiento")}
@@ -603,7 +603,7 @@ const HistorialMovimientos = () => {
                         <td className="px-4 py-2 text-center">{m.nombre || m.nombre_refaccion || "-"}</td>
                       )}
                       {movementType !== "inventory" && (
-                        <td className="px-4 py-2 text-center">{m.placa_vehiculo || m.placas || "-"}</td>
+                        <td className="px-4 py-2 text-center">{m.num_unidad || "-"}</td>
                       )}
                       {movementType !== "vehicles" && (
                         <>
@@ -615,9 +615,7 @@ const HistorialMovimientos = () => {
                       )}
                       <td className="px-4 py-2 text-center">{m.fecha}</td>
                       <td className="px-4 py-2 text-center">{m.hora}</td>
-                      {movementType !== "vehicles" && (
-                        <td className="px-4 py-2 text-center">{m.motivo || "-"}</td>
-                      )}
+                      <td className="px-4 py-2 text-center">{m.motivo || "-"}</td>
                       <td className="px-4 py-2 text-center">
                         <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${getColorForType(m.tipo_movimiento)}`}>
                           {m.tipo_movimiento}

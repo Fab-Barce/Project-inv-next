@@ -1,8 +1,9 @@
 "use client";
 
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Headerv2 from "@/app/components/headerv2";
+import Header_user from "@/app/components/header_user";
 import axios from "axios";
 import Button from "@/app/components/Button";
 
@@ -21,6 +22,13 @@ type Empresa = {
   nombre: string;
 };
 
+// Agregar el tipo Vehiculo
+type Vehiculo = {
+  vehiculo_id: number;
+  num_unidad: string;
+  activo: string;
+};
+
 export default function NuevoRefaccion() {
   const router = useRouter();
 
@@ -30,19 +38,20 @@ export default function NuevoRefaccion() {
     cantidad: 0,
     stock_minimo: 0,
     costo: 0,
-    marca: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false); 
   const [proveedores, setProveedor] = useState<Proveedor[]>([]);
   const [categorias, setCategoria] = useState<Categoria[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]); // Estado para los vehículos
   const [id_proveedor, setIdProveedor] = useState(0);
   const [id_categoria, setIdCategoria] = useState(0);
   const [id_empresa, setIdEmpresa] = useState(0);
+  const [id_vehiculo, setIdVehiculo] = useState(0); // Estado para el vehículo seleccionado
   const [imagen_refa, setImagen_refa] = useState(null);
   const [userId, setUserId] = useState<string | null>(null);
 
- 
+
   useEffect(() => {
     axios.get("http://localhost:8000/Proveedores/")
     .then (response => {
@@ -65,6 +74,14 @@ export default function NuevoRefaccion() {
       setEmpresas(response.data)
     }) 
   },[])
+
+  useEffect(() => {
+    axios.get("http://localhost:8000/Vehiculos/") // Obtener vehículos activos
+      .then(response => {
+        const vehiculosActivos = response.data.filter((vehiculo: any) => vehiculo.activo !== "false");
+        setVehiculos(vehiculosActivos);
+      });
+  }, []);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("user_id");
@@ -96,6 +113,10 @@ export default function NuevoRefaccion() {
     setIdEmpresa(Number(e.target.value));
   };
 
+  const handleVehiculoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setIdVehiculo(Number(e.target.value)); // Actualizar el vehículo seleccionado
+  };
+
   const handleSubmit = async () => {
     // Validación previa
     if (
@@ -107,7 +128,7 @@ export default function NuevoRefaccion() {
       !formDatas.costo ||
       !id_categoria ||
       !id_empresa ||
-      !formDatas.marca?.trim()
+      !id_vehiculo // Validar que se haya seleccionado un vehículo
     ) {
       alert("Por favor, completa todos los campos obligatorios antes de guardar.");
       return; // Detiene la ejecución si falta algún dato
@@ -126,7 +147,7 @@ export default function NuevoRefaccion() {
       formData.append("categoria_id", id_categoria.toString());
       formData.append("imagen_refa", imagen_refa || "");
       formData.append("empresa_id", id_empresa.toString());
-      formData.append("marca", formDatas.marca);
+      formData.append("vehiculo_id", id_vehiculo.toString()); // Incluir el vehículo seleccionado
   
       // Crear refacción
       const response = await axios.post(`http://localhost:8000/Refacciones/create/`, formData, {
@@ -160,7 +181,6 @@ export default function NuevoRefaccion() {
       setIsSubmitting(false); // Desbloquea el botón
     };
   };
-  
 
   const handleArchivoChange = (e:any) => {
     setImagen_refa(e.target.files[0]); // Usar el archivo seleccionado
@@ -168,7 +188,7 @@ export default function NuevoRefaccion() {
 
 return (
   <div>
-    <Headerv2 />
+    <Header_user />
     <div className="min-h-screen bg-gray-100 py-10 px-6">
       <div className="max-w-4xl mx-auto bg-white p-10 rounded-lg shadow-md border border-gray-300">
         
@@ -239,6 +259,22 @@ return (
                 ))}
               </select>
             </div>
+            <div>
+              <label htmlFor="vehiculo" className="block text-gray-700 font-semibold">Número de Unidad</label>
+              <select
+                id="vehiculo"
+                value={id_vehiculo}
+                onChange={handleVehiculoChange}
+                className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+                <option value="">Seleccione un vehículo</option>
+                {vehiculos.map((vehiculo: Vehiculo) => (
+                  <option key={vehiculo.vehiculo_id} value={vehiculo.vehiculo_id}>
+                    {vehiculo.num_unidad}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Columna derecha */}
@@ -280,16 +316,6 @@ return (
               />
             </div>
             <div>
-              <label className="block text-gray-700 font-semibold">Marca</label>
-              <input
-                type="text"
-                name="marca"
-                value={formDatas.marca}
-                onChange={handleInputChange}
-                className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-            <div>
               <label htmlFor="imagen" className="block text-gray-700 font-semibold">Imagen</label>
               <input
                 type="file"
@@ -312,9 +338,7 @@ return (
           </Button>
           <Button
             variant="green"
-            onClick={() => {
-              handleSubmit();
-            }}
+            onClick={handleSubmit}
             disabled={isSubmitting}
           >
             Guardar

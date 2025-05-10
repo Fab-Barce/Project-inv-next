@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation"; // Para manejar la redirección
 import PantallaUsuarios from "./componentes/pantalla_usuarios";
 import Usuario from "./componentes/usuario";
-import Headerv2 from "@/app/components/headerv2";
+import Header_admin from "@/app/components/header_admin";
 
 type Usuario = {
     user_id: number;
@@ -33,7 +33,7 @@ export default function UsuariosPage() {
 
     return (
         <div>
-            <Headerv2 />
+            <Header_admin />
             <div className="p-6 bg-gray-100 min-h-screen">
                 <div className="flex justify-between items-center mb-4">
 

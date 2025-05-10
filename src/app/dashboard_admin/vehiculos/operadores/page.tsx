@@ -3,7 +3,7 @@
 import { useState } from "react";
 import PantallaOperador from "./componentes/pantalla_operadores";  // Asegúrate de que el archivo se llame así
 import OperadorDetalle from "./componentes/operador";              // Asegúrate de que el archivo se llame así
-import Headerv2 from "@/app/components/headerv2";
+import Header_admin from "@/app/components/header_admin";
 
 
 type Operador = {
@@ -30,7 +30,7 @@ export default function Inventario() {
 
     return (
         <div>
-            <Headerv2 />
+            <Header_admin />
             {modo === "listado" ? (
                 <PantallaOperador onModificar={handleModificar} />
             ) : (

@@ -21,6 +21,7 @@ type Producto = {
     proveedor: string;
     empresa: string;
     marca: string;
+    num_unidad: string;
 };
 
 type Proveedor = {
@@ -40,7 +41,8 @@ type Proveedor = {
   type Vehiculo = {
     vehiculo_id: number;
     placas: string;
-    activo: string
+    activo: string;
+    num_unidad: string;
   };
 
 type Props = {
@@ -179,20 +181,27 @@ export default function Refaccion({ producto, onCancelar }: Props) {
       const handleGuardar = async () => {
         try {
             const cantidadOriginal = Number(producto.cantidad);
-            const nuevaCantidad = Number(cantidadModificada);
+            const cantidadCambio = Number(cantidadModificada);
     
-            if (isNaN(nuevaCantidad) || nuevaCantidad < 0) {
-                alert("Por favor, ingresa una cantidad válida.");
+            if (isNaN(cantidadCambio) || cantidadCambio <= 0) {
+                alert("Por favor, ingresa una cantidad válida mayor a 0.");
                 return;
             }
     
-            // ❗ Solo proceder si la cantidad cambió
-            if (cantidadOriginal === nuevaCantidad) {
-                alert("No hubo cambios en la cantidad.");
-                return;
+            let nuevaCantidad = cantidadOriginal;
+    
+            if (tipoMovimiento === "entrada") {
+                nuevaCantidad += cantidadCambio; // Sumar la cantidad
+            } else if (tipoMovimiento === "salida") {
+                nuevaCantidad -= cantidadCambio; // Restar la cantidad
+    
+                if (nuevaCantidad < 0) {
+                    alert("La cantidad no puede ser negativa.");
+                    return;
+                }
             }
     
-            // 🧠 Generar motivo automático si es salida
+            // Generar motivo automático si es salida
             const vehiculoSeleccionado = vehiculos.find(v => v.vehiculo_id === id_vehiculo);
             const placaVehiculo = vehiculoSeleccionado ? vehiculoSeleccionado.placas : "desconocido";
             let motivoFinal = datosMovimiento.motivo;
@@ -209,7 +218,7 @@ export default function Refaccion({ producto, onCancelar }: Props) {
             // 2️⃣ POST - Registrar movimiento
             const movimientoData = {
                 refaccion_id: producto.refaccion_id,
-                cantidad: nuevaCantidad,
+                cantidad: cantidadCambio,
                 tipo_movimiento: tipoMovimiento,
                 motivo: motivoFinal,
                 user_id: userId,
@@ -230,6 +239,24 @@ export default function Refaccion({ producto, onCancelar }: Props) {
         }
     };
     
+    const handleTipoMovimientoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const tipo = e.target.value;
+        setTipoMovimiento(tipo);
+    
+        if (tipo === "correccion") {
+            // Si es corrección, establecer la cantidad actual como valor
+            setCantidadModificada(producto?.cantidad || 0);
+        } else {
+            // Si no es corrección, restablecer a 0
+            setCantidadModificada(0);
+        }
+    };
+
+    // Función para abrir el modal y reiniciar el valor de cantidadModificada
+    const handleOpenModal = () => {
+        setCantidadModificada(0); // Establecer el valor inicial en 0
+        setIsOpen(true); // Abrir el modal
+    };
 
     return (
         <div className="min-h-screen bg-gray-100 py-10 px-6">
@@ -279,7 +306,33 @@ export default function Refaccion({ producto, onCancelar }: Props) {
               <Field label="Costo" name="costo" value={formData?.costo || ""} onChange={handleInputChange} editable={editable} />
               <Field label="Stock Mínimo" name="stock_minimo" value={formData?.stock_minimo || ""} onChange={handleInputChange} editable={editable} />
       
-             
+              {editable ? (
+                <div>
+                  <label className="block text-gray-700 font-semibold">Unidad:</label>
+                  <select
+                    name="vehiculo_id"
+                    value={formData?.vehiculo_id || ""}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      const selectedVehiculo = vehiculos.find(v => v.vehiculo_id === Number(e.target.value));
+                      if (selectedVehiculo) {
+                        setFormData(prev => (prev ? { ...prev, num_unidad: selectedVehiculo.num_unidad } : null));
+                      }
+                    }}
+                    className="w-full p-2 border rounded-md bg-white"
+                  >
+                    <option value="">Seleccione un vehículo</option>
+                    {vehiculos.map((vehiculo) => (
+                      <option key={vehiculo.vehiculo_id} value={vehiculo.vehiculo_id}>
+                        {vehiculo.num_unidad}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <Field label="Unidad" name="vehiculo_id" value={formData?.num_unidad || ""} editable={false} />
+              )}
+              
       
               {editable ? (
                 <div>
@@ -304,7 +357,7 @@ export default function Refaccion({ producto, onCancelar }: Props) {
       
               <div className="flex items-center space-x-2">
                 <Field label="Cantidad" name="cantidad" value={formData?.cantidad || 0} onChange={handleInputChange} editable={false} />
-                <button className="text-blue-500 hover:text-blue-700" onClick={() => setIsOpen(true)}>
+                <button className="text-blue-500 hover:text-blue-700" onClick={handleOpenModal}>
                   <FaEdit size={20} />
                 </button>
               </div>
@@ -360,7 +413,17 @@ export default function Refaccion({ producto, onCancelar }: Props) {
             <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50">
               <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
                 <h3 className="text-lg font-bold mb-4">Modificar Cantidad</h3>
-                <label className="block text-gray-700">Nueva Cantidad:</label>
+
+                {/* Campo para mostrar la cantidad actual */}
+                <label className="block text-gray-700">Cantidad Actual:</label>
+                <input
+                    type="number"
+                    value={producto?.cantidad || 0} // Mostrar la cantidad actual
+                    disabled // Campo no editable
+                    className="w-full p-2 border rounded-md bg-gray-200 cursor-not-allowed"
+                />
+
+                <label className="block text-gray-700 mt-3">Ingresa la cantidad a ingresar o retirar:</label>
                 <input
                   type="number"
                   value={cantidadModificada}
@@ -370,19 +433,20 @@ export default function Refaccion({ producto, onCancelar }: Props) {
                 <label className="block text-gray-700 mt-3">Tipo de Movimiento:</label>
                 <select
                   value={tipoMovimiento}
-                  onChange={(e) => setTipoMovimiento(e.target.value)}
+                  onChange={handleTipoMovimientoChange} // Usar la nueva función
                   className="w-full p-2 border rounded-md"
                 >
                   <option value="entrada">Entrada</option>
                   <option value="salida">Salida</option>
                   <option value="correccion">Corrección</option>
                 </select>
+
                 {tipoMovimiento === "salida" && (
                   <>
                     <div>
-                      <label htmlFor="vehiculo" className="block text-gray-700">Numero de unidad</label>
+                      <label htmlFor="vehiculo" className="block text-gray-700">Número de unidad</label>
                       <select id="vehiculo" value={id_vehiculo} onChange={handleVehiculoChange} className="w-full border px-2 py-1">
-                        <option value="">Seleccione un vehiculo</option>
+                        <option value="">Seleccione un vehículo</option>
                         {vehiculos.map((vehiculo: { vehiculo_id: number; placas: string }) => (
                           <option key={vehiculo.vehiculo_id} value={vehiculo.vehiculo_id}>{vehiculo.placas}</option>
                         ))}
@@ -403,6 +467,7 @@ export default function Refaccion({ producto, onCancelar }: Props) {
                 </div>
               </div>
             </Dialog>
+            
           </div>
         </div>
       );

@@ -6,6 +6,9 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
   ArrowsUpDownIcon,
+  ClipboardIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/solid";
 import Button from "@/app/components/Button";
 
@@ -22,11 +25,11 @@ type Props = {
   onModificar: (usuario: Usuario) => void;
 };
 
-
 export default function PantallaUsuarios({ onModificar }: Props) {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [showPasswords, setShowPasswords] = useState<{ [key: number]: boolean }>({});
 
   // Estados para filtros y ordenación
   const [searchTerm, setSearchTerm] = useState("");
@@ -107,6 +110,20 @@ export default function PantallaUsuarios({ onModificar }: Props) {
       setSortField(campo);
       setSortDirection("asc");
     }
+  };
+
+  const togglePasswordVisibility = (id: number) => {
+    setShowPasswords((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const copyUserInfo = (usuario: Usuario) => {
+    const userInfo = `Nombre: ${usuario.nombre}\nCorreo: ${usuario.correo}\nRol: ${usuario.rol}\nContraseña: ${usuario.contrasena}`;
+    navigator.clipboard.writeText(userInfo).then(() => {
+      alert("Información del usuario copiada al portapapeles.");
+    });
   };
 
   const usuariosFiltradosOrdenados = [...usuarios]
@@ -198,6 +215,7 @@ export default function PantallaUsuarios({ onModificar }: Props) {
                 { campo: "nombre", label: "Nombre" },
                 { campo: "correo", label: "Correo" },
                 { campo: "rol", label: "Rol" },
+                { campo: "contrasena", label: "Contraseña" },
               ].map(({ campo, label }) => (
                 <th
                   key={campo}
@@ -237,7 +255,32 @@ export default function PantallaUsuarios({ onModificar }: Props) {
                 <td className="px-4 py-2 text-center">{usuario.correo}</td>
                 <td className="px-4 py-2 text-center">{usuario.rol}</td>
                 <td className="px-4 py-2 text-center">
-                  <div className="flex justify-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <span>
+                      {showPasswords[usuario.user_id]
+                        ? usuario.contrasena
+                        : "********"}
+                    </span>
+                    <button
+                      onClick={() => togglePasswordVisibility(usuario.user_id)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      {showPasswords[usuario.user_id] ? (
+                        <EyeSlashIcon className="w-5 h-5" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </td>
+                <td className="px-4 py-2 text-center">
+                  <div className="flex justify-center gap-2">
+                    <button
+                      onClick={() => copyUserInfo(usuario)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <ClipboardIcon className="w-5 h-5" />
+                    </button>
                     <Button
                       variant="blue"
                       size="small"

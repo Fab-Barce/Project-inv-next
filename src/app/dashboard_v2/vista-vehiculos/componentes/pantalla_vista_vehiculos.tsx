@@ -107,12 +107,38 @@ export default function PantallaVehiculos({ onModificar }: Props) {
     return matches ? parseInt(matches[0]) : 0;
   };
 
+  // Función para ordenamiento natural
+  const compararNatural = (a: string, b: string) => {
+    const regex = /(\d+|\D+)/g;
+    const partesA = a.match(regex) || [];
+    const partesB = b.match(regex) || [];
+
+    for (let i = 0; i < Math.max(partesA.length, partesB.length); i++) {
+      const parteA = partesA[i] || "";
+      const parteB = partesB[i] || "";
+
+      // Comparar como números si ambas partes son numéricas
+      const numA = parseInt(parteA, 10);
+      const numB = parseInt(parteB, 10);
+
+      if (!isNaN(numA) && !isNaN(numB)) {
+        if (numA !== numB) return numA - numB;
+      } else if (parteA !== parteB) {
+        // Comparar como cadenas si no son numéricas
+        return parteA.localeCompare(parteB);
+      }
+    }
+
+    return 0;
+  };
+
+  // Actualizar la lógica de ordenamiento
   const listaFiltrada = [...vehiculos]
     .filter((v) => {
       if (campoBusqueda === "num_unidad") {
-        // Para números de unidad, normalizamos la búsqueda y el valor
-        const busquedaNormalizada = busqueda.toLowerCase().replace(/\s+/g, '');
-        const valorNormalizado = v[campoBusqueda]?.toString().toLowerCase().replace(/\s+/g, '') || '';
+        const busquedaNormalizada = busqueda.toLowerCase().replace(/\s+/g, "");
+        const valorNormalizado =
+          v[campoBusqueda]?.toString().toLowerCase().replace(/\s+/g, "") || "";
         return valorNormalizado.includes(busquedaNormalizada);
       } else {
         return v[campoBusqueda]
@@ -123,8 +149,16 @@ export default function PantallaVehiculos({ onModificar }: Props) {
     })
     .sort((a, b) => {
       if (!campoOrden) return 0;
+
       const valA = a[campoOrden];
       const valB = b[campoOrden];
+
+      if (campoOrden === "num_serie") {
+        // Usar ordenamiento natural para num_serie
+        return direccionOrden === "asc"
+          ? compararNatural(valA?.toString() || "", valB?.toString() || "")
+          : compararNatural(valB?.toString() || "", valA?.toString() || "");
+      }
 
       if (campoOrden === "num_unidad") {
         const numA = extraerNumero(valA?.toString() || "0");
@@ -135,6 +169,7 @@ export default function PantallaVehiculos({ onModificar }: Props) {
       if (typeof valA === "number" && typeof valB === "number") {
         return direccionOrden === "asc" ? valA - valB : valB - valA;
       }
+
       return direccionOrden === "asc"
         ? valA.toString().localeCompare(valB.toString())
         : valB.toString().localeCompare(valA.toString());
@@ -240,9 +275,9 @@ export default function PantallaVehiculos({ onModificar }: Props) {
                 {modoEliminar && <th className="px-4 py-2 text-center"></th>}
                 {[
                   { campo: "num_unidad", label: "Número de Unidad" },
+                  { campo: "operador", label: "Operador" },
                   { campo: "num_serie", label: "Número de Motor" },
                   { campo: "placas", label: "Placas" },
-                  { campo: "operador", label: "Operador" },
                   { campo: "empresa", label: "Empresa" },
                   { campo: "marca", label: "Marca" },
                   { campo: "anio", label: "Modelo" },
@@ -284,9 +319,9 @@ export default function PantallaVehiculos({ onModificar }: Props) {
                     </td>
                   )}
                   <td className="px-4 py-2 text-center">{v.num_unidad}</td>
+                  <td className="px-4 py-2 text-center">{v.operador}</td>
                   <td className="px-4 py-2 text-center">{v.num_serie}</td>
                   <td className="px-4 py-2 text-center">{v.placas}</td>
-                  <td className="px-4 py-2 text-center">{v.operador}</td>
                   <td className="px-4 py-2 text-center">{v.empresa}</td>
                   <td className="px-4 py-2 text-center">{v.marca}</td>
                   <td className="px-4 py-2 text-center">{v.anio}</td>

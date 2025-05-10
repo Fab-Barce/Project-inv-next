@@ -3,7 +3,7 @@
 import { useState } from "react";
 import PantallaCategoria from "./componentes/pant2";  // Asegúrate de que el archivo se llame así
 import CategoriaDetalle from "./componentes/cat2";              // Asegúrate de que el archivo se llame así
-import Headerv2 from "@/app/components/headerv2";
+import Header_viewer from "@/app/components/header_viewer";
 
 
 type Categoria = {
@@ -28,7 +28,7 @@ export default function Inventario() {
 
     return (
         <div>
-            <Headerv2 />
+            <Header_viewer />
             {modo === "listado" ? (
                 <PantallaCategoria onModificar={handleModificar} />
             ) : (

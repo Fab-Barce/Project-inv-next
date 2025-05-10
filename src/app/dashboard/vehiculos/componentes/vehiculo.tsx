@@ -26,9 +26,9 @@ type Vehiculo = {
     empresa: string;
     operador: string;
     linea: string;
-    activo: string;
-    num_unidad: string;
-};
+    activo:string;
+    num_unidad:string;
+    };
 
 type Props = {
     vehiculo: Vehiculo | null;
@@ -88,11 +88,26 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
         if (!formData) return;
     
         const updatedFields: Partial<Vehiculo> = {};
+        let operadorCambioMotivo = ""; // Aquí guardaremos el motivo si cambia el operador
     
         // Detectar solo campos modificados
         Object.keys(formData).forEach(key => {
-            if (formData[key as keyof Vehiculo] !== initialData?.[key as keyof Vehiculo]) {
-                updatedFields[key as keyof Vehiculo] = formData[key as keyof Vehiculo];
+            const current = formData[key as keyof Vehiculo];
+            const initial = initialData?.[key as keyof Vehiculo];
+    
+            if (current !== initial) {
+                updatedFields[key as keyof Vehiculo] = current;
+    
+                // Detectar cambio de operador
+                if (key === "operador_id") {
+                    const operadorAnterior = operadores.find(op => op.operador_id === Number(initial));
+                    const operadorNuevo = operadores.find(op => op.operador_id === Number(current));
+    
+                    const nombreAnterior = operadorAnterior ? operadorAnterior.nombre : `ID ${initial}`;
+                    const nombreNuevo = operadorNuevo ? operadorNuevo.nombre : `ID ${current}`;
+    
+                    operadorCambioMotivo = `Cambio de operador (${nombreAnterior}) a operador (${nombreNuevo})`;
+                }
             }
         });
     
@@ -123,9 +138,10 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
                 vehiculo_id: vehiculo.vehiculo_id,
                 tipo_movimiento: "actualizacion",
                 user_id: userId,
+                motivo: operadorCambioMotivo || "Actualización general"
             });
     
-            alert("Producto actualizado con éxito");
+            alert("Vehiculo actualizado con éxito");
             setEditable(false);
     
         } catch (error) {
@@ -133,7 +149,6 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
             alert("Hubo un error al guardar los cambios.");
         }
     };
-    
 
     return (
         <div className="min-h-screen bg-gray-100 py-10 px-6">
@@ -207,7 +222,6 @@ export default function VehiculoDetalle({ vehiculo, onCancelar }: Props) {
                     <Button
                         variant="green"
                         onClick={handleSave}
-                        disabled={!editable}
                     >
                         Guardar
                     </Button>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserIcon, EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon, UserGroupIcon } from "@heroicons/react/24/outline";
-import Headerv2 from "@/app/components/headerv2";
+import Header_admin from "@/app/components/header_admin";
 
 export default function CrearUsuario() {
     const [nombre, setNombre] = useState("");
@@ -70,7 +70,7 @@ export default function CrearUsuario() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            <Headerv2 />
+            <Header_admin />
             
             <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-6">
                 <div className="w-full max-w-md">

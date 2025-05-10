@@ -1,15 +1,15 @@
 "use client";
 import Link from "next/link";
-import Headerv2 from "../components/headerv2";
+import Header_viewer from "../components/header_viewer";
 import withAuth from "../utils/withAuth";
 import Footer from "../components/footer";
 
 function Home() {
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">
-          <Headerv2 />
+          <Header_viewer />
           
-          <main className="flex-grow container mx-auto px-4 py-8">
+          <main className="flex-grow container mx-auto mt-10 px-4 py-8">
             {/* Título principal */}
             <div className="text-center mb-10">
               <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
@@ -21,7 +21,7 @@ function Home() {
             </div>
       
             {/* Tarjetas de navegación */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 mt-20 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               
               {/* Inventario */}
               <Link href="/dashboard_v2/vista-inventario" className="group">

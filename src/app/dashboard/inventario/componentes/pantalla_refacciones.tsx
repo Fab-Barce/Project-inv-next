@@ -26,6 +26,15 @@ type Producto = {
   empresa: string;
   activo: string;
   marca: string;
+  num_unidad: string;
+};
+
+
+type Vehiculo = {
+  vehiculo_id: number;
+  placas: string;
+  activo: string;
+  num_unidad: string;
 };
 
 type Props = {
@@ -37,57 +46,75 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
   const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchField, setSearchField] = useState<keyof Producto>("nombre");
+  const [searchField, setSearchField] = useState<keyof Producto | "total">("nombre");
   const [sortField, setSortField] = useState<keyof Producto | "total" | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [vistaGaleria, setVistaGaleria] = useState<boolean>(false);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchRefacciones = async () => {
       try {
-        const response = await fetch("http://localhost:8000/Refacciones/");
-        const data = await response.json();
-  
-        const refaccionesFiltradas = data
-          .filter((item: any) => item.activo !== 'false') // Filtra los inactivos
-          .map((item: any) => ({
-            refaccion_id: item.refaccion_id || item.id,
-            proveedor_id: item.proveedor_id || 0,
-            vehiculo_id: item.vehiculo_id || 0,
-            numero_parte: item.numero_parte || "N/A",
-            nombre: item.nombre || "Sin nombre",
-            cantidad: Number(item.cantidad) || 0,
-            stock_minimo: Number(item.stock_minimo) || 0,
-            costo: Number(item.costo) || 0,
-            categoria_id: item.categoria_id || 0,
-            imagen_refa: item.imagen_refa || "",
-            empresa_id: item.empresa_id || 0,
-            categoria: item.categoria || "",
-            empresa: item.empresa || "",
-            proveedor: item.proveedor || "",
-            activo: item.activo || "",
-            marca: item.marca || "",
-          }));
-  
+        // Obtener refacciones
+        const refaccionesResponse = await fetch("http://localhost:8000/Refacciones/");
+        const refaccionesData = await refaccionesResponse.json();
+
+        // Obtener vehículos
+        const vehiculosResponse = await fetch("http://localhost:8000/Vehiculos/");
+        const vehiculosData = await vehiculosResponse.json();
+
+        // Filtrar vehículos activos
+        const vehiculosActivos = vehiculosData.filter((vehiculo: any) => vehiculo.activo !== "false");
+
+        // Mapear refacciones y asociar num_unidad del vehículo correspondiente
+        const refaccionesFiltradas = refaccionesData
+          .filter((item: any) => item.activo !== "false") // Filtra los inactivos
+          .map((item: any) => {
+            const vehiculo = vehiculosActivos.find((v: any) => v.vehiculo_id === item.vehiculo_id);
+            return {
+              refaccion_id: item.refaccion_id || item.id,
+              proveedor_id: item.proveedor_id || 0,
+              vehiculo_id: item.vehiculo_id || 0,
+              numero_parte: item.numero_parte || "N/A",
+              num_unidad: vehiculo?.num_unidad || "N/A", // Asociar num_unidad del vehículo
+              nombre: item.nombre || "Sin nombre",
+              cantidad: Number(item.cantidad) || 0,
+              stock_minimo: Number(item.stock_minimo) || 0,
+              costo: Number(item.costo) || 0,
+              categoria_id: item.categoria_id || 0,
+              imagen_refa: item.imagen_refa || "",
+              empresa_id: item.empresa_id || 0,
+              categoria: item.categoria || "",
+              empresa: item.empresa || "",
+              proveedor: item.proveedor || "",
+              activo: item.activo || "",
+              marca: item.marca || "",
+            };
+          });
+
         setRefacciones(refaccionesFiltradas);
       } catch (error) {
-        console.error("Error al obtener refacciones:", error);
+        console.error("Error al obtener refacciones o vehículos:", error);
       }
     };
-  
+
     fetchRefacciones();
-  }, []);
-  
+}, []);
 
   const filteredAndSorted = [...refacciones]
-    .filter((r) =>
-      r[searchField]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    .filter((r) => {
+      if (searchField === "total") {
+        const total = (r.costo * r.cantidad).toString();
+        return total.includes(searchTerm.toLowerCase());
+      }
+      return r[searchField]?.toString().toLowerCase().includes(searchTerm.toLowerCase());
+    })
     .sort((a, b) => {
       if (!sortField) return 0;
       
-      // Manejo especial para el campo "total"
       if (sortField === "total") {
         const totalA = a.costo * a.cantidad;
         const totalB = b.costo * b.cantidad;
@@ -151,6 +178,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="flex justify-between items-center mb-4">
@@ -159,7 +187,8 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
 
       {/* Botones */}
       <div className="flex flex-wrap gap-2 mb-4">
-        <Link href="/dashboard/inventario/nuevo">
+
+      <Link href="/dashboard/inventario/nuevo">
           <Button variant="green">Nuevo</Button>
         </Link>
         <Link href="/dashboard/inventario/categorias">
@@ -168,17 +197,15 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
         <Link href="/dashboard/inventario/proveedores">
           <Button variant="yellow">Proveedores</Button>
         </Link>
-        <Button
-          variant="orange"
-          onClick={() => {
-            setDeleteMode(!deleteMode);
-            setSelectedItems([]);
-          }}
+
+        <Button 
+          variant={deleteMode ? "orange" : "orange"}
+          onClick={() => setDeleteMode(!deleteMode)}
         >
-          {deleteMode ? "Cancelar Eliminación" : "Eliminar Refacción"}
+          {deleteMode ? "Cancelar Eliminación" : "Eliminar"}
         </Button>
         {deleteMode && (
-          <Button
+          <Button 
             variant="red"
             onClick={handleBulkDelete}
             disabled={selectedItems.length === 0}
@@ -186,16 +213,15 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
             Confirmar Eliminación
           </Button>
         )}
-
-        <Link href="/dashboard">
+        <Link href="/dashboard/">
           <Button variant="blue">Volver</Button>
         </Link>
-        <Button
+        <Button 
           variant="sky"
           onClick={() => setVistaGaleria(!vistaGaleria)}
           className="ml-auto"
         >
-          {vistaGaleria ? "Vista Tabla" : "Vista Galería"}
+          {vistaGaleria ? "Vista Galería" : "Vista Tabla"}
         </Button>
       </div>
 
@@ -203,13 +229,18 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
       <div className="flex flex-wrap gap-2 items-center bg-white p-4 shadow-md rounded mb-4">
         <select
           value={searchField}
-          onChange={(e) => setSearchField(e.target.value as keyof Producto)}
+          onChange={(e) =>
+            setSearchField(e.target.value as keyof Producto | "total")
+          }
           className="p-2 border rounded"
         >
-          <option value="nombre">Nombre</option>
           <option value="numero_parte">Número de Parte</option>
+          <option value="nombre">Nombre</option>
           <option value="proveedor">Proveedor</option>
-          <option value="categoria">Categoría</option>
+          <option value="cantidad">Cantidad</option>
+          <option value="stock_minimo">Stock Mínimo</option>
+          <option value="costo">Costo</option>
+          <option value="total">Total</option>
         </select>
         <input
           type="text"
@@ -229,6 +260,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                 {deleteMode && <th className="px-4 py-2 text-center"></th>}
                 {[
                   { key: "numero_parte", label: "Número de Parte" },
+                  { key: "num_unidad", label: "Número de Unidad" }, // Nueva columna
                   { key: "nombre", label: "Nombre" },
                   { key: "proveedor", label: "Proveedor" },
                   { key: "marca", label: "Marca" },
@@ -256,10 +288,10 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                   </th>
                 ))}
                 <th 
+                  className="px-4 py-2 text-center cursor-pointer select-none"
                   onClick={() => handleSort("total")}
-                  className="px-4 py-2 cursor-pointer select-none text-center"
                 >
-                  <div className="flex items-center justify-center gap-1">
+                  <div className="flex justify-center items-center gap-1">
                     Total
                     {sortField === "total" ? (
                       sortDirection === "asc" ? (
@@ -280,20 +312,58 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                 <tr key={refa.refaccion_id} className="border-t hover:bg-gray-50">
                   {deleteMode && (
                     <td className="px-4 py-2 text-center">
-                      <div className="flex justify-center">
-                        <label className="flex items-center space-x-2 cursor-pointer bg-gray-100 p-2 rounded-md hover:bg-gray-200">
-                          <input
-                            type="checkbox"
-                            checked={selectedItems.includes(refa.refaccion_id)}
-                            onChange={() => handleSelect(refa.refaccion_id)}
-                            className="w-5 h-5 cursor-pointer"
-                          />     
-                        </label>
-                      </div>
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(refa.refaccion_id)}
+                        onChange={() => handleSelect(refa.refaccion_id)}
+                      />
                     </td>
                   )}
                   <td className="px-4 py-2 text-center">{refa.numero_parte}</td>
-                  <td className="px-4 py-2 text-center">{refa.nombre}</td>
+                  <td className="px-4 py-2 text-center">{refa.num_unidad}</td> 
+                  <td className="px-4 py-2 text-center relative">
+                    <span
+                      className="cursor-pointer"
+                      onClick={() => setExpandedImage(refa.imagen_refa || "/placeholder.png")}
+
+                      onMouseEnter={(e) => {
+                        const timeout = setTimeout(() => {
+                          setHoveredImage(refa.imagen_refa || "/placeholder.png");
+                          setTooltipPosition({ x: e.clientX, y: e.clientY });
+                        }, 300); // Retraso de 300ms antes de mostrar la imagen
+                        setHoverTimeout(timeout);
+                      }}
+                      onMouseMove={(e) => {
+                        if (hoveredImage) {
+                          setTooltipPosition({ x: e.clientX, y: e.clientY });
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (hoverTimeout) {
+                          clearTimeout(hoverTimeout); // Limpiar el temporizador si el cursor sale antes de que se muestre la imagen
+                        }
+                        setHoveredImage(null);
+                        setTooltipPosition(null);
+                      }}
+                    >
+                      {refa.nombre}
+                    </span>
+                    {hoveredImage === refa.imagen_refa && tooltipPosition && (
+                      <div
+                        className="fixed bg-white border rounded shadow-lg p-2 z-50"
+                        style={{
+                          top: tooltipPosition.y + 10, // Posicionar ligeramente debajo del cursor
+                          left: tooltipPosition.x + 10, // Posicionar ligeramente a la derecha del cursor
+                        }}
+                      >
+                        <img
+                          src={hoveredImage}
+                          alt={refa.nombre}
+                          className="h-20 w-auto object-contain"
+                        />
+                      </div>
+                    )}
+                  </td>                  
                   <td className="px-4 py-2 text-center">{refa.proveedor}</td>
                   <td className="px-4 py-2 text-center">{refa.marca}</td>
                   <td className="px-4 py-2 text-center">
@@ -309,7 +379,9 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                   </td>
                   <td className="px-4 py-2 text-center">{refa.stock_minimo}</td>
                   <td className="px-4 py-2 text-center">${refa.costo.toFixed(2)}</td>
-                  <td className="px-4 py-2 text-center">${(refa.costo * refa.cantidad).toFixed(2)}</td>
+                  <td className="px-4 py-2 text-center">
+                    ${(refa.costo * refa.cantidad).toFixed(2)}
+                  </td>
                   {!deleteMode && (
                     <td className="px-4 py-2 text-center">
                       <div className="flex justify-center">
@@ -345,27 +417,21 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
               <h3 className="text-lg font-semibold text-center">{refa.nombre}</h3>
               <p className="text-sm text-gray-600 text-center">{refa.numero_parte}</p>
               {!deleteMode && (
-                <div className="mt-2">
-                  <Button
-                    variant="blue"
-                    size="small"
-                    onClick={() => onModificar(refa)}
-                  >
-                    Editar
-                  </Button>
-                </div>
+                <Button
+                  variant="blue"
+                  size="small"
+                  onClick={() => onModificar(refa)}
+                >
+                  Editar
+                </Button>
               )}
               {deleteMode && (
-                <div className="mt-2 flex justify-center">
-                  <label className="flex items-center space-x-2 cursor-pointer bg-gray-100 p-2 rounded-md hover:bg-gray-200">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.includes(refa.refaccion_id)}
-                      onChange={() => handleSelect(refa.refaccion_id)}
-                      className="w-5 h-5 cursor-pointer"
-                    />
-                    
-                  </label>
+                <div className="mt-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.includes(refa.refaccion_id)}
+                    onChange={() => handleSelect(refa.refaccion_id)}
+                  />
                 </div>
               )}
             </div>

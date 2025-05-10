@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Headerv2 from "@/app/components/headerv2";
+import Header_user from "@/app/components/header_user";
 import axios from "axios";
 import Button from "@/app/components/Button";
 
@@ -53,7 +53,7 @@ export default function NuevoProveedor() {
 
   return (
     <div>
-      <Headerv2 />
+      <Header_user />
   
       <div className="min-h-screen bg-gray-100 py-10 px-6">
         <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md border border-gray-300">
