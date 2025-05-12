@@ -12,7 +12,6 @@ import Button from "@/app/components/Button";
 type Producto = {
   refaccion_id: number;
   proveedor_id: string;
-  vehiculo_id: string;
   numero_parte: string;
   nombre: string;
   cantidad: number;
@@ -27,14 +26,7 @@ type Producto = {
   activo: string;
   marca: string;
   num_unidad: string;
-};
-
-
-type Vehiculo = {
-  vehiculo_id: number;
-  placas: string;
-  activo: string;
-  num_unidad: string;
+  linas: string;
 };
 
 type Props = {
@@ -61,25 +53,16 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
         // Obtener refacciones
         const refaccionesResponse = await fetch("http://localhost:8000/Refacciones/");
         const refaccionesData = await refaccionesResponse.json();
-
-        // Obtener vehículos
-        const vehiculosResponse = await fetch("http://localhost:8000/Vehiculos/");
-        const vehiculosData = await vehiculosResponse.json();
-
-        // Filtrar vehículos activos
-        const vehiculosActivos = vehiculosData.filter((vehiculo: any) => vehiculo.activo !== "false");
-
+  
         // Mapear refacciones y asociar num_unidad del vehículo correspondiente
         const refaccionesFiltradas = refaccionesData
           .filter((item: any) => item.activo !== "false") // Filtra los inactivos
           .map((item: any) => {
-            const vehiculo = vehiculosActivos.find((v: any) => v.vehiculo_id === item.vehiculo_id);
             return {
               refaccion_id: item.refaccion_id || item.id,
               proveedor_id: item.proveedor_id || 0,
               vehiculo_id: item.vehiculo_id || 0,
               numero_parte: item.numero_parte || "N/A",
-              num_unidad: vehiculo?.num_unidad || "N/A", // Asociar num_unidad del vehículo
               nombre: item.nombre || "Sin nombre",
               cantidad: Number(item.cantidad) || 0,
               stock_minimo: Number(item.stock_minimo) || 0,
@@ -92,6 +75,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
               proveedor: item.proveedor || "",
               activo: item.activo || "",
               marca: item.marca || "",
+              linas: item.linas || ""
             };
           });
 
@@ -260,7 +244,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                 {deleteMode && <th className="px-4 py-2 text-center"></th>}
                 {[
                   { key: "numero_parte", label: "Número de Parte" },
-                  { key: "num_unidad", label: "Número de Unidad" }, // Nueva columna
+                  { key: "linas", label: "Lineas" }, // Nueva columna
                   { key: "nombre", label: "Nombre" },
                   { key: "proveedor", label: "Proveedor" },
                   { key: "marca", label: "Marca" },
@@ -320,7 +304,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                     </td>
                   )}
                   <td className="px-4 py-2 text-center">{refa.numero_parte}</td>
-                  <td className="px-4 py-2 text-center">{refa.num_unidad}</td> 
+                  <td className="px-4 py-2 text-center">{refa.linas}</td> 
                   <td className="px-4 py-2 text-center relative">
                     <span
                       className="cursor-pointer"
@@ -415,7 +399,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                 onClick={() => setExpandedImage(refa.imagen_refa || "/placeholder.png")}
               />
               <h3 className="text-lg font-semibold text-center">{refa.nombre}</h3>
-              <p className="text-sm text-gray-600 text-center">{refa.numero_parte}</p>
+              <p className="text-sm text-gray-600 text-center">{refa.linas}</p>
               {!deleteMode && (
                 <Button
                   variant="blue"
