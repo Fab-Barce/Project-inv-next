@@ -21,13 +21,6 @@ type Empresa = {
   nombre: string;
 };
 
-// Agregar el tipo Vehiculo
-type Vehiculo = {
-  vehiculo_id: number;
-  num_unidad: string;
-  activo: string;
-};
-
 export default function NuevoRefaccion() {
   const router = useRouter();
 
@@ -38,7 +31,10 @@ export default function NuevoRefaccion() {
     stock_minimo: 0,
     costo: 0,
     linas: "",
+<<<<<<< HEAD
     marca: "", // Agregado
+=======
+>>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [proveedores, setProveedor] = useState<Proveedor[]>([]);
@@ -163,7 +159,10 @@ export default function NuevoRefaccion() {
       formData.append("categoria_id", id_categoria.toString());
       formData.append("imagen_refa", imagen_refa || "");
       formData.append("empresa_id", id_empresa.toString());
+<<<<<<< HEAD
       formData.append("marca", formDatas.marca); // Agregado
+=======
+>>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
 
       // Crear refacción
       const response = await axios.post(
@@ -207,7 +206,11 @@ export default function NuevoRefaccion() {
 
   return (
     <div>
+<<<<<<< HEAD
       <Header_user />
+=======
+      <Header_admin />
+>>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
       <div className="min-h-screen bg-gray-100 py-10 px-6">
         <div className="max-w-4xl mx-auto bg-white p-10 rounded-lg shadow-md border border-gray-300">
           <h1 className="text-3xl font-bold text-blue-600 mb-8 text-center">
@@ -409,6 +412,7 @@ export default function NuevoRefaccion() {
                   onChange={handleArchivoChange}
                 />
               </div>
+<<<<<<< HEAD
               <div>
                 <label className="block text-gray-700 font-semibold">Marca</label>
                 <input
@@ -419,6 +423,8 @@ export default function NuevoRefaccion() {
                   className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
+=======
+>>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
             </div>
           </div>
 

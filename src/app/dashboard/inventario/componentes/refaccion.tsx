@@ -446,8 +446,11 @@ export default function Refaccion({ producto, onCancelar }: Props) {
             editable={editable}
           />
 
+<<<<<<< HEAD
           {/* Añadir Lineas nuevas desde aqui */}
 
+=======
+>>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
           {editable ? (
             <div>
               <label className="block text-gray-700 font-semibold">
@@ -464,9 +467,12 @@ export default function Refaccion({ producto, onCancelar }: Props) {
                     <option value="Linea1">Linea1</option>
                     <option value="Linea2">Linea2</option>
                     <option value="Linea3">Linea3</option>
+<<<<<<< HEAD
                     <option value="Linea4">Linea4</option>
                     
 
+=======
+>>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
                   </select>
                   <button
                     type="button"
@@ -494,7 +500,10 @@ export default function Refaccion({ producto, onCancelar }: Props) {
               editable={false}
             />
           )}
+<<<<<<< HEAD
           
+=======
+>>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
 
           <div className="flex items-center space-x-2">
             <Field
