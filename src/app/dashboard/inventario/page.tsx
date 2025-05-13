@@ -6,22 +6,23 @@ import Refaccion from "./componentes/refaccion";
 import Header_user from "@/app/components/header_user";
 
 type Producto = {
-    refaccion_id: number;
-    proveedor_id: string;
-    vehiculo_id: string;
-    numero_parte: string;
-    nombre: string;
-    cantidad: number;
-    stock_minimo: number;
-    costo: number;
-    categoria_id: string;
-    imagen_refa: string;
-    empresa_id: string;
-    categoria: string;
-    proveedor: string;
-    empresa: string;
-    marca: string;
-    num_unidad: string;
+  refaccion_id: number;
+  proveedor_id: string;
+  numero_parte: string;
+  nombre: string;
+  cantidad: number;
+  stock_minimo: number;
+  costo: number;
+  categoria_id: string;
+  imagen_refa: string;
+  empresa_id: string;
+  categoria: string;
+  proveedor: string;
+  empresa: string;
+  activo: string;
+  marca: string;
+  num_unidad: string;
+  linas: string;
 };
 
 export default function Inventario() {

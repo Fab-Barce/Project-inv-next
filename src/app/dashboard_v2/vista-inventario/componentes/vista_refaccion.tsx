@@ -8,7 +8,6 @@ import Button from "@/app/components/Button";
 type Producto = {
     refaccion_id: number;
     proveedor_id: string;
-    vehiculo_id: string;
     numero_parte: string;
     nombre: string;
     cantidad: number;
@@ -22,6 +21,7 @@ type Producto = {
     empresa: string;
     marca: string;
     num_unidad: string;
+    linas: string;
 };
 
 type Proveedor = {
@@ -64,6 +64,7 @@ export default function Refaccion({ producto, onCancelar }: Props) {
     const [file, setFile] = useState<File | null>(null);
     const [initialData, setInitialData] = useState<Producto | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
+    const [lineasSeleccionadas, setLineasSeleccionadas] = useState<string[]>([]);
     const [id_vehiculo, setIdVehiculo] = useState(0);
 
     useEffect(() => {
@@ -119,6 +120,23 @@ export default function Refaccion({ producto, onCancelar }: Props) {
             setFile(e.target.files[0]);
         }
     };
+
+      const agregarLinea = () => {
+    setLineasSeleccionadas([...lineasSeleccionadas, ""]);
+  };
+
+  const eliminarLinea = (index: number) => {
+    const nuevas = [...lineasSeleccionadas];
+    nuevas.splice(index, 1);
+    setLineasSeleccionadas(nuevas);
+  };
+
+  const cambiarLinea = (index: number, valor: string) => {
+    const nuevas = [...lineasSeleccionadas];
+    nuevas[index] = valor;
+    setLineasSeleccionadas(nuevas);
+  };
+
 
     const handleSave = async () => {
         if (!formData) return;
@@ -269,32 +287,49 @@ export default function Refaccion({ producto, onCancelar }: Props) {
               <Field label="Stock Mínimo" name="stock_minimo" value={formData?.stock_minimo || ""} onChange={handleInputChange} editable={editable} />
 
 
-              {editable ? (
-                <div>
-                  <label className="block text-gray-700 font-semibold">Unidad:</label>
+          {editable ? (
+            <div>
+              <label className="block text-gray-700 font-semibold">
+                Líneas:
+              </label>
+              {lineasSeleccionadas.map((linea, index) => (
+                <div key={index} className="flex items-center space-x-2 mb-2">
                   <select
-                    name="vehiculo_id"
-                    value={formData?.vehiculo_id || ""}
-                    onChange={(e) => {
-                      handleInputChange(e);
-                      const selectedVehiculo = vehiculos.find(v => v.vehiculo_id === Number(e.target.value));
-                      if (selectedVehiculo) {
-                        setFormData(prev => (prev ? { ...prev, num_unidad: selectedVehiculo.num_unidad } : null));
-                      }
-                    }}
-                    className="w-full p-2 border rounded-md bg-white"
+                    value={linea}
+                    onChange={(e) => cambiarLinea(index, e.target.value)}
+                    className="flex-1 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
-                    <option value="">Seleccione un vehículo</option>
-                    {vehiculos.map((vehiculo) => (
-                      <option key={vehiculo.vehiculo_id} value={vehiculo.vehiculo_id}>
-                        {vehiculo.num_unidad}
-                      </option>
-                    ))}
+                    <option value="">Seleccione una línea</option>
+                    <option value="Linea1">Linea1</option>
+                    <option value="Linea2">Linea2</option>
+                    <option value="Linea3">Linea3</option>
                   </select>
+                  <button
+                    type="button"
+                    onClick={() => eliminarLinea(index)}
+                    className="text-red-500 font-bold text-xl"
+                    title="Eliminar línea"
+                  >
+                    ×
+                  </button>
                 </div>
-              ) : (
-                <Field label="Unidad" name="vehiculo_id" value={formData?.num_unidad || ""} editable={false} />
-              )}
+              ))}
+              <button
+                type="button"
+                onClick={agregarLinea}
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              >
+                + Agregar Línea
+              </button>
+            </div>
+          ) : (
+            <Field
+              label="Líneas"
+              name="lineas"
+              value={(formData?.linas || "").split(",").join(", ")}
+              editable={false}
+            />
+          )}
       
              
       

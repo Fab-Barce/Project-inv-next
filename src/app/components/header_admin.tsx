@@ -178,7 +178,7 @@ const Header_admin = () => {
             {/* Usuarios */}
             <div>
               <Link
-                href="/dashboard_admin/usuarios"
+                href="/dashboard_admin/users"
                 onClick={toggleSidebar}
                 className="ml-1 flex items-center text-blue-800 font-semibold uppercase tracking-wide text-xs hover:text-blue-600"
               >

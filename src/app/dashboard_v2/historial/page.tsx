@@ -447,12 +447,12 @@ const HistorialMovimientos = () => {
                     {movementType !== "inventory" && (
                       <th
                         className="px-4 py-3 cursor-pointer select-none text-center"
-                        onClick={() => handleSort("placa_vehiculo")}
+                        onClick={() => handleSort("num_unidad")}
                       >
                         <div className="flex items-center justify-center gap-1">
                           <TruckIcon className="w-4 h-4" />
                           Vehículo
-                          {sortField === "placa_vehiculo" ? (
+                          {sortField === "num_unidad" ? (
                             sortDirection === "asc" ? (
                               <ArrowUpIcon className="w-4 h-4" />
                             ) : (
@@ -546,7 +546,7 @@ const HistorialMovimientos = () => {
                       >
                         <div className="flex items-center justify-center gap-1">
                           <TagIcon className="w-4 h-4" />
-                          Motivo
+                          Cambios
                           {sortField === "motivo" ? (
                             sortDirection === "asc" ? (
                               <ArrowUpIcon className="w-4 h-4" />
