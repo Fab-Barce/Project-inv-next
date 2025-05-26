@@ -324,7 +324,7 @@ export default function Refaccion({ producto, onCancelar }: Props) {
             </div>
           ) : (
             <Field
-              label="Líneas"
+              label="Asignación"
               name="lineas"
               value={(formData?.linas || "").split(",").join(", ")}
               editable={false}

@@ -39,6 +39,9 @@ export default function PantallaVehiculos({ onModificar }: Props) {
   const [campoOrden, setCampoOrden] = useState<keyof Vehiculo | null>(null);
   const [direccionOrden, setDireccionOrden] = useState<"asc" | "desc">("asc");
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const obtenerVehiculos = async () => {
@@ -294,7 +297,7 @@ export default function PantallaVehiculos({ onModificar }: Props) {
                 {modoEliminar && <th className="px-4 py-2"></th>}
                 {[
                   { campo: "num_unidad", label: "Número de Unidad" },
-                  { campo: "operador", label: "Operador" }, // Mover "Operador" aquí
+                  { campo: "operador", label: "Operador" },
                   { campo: "num_serie", label: "Número de Motor" },
                   { campo: "placas", label: "Placas" },
                   { campo: "empresa", label: "Empresa" },
@@ -338,8 +341,48 @@ export default function PantallaVehiculos({ onModificar }: Props) {
                       />
                     </td>
                   )}
-                  <td className="px-4 py-2 text-center">{v.num_unidad}</td>
-                  <td className="px-4 py-2 text-center">{v.operador}</td> 
+                  {/* Número de unidad con tooltip de imagen */}
+                  <td className="px-4 py-2 text-center relative">
+                    <span
+                      className="cursor-pointer"
+                      onClick={() => setExpandedImage(v.imagen_vehi || "/placeholder.png")}
+                      onMouseEnter={(e) => {
+                        const timeout = setTimeout(() => {
+                          setHoveredImage(v.imagen_vehi || "/placeholder.png");
+                          setTooltipPosition({ x: e.clientX, y: e.clientY });
+                        }, 300);
+                        setHoverTimeout(timeout);
+                      }}
+                      onMouseMove={(e) => {
+                        if (hoveredImage) {
+                          setTooltipPosition({ x: e.clientX, y: e.clientY });
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (hoverTimeout) clearTimeout(hoverTimeout);
+                        setHoveredImage(null);
+                        setTooltipPosition(null);
+                      }}
+                    >
+                      {v.num_unidad}
+                    </span>
+                    {hoveredImage === (v.imagen_vehi || "/placeholder.png") && tooltipPosition && (
+                      <div
+                        className="fixed bg-white border rounded shadow-lg p-2 z-50"
+                        style={{
+                          top: tooltipPosition.y + 10,
+                          left: tooltipPosition.x + 10,
+                        }}
+                      >
+                        <img
+                          src={hoveredImage}
+                          alt={v.num_unidad}
+                          className="h-20 w-auto object-contain"
+                        />
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 text-center">{v.operador}</td>
                   <td className="px-4 py-2 text-center">{v.num_serie}</td>
                   <td className="px-4 py-2 text-center">{v.placas}</td>
                   <td className="px-4 py-2 text-center">{v.empresa}</td>
@@ -361,6 +404,22 @@ export default function PantallaVehiculos({ onModificar }: Props) {
               ))}
             </tbody>
           </table>
+          {/* Tooltip de imagen global */}
+          {hoveredImage && tooltipPosition && (
+            <div
+              className="fixed bg-white border rounded shadow-lg p-2 z-50 pointer-events-none"
+              style={{
+                top: tooltipPosition.y + 10,
+                left: tooltipPosition.x + 10,
+              }}
+            >
+              <img
+                src={hoveredImage}
+                alt="Vista previa"
+                className="h-20 w-auto object-contain"
+              />
+            </div>
+          )}
         </div>
       )}
 

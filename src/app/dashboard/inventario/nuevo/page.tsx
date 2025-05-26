@@ -38,10 +38,7 @@ export default function NuevoRefaccion() {
     stock_minimo: 0,
     costo: 0,
     linas: "",
-<<<<<<< HEAD
     marca: "", // Agregado
-=======
->>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [proveedores, setProveedor] = useState<Proveedor[]>([]);
@@ -166,10 +163,7 @@ export default function NuevoRefaccion() {
       formData.append("categoria_id", id_categoria.toString());
       formData.append("imagen_refa", imagen_refa || "");
       formData.append("empresa_id", id_empresa.toString());
-<<<<<<< HEAD
       formData.append("marca", formDatas.marca); // Agregado
-=======
->>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
 
       // Crear refacción
       const response = await axios.post(
@@ -313,38 +307,16 @@ export default function NuevoRefaccion() {
               </div>
               <div>
                 <label className="block text-gray-700 font-semibold">
-                  Líneas
+                  Asignación
                 </label>
-                {lineasSeleccionadas.map((linea, index) => (
-                  <div key={index} className="flex items-center space-x-2 mb-2">
-                    <select
-                      value={linea}
-                      onChange={(e) => handleLineaChange(index, e.target.value)}
-                      className="flex-1 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                      <option value="">Seleccione una línea</option>
-                      <option value="Linea1">Linea1</option>
-                      <option value="Linea2">Linea2</option>
-                      <option value="Linea3">Linea3</option>
-                      {/* Agrega más líneas si es necesario */}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => eliminarLinea(index)}
-                      className="text-red-500 font-bold text-xl"
-                      title="Eliminar línea"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={agregarLinea}
-                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                >
-                  + Agregar Línea
-                </button>
+                <input
+                  type="text"
+                  name="linas"
+                  value={formDatas.linas}
+                  onChange={handleInputChange}
+                  className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  placeholder=""
+                />
               </div>
             </div>
 
@@ -415,7 +387,6 @@ export default function NuevoRefaccion() {
                   onChange={handleArchivoChange}
                 />
               </div>
-<<<<<<< HEAD
               <div>
                 <label className="block text-gray-700 font-semibold">Marca</label>
                 <input
@@ -426,8 +397,6 @@ export default function NuevoRefaccion() {
                   className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
-=======
->>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
             </div>
           </div>
 

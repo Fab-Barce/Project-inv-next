@@ -33,7 +33,8 @@ type Movimiento = {
   tipo_movimiento: string;
   user_nombre: string;
   cantidad_restante?: number | null;
-  num_unidad?: string | null,
+  num_unidad?: string | null;
+  num_parte?: string | null; // <-- Agrega este campo
 };
 
 type CampoBusqueda = keyof Movimiento;
@@ -41,6 +42,7 @@ type CampoBusqueda = keyof Movimiento;
 const campos: { label: string; value: CampoBusqueda; icon: any }[] = [
   { label: "ID Movimiento", value: "id_movimiento", icon: TagIcon },
   { label: "Refacción", value: "nombre_refaccion", icon: WrenchIcon },
+  { label: "Número de Parte", value: "num_parte", icon: TagIcon }, // <-- Agrega aquí
   { label: "Vehículo", value: "num_unidad", icon: TruckIcon },
   { label: "Cantidad", value: "cantidad", icon: ArrowPathIcon },
   { label: "Fecha", value: "fecha", icon: CalendarIcon },
@@ -49,6 +51,32 @@ const campos: { label: string; value: CampoBusqueda; icon: any }[] = [
   { label: "Tipo Movimiento", value: "tipo_movimiento", icon: ArrowPathIcon },
   { label: "Usuario", value: "user_nombre", icon: UserIcon },
 ];
+
+const extraerNumero = (str: string) => {
+  const matches = str?.match(/\d+/);
+  return matches ? parseInt(matches[0]) : 0;
+};
+
+const compararNatural = (a: string, b: string) => {
+  const regex = /(\d+|\D+)/g;
+  const partesA = a.match(regex) || [];
+  const partesB = b.match(regex) || [];
+
+  for (let i = 0; i < Math.max(partesA.length, partesB.length); i++) {
+    const parteA = partesA[i] || "";
+    const parteB = partesB[i] || "";
+
+    const numA = parseInt(parteA, 10);
+    const numB = parseInt(parteB, 10);
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+      if (numA !== numB) return numA - numB;
+    } else if (parteA !== parteB) {
+      return parteA.localeCompare(parteB);
+    }
+  }
+  return 0;
+};
 
 const HistorialMovimientos = () => {
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
@@ -79,7 +107,7 @@ const HistorialMovimientos = () => {
         const movimientosOrdenados = [...movimientosData].sort((a, b) => {
           const fechaA = new Date(`${a.fecha} ${a.hora}`);
           const fechaB = new Date(`${b.fecha} ${b.hora}`);
-          return fechaA.getTime() - fechaB.getTime();
+          return fechaB.getTime() - fechaA.getTime(); // Orden descendente
         });
         
         // Process each movement to calculate remaining inventory
@@ -97,12 +125,13 @@ const HistorialMovimientos = () => {
             inventario[nombre] += cantidad;
           } else if (movimiento.tipo_movimiento.toLowerCase() === "salida") {
             inventario[nombre] -= cantidad;
+          } else if (movimiento.tipo_movimiento.toLowerCase() === "correccion") {
+            inventario[nombre] = cantidad; // Corrección: establecer la cantidad exacta
           }
           
           // Add the remaining quantity to the movement object
           movimiento.cantidad_restante = inventario[nombre];
         });
-        
         setInventarioActual(inventario);
         setMovimientos(movimientosOrdenados);
       })
@@ -153,6 +182,19 @@ const HistorialMovimientos = () => {
     ? [...movimientosFiltrados].sort((a, b) => {
         const aValue = a[sortField] ?? "";
         const bValue = b[sortField] ?? "";
+
+        // Ordenamiento natural para num_unidad
+        if (sortField === "num_unidad") {
+          // Solo por número:
+          const numA = extraerNumero(aValue?.toString() || "0");
+          const numB = extraerNumero(bValue?.toString() || "0");
+          return sortDirection === "asc" ? numA - numB : numB - numA;
+
+          // Si prefieres orden natural completo (letras y números), usa esto:
+          // return sortDirection === "asc"
+          //   ? compararNatural(aValue?.toString() || "", bValue?.toString() || "")
+          //   : compararNatural(bValue?.toString() || "", aValue?.toString() || "");
+        }
 
         if (typeof aValue === "number" && typeof bValue === "number") {
           return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
@@ -217,7 +259,7 @@ const HistorialMovimientos = () => {
 
           {/* Botón Volver */}
           <div className="flex justify-end mb-6">
-            <Link href="/dashboard_admin">
+            <Link href="/dashboard">
               <Button variant="blue">
                 Volver
               </Button>
@@ -424,7 +466,8 @@ const HistorialMovimientos = () => {
               <table className="min-w-full text-sm">
               <thead className="bg-gray-100 text-gray-700 border-b">
                 <tr>
-                    {movementType !== "vehicles" && (
+                  {movementType !== "vehicles" && (
+                    <>
                       <th
                         className="px-4 py-3 cursor-pointer select-none text-center"
                         onClick={() => handleSort("nombre_refaccion")}
@@ -443,7 +486,26 @@ const HistorialMovimientos = () => {
                           )}
                         </div>
                       </th>
-                    )}
+                      <th
+                        className="px-4 py-3 cursor-pointer select-none text-center"
+                        onClick={() => handleSort("num_parte")}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          <TagIcon className="w-4 h-4" />
+                          Núm. Parte
+                          {sortField === "num_parte" ? (
+                            sortDirection === "asc" ? (
+                              <ArrowUpIcon className="w-4 h-4" />
+                            ) : (
+                              <ArrowDownIcon className="w-4 h-4" />
+                            )
+                          ) : (
+                            <ArrowsUpDownIcon className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                      </th>
+                    </>
+                  )}
                     {movementType !== "inventory" && (
                       <th
                         className="px-4 py-3 cursor-pointer select-none text-center"
@@ -599,32 +661,35 @@ const HistorialMovimientos = () => {
               <tbody className="divide-y divide-gray-300">
                 {movimientosOrdenados.map((m) => (
                   <tr key={m.id_movimiento} className="hover:bg-gray-100">
-                      {movementType !== "vehicles" && (
-                        <td className="px-4 py-2 text-center">{m.nombre || m.nombre_refaccion || "-"}</td>
-                      )}
-                      {movementType !== "inventory" && (
-                        <td className="px-4 py-2 text-center">{m.num_unidad || "-"}</td>
-                      )}
-                      {movementType !== "vehicles" && (
-                        <>
-                          <td className="px-4 py-2 text-center">{formatQuantity(m.cantidad, m.tipo_movimiento)}</td>
-                          <td className="px-4 py-2 text-center font-medium">
-                            {m.cantidad_restante || 0}
-                          </td>
-                        </>
-                      )}
-                      <td className="px-4 py-2 text-center">{m.fecha}</td>
-                      <td className="px-4 py-2 text-center">{m.hora}</td>
-                      <td className="px-4 py-2 text-center">{m.motivo || "-"}</td>
-                      <td className="px-4 py-2 text-center">
-                        <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${getColorForType(m.tipo_movimiento)}`}>
-                          {m.tipo_movimiento}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2 text-center">{m.user_nombre}</td>
-                  </tr>
-                ))}
-              </tbody>
+      {movementType !== "vehicles" && (
+        <>
+          <td className="px-4 py-2 text-center">{m.nombre || m.nombre_refaccion || "-"}</td>
+          <td className="px-4 py-2 text-center">{m.num_parte || "-"}</td>
+        </>
+      )}
+      {movementType !== "inventory" && (
+        <td className="px-4 py-2 text-center">{m.num_unidad || "-"}</td>
+      )}
+      {movementType !== "vehicles" && (
+        <>
+          <td className="px-4 py-2 text-center">{formatQuantity(m.cantidad, m.tipo_movimiento)}</td>
+          <td className="px-4 py-2 text-center font-medium">
+            {m.cantidad_restante || 0}
+          </td>
+        </>
+      )}
+      <td className="px-4 py-2 text-center">{m.fecha}</td>
+      <td className="px-4 py-2 text-center">{m.hora}</td>
+      <td className="px-4 py-2 text-center">{m.motivo || "-"}</td>
+      <td className="px-4 py-2 text-center">
+        <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${getColorForType(m.tipo_movimiento)}`}>
+          {m.tipo_movimiento}
+        </span>
+      </td>
+      <td className="px-4 py-2 text-center">{m.user_nombre}</td>
+    </tr>
+  ))}
+</tbody>
             </table>
           </div>
           )}

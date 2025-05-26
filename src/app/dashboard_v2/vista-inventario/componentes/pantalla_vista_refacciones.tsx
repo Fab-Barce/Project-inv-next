@@ -189,21 +189,6 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
           <Button variant="yellow">Proveedores</Button>
         </Link>
 
-        <Button 
-          variant={deleteMode ? "orange" : "orange"}
-          onClick={() => setDeleteMode(!deleteMode)}
-        >
-          {deleteMode ? "Cancelar Eliminación" : "Eliminar"}
-        </Button>
-        {deleteMode && (
-          <Button 
-            variant="red"
-            onClick={handleBulkDelete}
-            disabled={selectedItems.length === 0}
-          >
-            Confirmar Eliminación
-          </Button>
-        )}
         <Link href="/dashboard_v2/">
           <Button variant="blue">Volver</Button>
         </Link>
@@ -226,8 +211,10 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
           className="p-2 border rounded"
         >
           <option value="numero_parte">Número de Parte</option>
+          <option value="linas">Asignación</option> {/* <-- Añadido */}
           <option value="nombre">Nombre</option>
           <option value="proveedor">Proveedor</option>
+          <option value="marca">Marca</option> {/* <-- Añadido */}
           <option value="cantidad">Cantidad</option>
           <option value="stock_minimo">Stock Mínimo</option>
           <option value="costo">Costo</option>
@@ -251,7 +238,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                 {deleteMode && <th className="px-4 py-2 text-center"></th>}
                 {[
                   { key: "numero_parte", label: "Número de Parte" },
-                  { key: "linas", label: "Lineas" }, // Nueva columna
+                  { key: "linas", label: "Asignación" }, // Nueva columna
                   { key: "nombre", label: "Nombre" },
                   { key: "proveedor", label: "Proveedor" },
                   { key: "marca", label: "Marca" },

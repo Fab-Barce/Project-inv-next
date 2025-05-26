@@ -221,6 +221,8 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
           <option value="numero_parte">Número de Parte</option>
           <option value="nombre">Nombre</option>
           <option value="proveedor">Proveedor</option>
+          <option value="marca">Marca</option> {/* <-- Añadido */}
+          <option value="linas">Asignación</option> {/* Nueva opción */}
           <option value="cantidad">Cantidad</option>
           <option value="stock_minimo">Stock Mínimo</option>
           <option value="costo">Costo</option>
@@ -244,7 +246,7 @@ export default function Pantalla_refacciones({ onModificar }: Props) {
                 {deleteMode && <th className="px-4 py-2 text-center"></th>}
                 {[
                   { key: "numero_parte", label: "Número de Parte" },
-                  { key: "linas", label: "Lineas" }, // Nueva columna
+                  { key: "linas", label: "Asignación" }, // Nueva columna
                   { key: "nombre", label: "Nombre" },
                   { key: "proveedor", label: "Proveedor" },
                   { key: "marca", label: "Marca" },

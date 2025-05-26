@@ -224,19 +224,25 @@ export default function Refaccion({ producto, onCancelar }: Props) {
           alert("La cantidad no puede ser negativa.");
           return;
         }
+      } else if (tipoMovimiento === "correccion") {
+        nuevaCantidad = cantidadCambio; // Corrección: establecer la cantidad exacta
       }
 
       // Generar motivo automático si es salida
       const vehiculoSeleccionado = vehiculos.find(
         (v) => v.vehiculo_id === id_vehiculo
       );
-      const placaVehiculo = vehiculoSeleccionado
-        ? vehiculoSeleccionado.placas
+      const numUnidadVehiculo = vehiculoSeleccionado
+        ? vehiculoSeleccionado.num_unidad
         : "desconocido";
       let motivoFinal = datosMovimiento.motivo;
 
-      if (tipoMovimiento === "salida") {
-        motivoFinal = `Pieza ${producto.nombre} establecida en vehículo ${placaVehiculo}`;
+      if (tipoMovimiento === "entrada") {
+        motivoFinal = `Pieza ${producto.nombre} ingresada al almacén`;
+      } else if (tipoMovimiento === "correccion") {
+        motivoFinal = `Corrección de pieza ${producto.nombre}`;
+      } else if (tipoMovimiento === "salida") {
+        motivoFinal = `Pieza ${producto.nombre} establecida en unidad ${numUnidadVehiculo}`;
       }
 
       // 1️⃣ PATCH - Actualizar la cantidad
@@ -295,22 +301,6 @@ export default function Refaccion({ producto, onCancelar }: Props) {
   const handleOpenModal = () => {
     setCantidadModificada(0); // Establecer el valor inicial en 0
     setIsOpen(true); // Abrir el modal
-  };
-
-  const agregarLinea = () => {
-    setLineasSeleccionadas([...lineasSeleccionadas, ""]);
-  };
-
-  const eliminarLinea = (index: number) => {
-    const nuevas = [...lineasSeleccionadas];
-    nuevas.splice(index, 1);
-    setLineasSeleccionadas(nuevas);
-  };
-
-  const cambiarLinea = (index: number, valor: string) => {
-    const nuevas = [...lineasSeleccionadas];
-    nuevas[index] = valor;
-    setLineasSeleccionadas(nuevas);
   };
 
   return (
@@ -446,49 +436,14 @@ export default function Refaccion({ producto, onCancelar }: Props) {
             editable={editable}
           />
 
-          {editable ? (
-            <div>
-              <label className="block text-gray-700 font-semibold">
-                Líneas:
-              </label>
-              {lineasSeleccionadas.map((linea, index) => (
-                <div key={index} className="flex items-center space-x-2 mb-2">
-                  <select
-                    value={linea}
-                    onChange={(e) => cambiarLinea(index, e.target.value)}
-                    className="flex-1 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  >
-                    <option value="">Seleccione una línea</option>
-                    <option value="Linea1">Linea1</option>
-                    <option value="Linea2">Linea2</option>
-                    <option value="Linea3">Linea3</option>
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => eliminarLinea(index)}
-                    className="text-red-500 font-bold text-xl"
-                    title="Eliminar línea"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={agregarLinea}
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                + Agregar Línea
-              </button>
-            </div>
-          ) : (
-            <Field
-              label="Líneas"
-              name="lineas"
-              value={(formData?.linas || "").split(",").join(", ")}
-              editable={false}
-            />
-          )}
+          {/* Campo Líneas como escritura libre */}
+          <Field
+            label="Asignación"
+            name="linas"
+            value={formData?.linas || ""}
+            onChange={handleInputChange}
+            editable={editable}
+          />
 
           <div className="flex items-center space-x-2">
             <Field

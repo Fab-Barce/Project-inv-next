@@ -230,13 +230,17 @@ export default function Refaccion({ producto, onCancelar }: Props) {
       const vehiculoSeleccionado = vehiculos.find(
         (v) => v.vehiculo_id === id_vehiculo
       );
-      const placaVehiculo = vehiculoSeleccionado
-        ? vehiculoSeleccionado.placas
+      const numUnidadVehiculo = vehiculoSeleccionado
+        ? vehiculoSeleccionado.num_unidad
         : "desconocido";
       let motivoFinal = datosMovimiento.motivo;
 
-      if (tipoMovimiento === "salida") {
-        motivoFinal = `Pieza ${producto.nombre} establecida en vehículo ${placaVehiculo}`;
+      if (tipoMovimiento === "entrada") {
+        motivoFinal = `Pieza ${producto.nombre} ingresada a almacén`;
+      } else if (tipoMovimiento === "correccion") {
+        motivoFinal = `Corrección de pieza ${producto.nombre}`;
+      } else if (tipoMovimiento === "salida") {
+        motivoFinal = `Pieza ${producto.nombre} establecida en unidad ${numUnidadVehiculo}`;
       }
 
       // 1️⃣ PATCH - Actualizar la cantidad
@@ -295,22 +299,6 @@ export default function Refaccion({ producto, onCancelar }: Props) {
   const handleOpenModal = () => {
     setCantidadModificada(0); // Establecer el valor inicial en 0
     setIsOpen(true); // Abrir el modal
-  };
-
-  const agregarLinea = () => {
-    setLineasSeleccionadas([...lineasSeleccionadas, ""]);
-  };
-
-  const eliminarLinea = (index: number) => {
-    const nuevas = [...lineasSeleccionadas];
-    nuevas.splice(index, 1);
-    setLineasSeleccionadas(nuevas);
-  };
-
-  const cambiarLinea = (index: number, valor: string) => {
-    const nuevas = [...lineasSeleccionadas];
-    nuevas[index] = valor;
-    setLineasSeleccionadas(nuevas);
   };
 
   return (
@@ -446,64 +434,14 @@ export default function Refaccion({ producto, onCancelar }: Props) {
             editable={editable}
           />
 
-<<<<<<< HEAD
-          {/* Añadir Lineas nuevas desde aqui */}
-
-=======
->>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
-          {editable ? (
-            <div>
-              <label className="block text-gray-700 font-semibold">
-                Líneas:
-              </label>
-              {lineasSeleccionadas.map((linea, index) => (
-                <div key={index} className="flex items-center space-x-2 mb-2">
-                  <select
-                    value={linea}
-                    onChange={(e) => cambiarLinea(index, e.target.value)}
-                    className="flex-1 border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  >
-                    <option value="">Seleccione una línea</option>
-                    <option value="Linea1">Linea1</option>
-                    <option value="Linea2">Linea2</option>
-                    <option value="Linea3">Linea3</option>
-<<<<<<< HEAD
-                    <option value="Linea4">Linea4</option>
-                    
-
-=======
->>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => eliminarLinea(index)}
-                    className="text-red-500 font-bold text-xl"
-                    title="Eliminar línea"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={agregarLinea}
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                + Agregar Línea
-              </button>
-            </div>
-          ) : (
-            <Field
-              label="Líneas"
-              name="lineas"
-              value={(formData?.linas || "").split(",").join(", ")}
-              editable={false}
-            />
-          )}
-<<<<<<< HEAD
-          
-=======
->>>>>>> 216d32c881246106511e7d0a6e4644d882e766ca
+          {/* Campo Líneas como escritura libre */}
+          <Field
+            label="Asignación"
+            name="linas"
+            value={formData?.linas || ""}
+            onChange={handleInputChange}
+            editable={editable}
+          />
 
           <div className="flex items-center space-x-2">
             <Field
